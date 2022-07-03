@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - ppc</title>
+ <link>https://ctfcrew.org/categories/ppc</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>SATELLITE RELOADED (reverse 250)</title>
+ <link>https://ctfcrew.org/writeup/83</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/reverse&quot;&gt;reverse&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/26&quot;&gt;ASIS CTF Finals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Download this &lt;a href=&quot;http://asis-ctf.ir/tasks/2satreloaded_465509d872885f2a92656e29d3881ad6&quot;&gt;file&lt;/a&gt; and find the flag.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;After unziping this file we found that it&#039;s x64 ELF. At the main function we see some buffer dexoring:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic008.png&quot; alt=&quot;&quot; width=&quot;628&quot; height=&quot;691&quot;&gt;&lt;/p&gt;&lt;p&gt;Lets dexor it and save to file (IDA command line with idapython used):&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;s = &#039;&#039;
+for i in range(10952):
+	b = Byte(0x601820+i)
+	if b==0:
+		break
+	s += chr(b ^ (0xd4 + i%2))
+open(&#039;sat.txt&#039;,&#039;w&#039;).write(s)
+&lt;/pre&gt;&lt;p&gt;The decrypted buffer seems to be a condition for some binary array (full dexored buffer avaliable &lt;a href=&quot;http://ctfcrew.org/sites/default/files/writeups/sat.txt&quot;&gt;here&lt;/a&gt;):&lt;/p&gt;&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;( a[253] | ! a[218] ) &amp;amp; ( ! a[92] | ! a[46] ) &amp;amp; ( ! a[2] | ! a[285] ) &amp;amp; ( ! a[275] | ! a[256] ) ...&lt;/pre&gt;&lt;p&gt;so we can suggest that this array is a binary representation of the flag (295 bits ~ 37 bytes) and everything we need is to find such array &lt;em&gt;a&lt;/em&gt; that this condition is true.&lt;/p&gt;&lt;p&gt;Well, this type of problem is well-known as &lt;a href=&quot;http://en.wikipedia.org/wiki/Boolean_satisfiability_problem&quot;&gt;SAT&lt;/a&gt;. There are many different solvers for such things in the Internet. We used &lt;a href=&quot;http://minisat.se/&quot;&gt;minisat&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Firstly, we need to convert all conditions to&amp;nbsp;&lt;a href=&quot;http://www.dwheeler.com/essays/minisat-user-guide.html&quot;&gt;MiniSAT Input Format&lt;/a&gt;. You can write short script for that but we did few &#039;Replace with&#039; at text editor.&lt;/p&gt;&lt;p&gt;Notice that array element with zero index should be substituted by non-zero index because of MiniSAT input format (0 means and of line). We changed 0 index to next after last one - 295. Now our SAT looks like&amp;nbsp;&lt;a href=&quot;http://ctfcrew.org/sites/default/files/writeups/mysat.txt&quot;&gt;needed&lt;/a&gt; and we can do:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ minisat mysat.txt myout.txt
+============================[ Problem Statistics ]=============================
+|                                                                             |
+|  Number of variables:           295                                         |
+|  Number of clauses:             441                                         |
+|  Parse time:                   0.00 s                                       |
+|  Eliminated clauses:           0.00 Mb                                      |
+|  Simplification time:          0.00 s                                       |
+|                                                                             |
+============================[ Search Statistics ]==============================
+| Conflicts |          ORIGINAL         |          LEARNT          | Progress |
+|           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |
+===============================================================================
+===============================================================================
+restarts              : 1
+conflicts             : 0              (0 /sec)
+decisions             : 1              (0.00 % random) (467 /sec)
+propagations          : 294            (137191 /sec)
+conflict literals     : 0              ( nan % deleted)
+Memory used           : 0.22 MB
+CPU time              : 0.002143 s
+
+SATISFIABLE
+$ cat myout.txt 
+SAT
+-1 -2 -3 -4 -5 6 -7 8 -9 10 -11 -12 13 14 -15 16 -17 -18 19 -20 -21 22 -23 24 -25 26 -27 -28 29 30 -31 32 -33 34 35 36 37 38 -39 -40 41 42 -43 -44 45 -46 -47 -48 49 50 -51 -52 -53 -54 -55 56 57 -58 -59 -60 -61 62 -63 -64 65 66 -67 68 69 -70 -71 -72 73 74 -75 76 -77 -78 -79 80 81 -82 -83 84 -85 86 -87 -88 89 90 91 -92 -93 94 -95 -96 97 98 -99 100 -101 102 -103 -104 105 106 -107 108 109 110 -111 112 113 -114 -115 -116 117 118 -119 -120 121 122 123 -124 -125 126 -127 -128 129 130 -131 132 133 -134 -135 -136 137 138 -139 -140 -141 142 -143 144 145 -146 -147 -148 -149 150 -151 -152 153 154 -155 -156 157 -158 -159 160 161 -162 -163 -164 165 -166 -167 168 169 -170 -171 172 -173 174 -175 176 177 -178 -179 -180 -181 182 -183 184 185 -186 -187 188 -189 190 -191 -192 193 194 195 -196 -197 198 -199 200 201 -202 -203 -204 205 -206 -207 208 209 -210 -211 -212 213 -214 -215 -216 217 218 -219 -220 221 -222 -223 -224 225 226 -227 -228 229 230 -231 -232 233 234 -235 -236 -237 -238 -239 240 241 -242 -243 -244 245 -246 -247 -248 249 250 -251 -252 253 254 -255 -256 257 258 -259 260 -261 262 -263 -264 265 266 -267 -268 -269 270 -271 272 273 -274 -275 -276 277 -278 -279 280 281 -282 -283 -284 285 286 -287 288 289 -290 -291 -292 -293 294 295 0&lt;/pre&gt;&lt;p&gt;Nice, solution found. Try to convert in to some printable data:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;&amp;gt;&amp;gt;&amp;gt; sol = &#039;-1 -2 -3 -4 -5 6 -7 8 -9 10 -11 -12 13 14 -15 16 -17 -18 19 -20 -21 22 -23 24 -25 26 -27 -28 29 30 -31 32 -33 34 35 36 37 38 -39 -40 41 42 -43 -44 45 -46 -47 -48 49 50 -51 -52 -53 -54 -55 56 57 -58 -59 -60 -61 62 -63 -64 65 66 -67 68 69 -70 -71 -72 73 74 -75 76 -77 -78 -79 80 81 -82 -83 84 -85 86 -87 -88 89 90 91 -92 -93 94 -95 -96 97 98 -99 100 -101 102 -103 -104 105 106 -107 108 109 110 -111 112 113 -114 -115 -116 117 118 -119 -120 121 122 123 -124 -125 126 -127 -128 129 130 -131 132 133 -134 -135 -136 137 138 -139 -140 -141 142 -143 144 145 -146 -147 -148 -149 150 -151 -152 153 154 -155 -156 157 -158 -159 160 161 -162 -163 -164 165 -166 -167 168 169 -170 -171 172 -173 174 -175 176 177 -178 -179 -180 -181 182 -183 184 185 -186 -187 188 -189 190 -191 -192 193 194 195 -196 -197 198 -199 200 201 -202 -203 -204 205 -206 -207 208 209 -210 -211 -212 213 -214 -215 -216 217 218 -219 -220 221 -222 -223 -224 225 226 -227 -228 229 230 -231 -232 233 234 -235 -236 -237 -238 -239 240 241 -242 -243 -244 245 -246 -247 -248 249 250 -251 -252 253 254 -255 -256 257 258 -259 260 -261 262 -263 -264 265 266 -267 -268 -269 270 -271 272 273 -274 -275 -276 277 -278 -279 280 281 -282 -283 -284 285 286 -287 288 289 -290 -291 -292 -293 294 295&#039;
+&amp;gt;&amp;gt;&amp;gt; sol = sol.split(&#039; &#039;)
+&amp;gt;&amp;gt;&amp;gt; res = &#039;&#039;
+&amp;gt;&amp;gt;&amp;gt; for c in sol: 
+...     if &#039;-&#039; in c: res += &#039;0&#039;
+...     else: res += &#039;1&#039;
+... 
+&amp;gt;&amp;gt;&amp;gt; c
+&#039;295&#039;
+&amp;gt;&amp;gt;&amp;gt; res
+&#039;0000010101001101001001010100110101111100110010001100000110000100110110001101000110010100111001001101010011011101100011001110010011011000110001011000010011001001100010011001010110000101100101001110010110001001100010001100100011001100110000011000100011001100110101001100010110001001100011011000011&#039;
+&amp;gt;&amp;gt;&amp;gt; len(res)
+295
+&amp;gt;&amp;gt;&amp;gt; res = &#039;0&#039; + res[-1] + res[:-1] #move last to first (because [0] index) and add leading zero for padding
+&amp;gt;&amp;gt;&amp;gt; hex(int(res, 2))[2:-1].decode(&#039;hex&#039;)
+&#039;ASIS_20a64e957c961a2beae9bb230b351bca&#039;&lt;/pre&gt;&lt;p&gt;The flag is&amp;nbsp;&lt;strong&gt;ASIS_20a64e957c961a2beae9bb230b351bca&lt;/strong&gt;.&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Sports Shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfediqshop/release-dates/nike/air-force-1-shadow/&quot;&gt;Women&#039;s Nike Air Force 1 Shadow trainers - Latest Releases , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/mysat.txt&quot; type=&quot;text/plain; length=4645&quot;&gt;mysat.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/sat.txt&quot; type=&quot;text/plain; length=10951&quot;&gt;sat.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Wed, 15 Oct 2014 06:12:57 +0000</pubDate>
+ <dc:creator>Dor1s</dc:creator>
+ <guid isPermaLink="false">83 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/83#comments</comments>
+</item>
+<item>
+ <title>Sattelite (ppc 200)</title>
+ <link>https://ctfcrew.org/writeup/81</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/26&quot;&gt;ASIS CTF Finals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Connect here and find the flag:&lt;/p&gt;&lt;p&gt;`nc asis-ctf.ir 12435`&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;Ok, task asks us to connect, let&#039;s do it:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;notebook:~ hacker$ nc asis-ctf.ir 12435
+
+hi all,  You must send a string for each level that would make the literal True
+send &quot;Sattelite&quot;
+Sattelite
+(x4 ∨ x5) ∧ (¬x3 ∨ ¬x1) ∧ (¬x3 ∨ x5) ∧ (x3 ∨ ¬x4) ∧ (x1 ∨ ¬x5)&lt;/pre&gt;&lt;p&gt;Server asks us to solve&amp;nbsp;Boolean Satisfiabilit Problem also known as SAT (task&#039;s name corresponds to it). So we have to do two things: first - parse boolean equation and second - solve it.&lt;/p&gt;&lt;p&gt;This code solves both of them:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+import socket
+import math
+from time import sleep
+
+def unpack(r):
+	r = r.replace(&#039;(&#039;,&#039;&#039;)
+	r = r.replace(&#039;)&#039;,&#039;&#039;)
+	r = r.replace(&#039;x&#039;,&#039;&#039;)
+	r = r.replace(&#039;\xc2\xac&#039;, &#039;-&#039;)
+	r = r.replace(&#039;\xe2\x88\xa8&#039;, &#039;&#039;)
+	return [int(n,10) for n in r.split()]
+
+def increment(s):
+	for i in xrange(len(s)):
+		if s[i] == 0:
+			s[i] = 1
+			break
+		elif s[i] == 1:
+			s[i] = 0
+	return s
+
+def brute(eq, length):
+	solution = [0]*length
+	while True:
+		bad = False
+		for b in eq:
+			x = int(math.copysign(b[0],1))
+			y = int(math.copysign(b[1],1))
+			val = (b[0] &amp;gt; 0 and solution[x-1] == 1) or (b[0] &amp;lt; 0 and solution[x-1] == 0) or (b[1] &amp;gt; 0 and solution[y-1] == 1) or (b[1] &amp;lt; 0 and solution[y-1] == 0)
+			if val == False:
+				bad = True
+				break
+		if bad == False:
+			return solution
+		solution = increment(solution)
+		if solution == [0]*length:
+			return []
+
+s = socket.socket()
+s.connect((&#039;asis-ctf.ir&#039;, 12435))
+print s.recv(1024)
+s.send(&#039;Sattelite\n&#039;)
+
+while True:
+	response = s.recv(1024).strip()
+	print &quot;Server: &quot; + response
+	blocks = [unpack(r) for r in response.split(&quot; \xe2\x88\xa7 &quot;)]
+	solution = brute(blocks,len(blocks))
+	if solution == []:
+		print &quot;No solutions found...&quot;
+		break
+	answer = &#039;&#039;.join([str(x) for x in solution])
+	print &quot;Answer: &quot; + answer
+	s.send(answer+&quot;\n&quot;)
+	response = s.recv(1024).strip()
+	print &quot;Server: &quot; + response
+	if &quot;OK&quot; not in response:
+		print &quot;Bad solution...&quot;
+		break
+	print &quot;&quot;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;The flag is: ASIS_5b5e15ec25479ac8b743c6e818d75464&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Sportswear free shipping&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeabafxshop/adidas&quot;&gt;adidas&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Tue, 14 Oct 2014 07:27:15 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">81 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/81#comments</comments>
+</item>
+<item>
+ <title>secure_coding 1,2,3 (coding 100, 200, 300)</title>
+ <link>https://ctfcrew.org/writeup/80</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/misc&quot;&gt;misc&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/25&quot;&gt;Sharif University CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;In these tasks we were given a service which:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;accepts .cpp file&lt;/li&gt;&lt;li&gt;compiles it via MSVS10 or gcc4.8 (you can choose which one)&lt;/li&gt;&lt;li&gt;launches a couple of tests on successfully compiled binary&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;You can look at it &lt;a href=&quot;http://ctf.sharif.edu:53840/problem.php?problem=ctf5quals_seccoding1&quot;&gt;here&lt;/a&gt;, &lt;a href=&quot;http://ctf.sharif.edu:53840/problem.php?problem=ctf5quals_seccoding2&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;http://ctf.sharif.edu:53840/problem.php?problem=ctf5quals_seccoding3&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Also there are original source code files, which are vulnerable and unstable. Tests launched on the service are checking some vulnerabilities on compiled binaries and our goal is to fix them and prevent program from crashing.&lt;/p&gt;&lt;p&gt;Well, the best way to show how we have solved these tasks is to show diff between original source code files and our solutions. Look at this&amp;nbsp;&lt;a href=&quot;https://github.com/BalalaikaCr3w/CTF/commit/ebe9b670195b78363ffe74df6a3d4ffe32bcdc0f&quot;&gt;commit&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;When uploaded source code passes all tests and keeps its initial functionality the service prints messages like:&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;WON!&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Flag: b658c70eb17bf96d6f8d64145b4cc859&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;WON!&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Flag: 57ba58587f972a80c12b5f590078270c&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;WON!&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Flag: 696570afe73d9e8cbd206d10dbf58e8b&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;I don&#039;t think that it is needed to describe each line in our solution. But I mention most popular vulnerabilities fixed in these tasks:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;buffer overflow&lt;/li&gt;&lt;li&gt;writing to unallocated memory / reading uninitialized memory&lt;/li&gt;&lt;li&gt;format string vulnerabilities&lt;/li&gt;&lt;li&gt;few other errors&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;If you would have any questions about our code ask it via our &lt;a href=&quot;https://twitter.com/BalalaikaCr3w&quot;&gt;twitter account&lt;/a&gt;. We will answer and try to explain our fixes.&lt;/p&gt;&lt;p&gt;Btw, my lovely fix is:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/sec_coding300_best.png&quot; alt=&quot;&quot; width=&quot;929&quot; height=&quot;94&quot;&gt;&lt;/p&gt;&lt;p&gt;At the end of CTF we had just one vulnerability in our source code and suddenly we understood that input like &quot;%%x&quot; crashes the program. I could not come up with anything better than such fix and &lt;a href=&quot;http://ctf.sharif.edu/2014/quals/su-ctf/scoreboard/&quot;&gt;we got the 1st place&lt;/a&gt; when CTF was 12 minutes left.&lt;/p&gt;&lt;p&gt;p.s.&lt;/p&gt;&lt;p&gt;If service tells you complier error, try to choose another compiler ;)&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Adidas shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeagcnshop/fr/fr/nike-homme&quot;&gt;NIKE  HOMME&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Fri, 03 Oct 2014 14:10:45 +0000</pubDate>
+ <dc:creator>Dor1s</dc:creator>
+ <guid isPermaLink="false">80 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/80#comments</comments>
+</item>
+<item>
+ <title>Brain fuzzing</title>
+ <link>https://ctfcrew.org/writeup/59</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/22&quot;&gt;SecuInside CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;This kind of famous task. You have board with buttons, wich have 2 positions. In Russia there is old quest game with &lt;a href=&quot;http://ru.wikipedia.org/wiki/%D0%91%D1%80%D0%B0%D1%82%D1%8C%D1%8F_%D0%9A%D0%BE%D0%BB%D0%BE%D0%B1%D0%BA%D0%B8&quot;&gt;brother pilots&lt;/a&gt; and there was the same task to open the fridge with board 4x4. And there was solution remember all buttons in first position. And switch all this buttons one by one. Repeating this algoritm from 1 to 3 times, you will win.&lt;/p&gt;&lt;p&gt;Also it was kind of this task on phdays quals 2013 (I haven&#039;t seen it, but heard about it), and kind of this task on defcon quals 2013, but there was the diffrence. There when you were pushing the button raw and column were reversing but the button you push wasn&#039;t&lt;/p&gt;&lt;p&gt;On this ctf there was 4 levels of dificulty of this task. First one is the same a wrote (3 times). Second the same but you need to remeber your steps by yourself(3 times more)&lt;/p&gt;&lt;p&gt;But the most difficult was third part. Orgs have changed the conditions and this time button had 3 positions. That was difficult. After some googling, we found &lt;a href=&quot;http://www.rsdn.ru/forum/etude/3165333.hot&quot;&gt;better algorythm&lt;/a&gt; for 2 position condition (sorry for russian link). The sense is to build weight matrix. I upgraded it, for more than 2 postions. It was kind of lucky upgrade, I wasn&#039;t sure it work. So we build matrix where the cell is &lt;strong&gt;(-1)*(sum(raw) + sum(column)) mod N (N=3)&lt;/strong&gt;.&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;# ar is board transfered to ints [[0,1],[1,0]]
+def wMatr(ar, N=3):
+    cMax = len(ar[0])
+    rMax = len(ar)
+    wM = deepcopy(ar)
+    for i, raw in enumerate(ar):
+        for j, column in enumerate(raw):
+            # counting weight for cell, last sub is to remove the dublicate of cell with i,j coords
+            wM[i][j] = (sum(raw) + sum(ar[k][j] for k in xrange(rMax)) - ar[i][j]) % N
+            # reverse the value cell
+            if wM[i][j] != 0:
+                wM[i][j] = N - wM[i][j]
+    return wM
+&lt;/pre&gt;&lt;p&gt;And after that we push the buttons according to that matrix. After first applying of this algorytm, we get board with the same raws like:&lt;/p&gt;&lt;p&gt;1111&lt;br&gt; 2222&lt;br&gt; 1111&lt;br&gt; 0000&lt;/p&gt;&lt;p&gt;After applying it more than one time, we get the right answer. But that decision is not optimal. And sometimes, it need too many attemps. But it wroked 90% of times.&lt;/p&gt;&lt;p&gt;The last 4th task was kind of boss, it was board with 2 postitions but with size 200x200. There were some problems with connection, so my script sometimes couldn&#039;t get the full board. But after over9000 attemps it worked&lt;/p&gt;&lt;p&gt;Full code of the solution:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import re
+from socket import create_connection
+from copy import deepcopy
+from time import sleep
+
+host = &quot;54.198.73.164&quot;
+host = &quot;54.81.138.191&quot;
+port = 5555
+hSock = create_connection((host, port))
+ans = hSock.recv(10240)
+
+def invert2(x, y, ar, N=3):
+    t = ar[x][y]
+    for i in range(len(ar[0])):
+        ar[x][i] = (ar[x][i] + 1) % N
+    for i in range(len(ar)):
+        ar[i][y] = (ar[i][y] + 1) % N
+    ar[x][y] = (t+1) % N
+    return ar
+
+repl = {
+  2: {
+    &quot;O&quot;: 0,
+    &quot;X&quot;: 1
+  },
+  3: {
+    &quot;O&quot;: 0,
+    &quot;W&quot;: 1,
+    &quot;X&quot;: 2
+  }
+}
+
+def serv():
+    for asd in range(10000):
+        if asd == 0 or &quot;Lupin hear a sound from safebox&quot; in ans:
+            sleep(1)
+            ans = hSock.recv(102400)
+            print ans
+            x, y = map(int, re.findall(&quot;Board&amp;gt;\s+(\d+)\s+(\d+)&quot;, ans)[0])
+            ar = ans.split(&quot;\n&quot;)[-x-1:-1]
+            N = len(set(&quot;&quot;.join(ar)))
+            ar = map(list, ar)
+            for i in range(len(ar)):
+                for j in range(len(ar[0])):
+                    ar[i][j] = repl[N][ar[i][j]]
+
+            mine = deepcopy(ar)
+        
+        while True:
+            sleep(1)
+            wM = wMatr(mine, N)
+            for i, raw in enumerate(wM):
+                for j, column in enumerate(raw):
+                    for k in range(column):
+                        mine = invert2(i, j, mine, N)
+                        hSock.send(&quot;%s %s\n&quot; % (i, j));
+                        ans = hSock.recv(102400)
+                        if len(ans) &amp;gt; 5:
+                            print ans
+                    #print &quot;\n&quot;.join(&quot;&quot;.join(map((str), c)) for c in mine), &quot;\n&quot;
+            if &quot;Lupin hear a sound from safebox. some layout of button changed&quot; in ans:
+                break
+            if &quot;Too many attempts&quot; in ans:
+                exit(0)
+            if set(&quot;&quot;.join(&quot;&quot;.join(map((str), c)) for c in mine)) == set([&quot;0&quot;]):
+                break
+
+    print hSock.recv(10240)
+
+def wMatr(ar, N=3):
+    cMax = len(ar[0])
+    rMax = len(ar)
+    wM = deepcopy(ar)
+    for i, raw in enumerate(ar):
+        for j, column in enumerate(raw):
+            wM[i][j] = (sum(raw) + sum(ar[k][j] for k in xrange(rMax)) - ar[i][j]) % N
+            if wM[i][j] != 0:
+                wM[i][j] = N - wM[i][j]
+    return wM
+
+serv()&lt;/pre&gt;&lt;p&gt;&lt;br&gt;Finally we receive message with flag:&lt;/p&gt;&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Lupin hear a sound from safebox. some layout of button changed
+
+There is a beep sound from safebox. we might be on the right way.
+Some strange noise come out from the safebox..
+                        &#039;
+               &#039;        &#039;        &#039;
+       &#039;         &#039;      &#039;      &#039;        &#039;
+          &#039;        \    &#039;    /       &#039;
+              &#039; .   .-&quot;```&quot;-.  . &#039;
+                    \`-._.-`/   
+         - -  =      \\ | //      =  -  -
+                    &#039; \\|// &#039;   
+              . &#039;      \|/     &#039; .
+           .         &#039;  `  &#039;         .
+        .          /    .    \           .
+                 .      .      .
+
+
+Congrats!!!! Lupin finally got the Cherry Saphhire!!
+Right behind of the jewel, Lupin found a short memo
+-----------------------------------------------------
+The flag is &quot;THE BEST people are always TAKEN, if you don&#039;t STEAL them, you won&#039;t HAVE them&quot; (without quote)&lt;/pre&gt;&lt;p&gt;&lt;br&gt; So, &lt;strong&gt;THE BEST people are always TAKEN, if you don&#039;t STEAL them, you won&#039;t HAVE them&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.runtrendy.com/&quot;&gt;Running Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.sb-roscoff.fr/en/bdehfshop/en/category/men/sneaker/?manufacturer=Nike&amp;page=1&quot;&gt;Buy online Sneaker for Men&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 01 Jun 2014 18:08:55 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">59 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/59#comments</comments>
+</item>
+<item>
+ <title>Secret String (ppc 300)</title>
+ <link>https://ctfcrew.org/writeup/50</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/17&quot;&gt;RuCTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;As we can see from the task, the talk is about DNA replication, as said my friends from team, we should find the most popular string in the given file.&lt;/p&gt;&lt;p&gt;First of all, I should say, that I&#039;m using python. In the start I just tried to build index where keys are string that can be found in file and values are there frequency. But that didn&#039;t work. Because in python index always saved in the RAM, and for my counting, I should have more than 16GB (I think something like 32 or 64). That numbers is reachable, but I guessed that it should be better solution.&lt;/p&gt;&lt;p&gt;So there is two solutions:&lt;/p&gt;&lt;p&gt;First I think just install some datebase with indexies that could use disk for storage. But in this case you should do more admin stuff I think.&lt;/p&gt;&lt;p&gt;Second: I wrote variant just for lulz, with no math calculation and it worked:&lt;/p&gt;&lt;p&gt;At the begiging script builds index reading stings from random places. For me 10 000 000 strings was enough. After that I just take 10 00 most popular string, and count there frequency only:&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;pre class=&quot;brush: python&quot;&gt;from collections import defaultdict
+from operator import itemgetter
+from random import randint
+index = defaultdict(int)
+
+with open(&quot;word2&quot;) as f:
+    s = f.read()
+    for i in xrange(10000000):
+        j = randint(0, len(s))
+        index[s[j:j+32]] += 1
+
+    index = dict(sorted(index.iteritems(), key=itemgetter(1), reverse=True)[:10000])
+    for i, el in enumerate(s):
+        try:
+            curS = s[i:i+32]
+        except:
+            break
+        if i % 100000 == 0:
+            print i
+        if curS in index:
+            index[curS] += 1
+
+print max(index.iteritems(), key=itemgetter(1))
+&lt;/pre&gt;&lt;p&gt;The answer is &lt;strong&gt;GGAACAAGTTACATGGGCCGAATGCTATTGTC&lt;/strong&gt;, and it could be found 64 times in the file. Script works for 120 second.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.nikesneakers.org/&quot;&gt;latest Nike release&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.worldarchitecturefestival.com/dfbbatshop/running-shoe-buyers-guide/best-running-shoes-men&quot;&gt;Best Running Shoes for Men 2021 , Buyer&#039;s Guide , Worldarchitecturefestival&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 17 Mar 2014 18:37:14 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">50 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/50#comments</comments>
+</item>
+<item>
+ <title>Maze (PPC - 200)</title>
+ <link>https://ctfcrew.org/writeup/39</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/17&quot;&gt;RuCTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Universal dangerous positive: 194.226.244.125:1024. Send me your password: &quot;3k8bbz032mrap75c8iz8tmi7f4ou00&quot;. Flag format is &quot;RUCTF_.*&quot;&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&quot;Universal dangerous positive&quot; hints us, that there is UDP protocol. So lets connect to given ip and send password:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;UDP_IP = &quot;194.226.244.125&quot;
+UDP_PORT = 1024
+message = &quot;3k8bbz032mrap75c8iz8tmi7f4ou00&quot;
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.settimeout(1)
+
+sock.sendto(message, (UDP_IP, UDP_PORT))
+print sock.recv(100000)&lt;/pre&gt;&lt;p&gt;This code prints:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Hello stranger!
+You can go down(1280) with password: g5op3e6wxcy71m24dgcmhq714nd799
+You can go right(1025) with password: 084399ptmy7u4bxwy003x2ko2oa06n&lt;/pre&gt;&lt;p&gt;Ok, we have a maze, each cell of maze is defined by port and password. When we send correct password to port it responds with information about it&#039;s neighbors. So we have to write some code&lt;/p&gt;&lt;p&gt;First thing: maze&#039;s answers recognition (it&#039;s ugly, but it works):&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;res = sock.recv(100000)
+print res
+
+#Parse the answer
+mess = []
+dirs = []
+while True:
+        #looking for direction:
+	ind1 = res.find(&quot;can go &quot;)
+	if -1 == ind1:
+		break
+	ind1 = ind1 + len(&quot;can go &quot;)
+	dirs.append(res[ind1:ind1+1])
+	#looking for password
+	ind = res.find(&quot;password: &quot;)
+	if -1 == ind :
+		break
+	ind = ind + len(&quot;password: &quot;)
+	mess.append(res[ind: ind+30])
+	res = res[ind+30:]&lt;/pre&gt;&lt;p&gt;&amp;nbsp;Now we have array with password and corresponding array with directions (with first letters of them). We need some maze-solving algorithm, for example right-hand methond:&amp;nbsp;&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#declare in the begining
+order = [&quot;r&quot;,&quot;d&quot;,&quot;l&quot;,&quot;u&quot;] #right-hand alg order
+direction = 3
+
+#and do this in cycle:
+
+#Compute next turn (right-hand method)
+next_dir = (direction + 1) % 4
+next_i = -1
+while True:
+	for i in xrange(0, len(dirs), 1):
+		if dirs[i] == order[next_dir]:
+			next_i = i
+			break
+	if -1 != next_i:
+		break
+	next_dir = (next_dir - 1) %4
+
+message = mess[next_i]
+
+#update port and coordinates
+
+if next_dir == 0:
+	UDP_PORT +=1
+if next_dir == 2:
+	UDP_PORT -=1
+if next_dir == 1:
+	UDP_PORT +=256
+if next_dir == 3:
+	UDP_PORT -=256&lt;br&gt;direction = next_dir&lt;/pre&gt;&lt;p&gt;&amp;nbsp;So we choose next direction, trying to turn to the right every time when it possible and then update message and port to new values. As you can see, each time you go left and right port simply dec/increments, but when you go up and down it changes by 256... it&#039;s obvious from first server answer. (All other answer does not specify port, only passwords.)&lt;/p&gt;&lt;p&gt;Last thing we need.. some cool gui to draw this maze.. i used pygui... and there is result:&lt;iframe src=&quot;//www.youtube.com/embed/-zjGhStabRg&quot; frameborder=&quot;0&quot; width=&quot;1280&quot; height=&quot;720&quot;&gt;&lt;/iframe&gt;&lt;/p&gt;&lt;p&gt;And full code of solving script:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/python
+import socket
+from time import sleep
+import sys
+from GUI import Application, ScrollableView, Document, Window, Cursor, rgb
+from GUI.StdColors import black, red, white
+from GUI.Files import FileType
+from GUI.Geometry import pt_in_rect, offset_rect, rects_intersect
+
+class MazeView(ScrollableView):
+	hero_x = 0
+	hero_y = 0
+	maze_walls = [[0 for x in xrange(256)] for x in xrange(256)] 
+
+	offset = 10
+	multi = 4
+
+	def add_point(self, p_x ,p_y):
+
+		self.maze_walls[p_x][p_y]=1
+
+	def move_hero(self, p_x ,p_y):
+		self.hero_x = p_x
+		self.hero_y = p_y
+		self.invalidate_rect(( self.offset + (p_x - 3) * self.multi, self.offset + (p_y -3) * self.multi, self.offset + (p_x+3) * self.multi, self.offset + (p_y+3) * self.multi ))
+		self.update()
+
+	def draw(self, canvas, update_rect):
+		#canvas.erase_rect(update_rect)
+		#draw main wall
+		canvas.fill_frame_rect((self.offset-self.multi,self.offset-self.multi,self.offset+257*self.multi,self.offset+257*self.multi))
+		canvas.fillcolor = white
+		canvas.pencolor = white
+		canvas.fill_frame_rect((self.offset,self.offset,self.offset+256*self.multi,self.offset+256*self.multi))
+		#draw hero
+		canvas.fillcolor = red
+		canvas.pencolor = red
+		canvas.fill_frame_rect((self.offset + self.hero_x*self.multi, self.offset + self.hero_y*self.multi ,self.offset + self.hero_x*self.multi + self.multi,self.offset + self.hero_y*self.multi+ self.multi))
+		#draw inner walls
+		canvas.fillcolor = black
+		canvas.pencolor = black
+
+		for k in xrange(self.hero_x-5,self.hero_x+5,1):
+			for l in xrange(self.hero_y-5,self.hero_y+5,1):
+				if k &amp;lt; 0 or l &amp;lt;0 or k&amp;gt;= 256 or l &amp;gt;=256 : continue
+				if 1 == self.maze_walls[k][l]:
+					if True == pt_in_rect((self.offset + k*self.multi, self.offset + l*self.multi), update_rect):
+						canvas.fill_frame_rect((self.offset + k*self.multi, self.offset + l*self.multi,self.offset + k*self.multi + self.multi,self.offset + l*self.multi+ self.multi))
+
+
+win = Window(size = (258*4+20, 258*4+20))
+view = MazeView(extent = (512*4, 512*4))
+win.place(view, left = 0, top = 0, right = 0, bottom = 0, sticky = &#039;nsew&#039;)
+win.show()
+
+UDP_IP = &quot;194.226.244.125&quot;
+order = [&quot;r&quot;,&quot;d&quot;,&quot;l&quot;,&quot;u&quot;] #right-hand alg order
+
+message = &quot;3k8bbz032mrap75c8iz8tmi7f4ou00&quot;
+UDP_PORT = 1024
+direction = 3
+cur_x = 0
+cur_y = 0
+
+while True: # ti recover after disconnect
+	try:
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		sock.settimeout(1)
+		while True: 
+			sock.sendto(message, (UDP_IP, UDP_PORT))
+			print &quot;Current position: &quot; + str(cur_x) + &quot;, &quot; + str(cur_y)
+			res = sock.recv(100000)
+			print res
+
+			#Parse the answer
+			mess = []
+			dirs = []
+			while True:
+				#looking for direction:
+				ind1 = res.find(&quot;can go &quot;)
+				if -1 == ind1:
+					break
+				ind1 = ind1 + len(&quot;can go &quot;)
+				dirs.append(res[ind1:ind1+1])
+				#looking for password
+				ind = res.find(&quot;password: &quot;)
+				if -1 == ind :
+					break
+				ind = ind + len(&quot;password: &quot;)
+				mess.append(res[ind: ind+30])
+				res = res[ind+30:]
+
+			view.move_hero(cur_x,cur_y)
+
+			if (dirs.count(&#039;r&#039;) == 0):
+				view.add_point(cur_x+1,cur_y)
+
+			if (dirs.count(&#039;l&#039;) == 0):
+				view.add_point(cur_x-1,cur_y)
+
+			if (dirs.count(&#039;u&#039;) == 0):
+				view.add_point(cur_x,cur_y-1)
+
+			if (dirs.count(&#039;d&#039;) == 0):
+				view.add_point(cur_x,cur_y+1)
+
+			#Compute next turn (right-hand method)
+			next_dir = (direction + 1) % 4
+			next_i = -1
+			while True:
+				for i in xrange(0, len(dirs), 1):
+					if dirs[i] == order[next_dir]:
+						next_i = i
+						break
+				if -1 != next_i:
+					break
+				next_dir = (next_dir - 1) %4
+
+			message = mess[next_i]
+
+			#update port and coordinates
+
+			if next_dir == 0:
+				cur_x += 1
+				UDP_PORT +=1
+			if next_dir == 2:
+				cur_x -= 1
+				UDP_PORT -=1
+			if next_dir == 1:
+				cur_y +=1
+				UDP_PORT +=256
+			if next_dir == 3:
+				cur_y -= 1
+				UDP_PORT -=256
+
+			direction = next_dir
+	except Exception, e:
+		print e&lt;/pre&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.copperbridgemedia.com/&quot;&gt;Running sports&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.fitforhealth.eu/cdaoshop/air-jordan-release-dates/&quot;&gt;jordan Release Dates&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/maze.zip&quot; type=&quot;application/zip; length=2309&quot;&gt;maze.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Tue, 11 Mar 2014 09:28:24 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">39 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/39#comments</comments>
+</item>
+<item>
+ <title>NEOQUEST 2014 Quals - TimeShift 2. Revenge</title>
+ <link>https://ctfcrew.org/writeup/36</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/16&quot;&gt;NeoQuest Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;Задание:&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Мое внимание привлекает монитор. На него наклеен стикер с надписью B4365F2. Видимо, это какой-то ключ. На экране мигают две точки, соединенные пунктиром, а ниже бегут пакеты сетевого трафика. Наверное, это передача каких-то команд ракете. Но, по всей видимости, передаваемые данные зашифрованы... На компьютере также открыт файл, в котором записаны два IP-адреса (213.170.102.196:4001, 213.170.102.197:4002). Наверняка IP-адреса помогут мне понять схему работы протокола, по которому передаются команды! Да и в отладочной информации, если покопаться, можно будет обнаружить что-нибудь полезное...&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;Подключившись к адресам из задания понимаем, что используется какой-то протокол связанный с SSL.&lt;/p&gt;&lt;p&gt;Ответ от&amp;nbsp;213.170.102.196:4001:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Alert! Expected client hello message.
+Format:
+	1 byte		type	NEOSSL_HANDSHAKE	0x16
+	2 byte		version	NEOSSL1_VERSION		0x01
+	3-4 bytes	length (excluding header)
+	5 byte		data	NEOSSL_CLIENT_HELLO	0x01
+---DEBUG INFO---
+Ubuntu Release 10.04 (lucid)
+Kernel Linux 2.6.32-21-generic
+Memory 1001.9 MiB
+Processor Intel(R) Core(TM) i3 CPU
+Processing time 1998 cycles
+Processing threads - 1 thread
+Public-key cryptography algorithm - RSA (with Montgomery multiplication)
+Symmetric-key cryptography algorithm - AES-128 (zero IV)
+------&lt;/pre&gt;&lt;p&gt;Ответ&amp;nbsp;213.170.102.197:4002:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Alert! Expected server hello message.
+Format:
+	1 byte		type	NEOSSL_HANDSHAKE	0x16
+	2 byte		version	NEOSSL1_VERSION		0x01
+	3-4 bytes	length (excluding header)
+	5 byte		data	NEOSSL_SERVER_HELLO	0x02
+	6 byte		data	RSA_WITH_AES_128_CBC	0x01
+	7-n bytes	data	Certificate
+---DEBUG INFO---
+Ubuntu Release 10.04 (lucid)
+Kernel Linux 2.6.32-21-generic
+Memory 1001.9 MiB
+Processor Intel(R) Core(TM) i3 CPU
+Processing time 1625 cycles
+Processing threads - 1 thread
+Public-key cryptography algorithm - RSA (with Montgomery multiplication)
+Symmetric-key cryptography algorithm - AES-128 (zero IV)
+------
+&lt;/pre&gt;&lt;p&gt;&amp;nbsp;Получив формат пакета с ссертификатом от одного сервера и сертификат от другого, приходит идея устроить пересылку сообщений между серверами:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;Устанавливаем два подключения&lt;/li&gt;&lt;li&gt;Пересылаем сообщения между серверами друг другу, просматривая их&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;Понимаем, что устанавливается SSL соединение (не совсем классическое, а несколько упрощенное):&amp;nbsp;&lt;/p&gt;&lt;ol&gt;&lt;li&gt;1-ый сервер выдает сертификат&lt;/li&gt;&lt;li&gt;2-ой сервер в ответ на сертификат выдает зашифрованный на открытом ключе первого сервера сеансовый ключ для &amp;nbsp;AES-128-CBC (из отладочной информации понимаем)&lt;/li&gt;&lt;li&gt;В ответ на это 1 сервер отвечает коротким сообщением об окончании установления соединения&lt;/li&gt;&lt;li&gt;Пересылается один пакет, зашифрованный уже сеансовым симметричным ключом&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Помучавшись с попыткой подменить сертификат, приходим к выводу, что используется атака по времени. Ибо:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Название намекает&lt;/li&gt;&lt;li&gt;Намеки в дебажном выводе&lt;/li&gt;&lt;li&gt;Слишком много намеков в дебажном выводе&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Наиболее простым и правильным решением оказывается проведение Тайминг-атаки по мотивам вот этой статьи: &lt;a href=&quot;http://crypto.stanford.edu/~dabo/papers/ssl-timing.pdf&quot;&gt;http://crypto.stanford.edu/~dabo/papers/ssl-timing.pdf&lt;/a&gt;. Ибо&amp;nbsp;&lt;em&gt;Public-key cryptography algorithm - RSA (with Montgomery multiplication)&lt;/em&gt;.&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/python
+from struct import pack
+from sock import Sock
+import sys
+from fractions import gcd
+from numpy import random
+from operator import *
+from time import *
+
+#Extended Euclidean algorithm
+def extended_euclidean(a, b):	
+	x = 0
+	lastx = 1
+	y = 1
+	lasty = 0
+	
+	while b != 0:
+		q = a // b
+		a, b = b, a % b		
+		x, lastx = (lastx - q * x, x)
+		y, lasty = (lasty - q * y, y)
+	return (a, lastx, lasty)
+	
+def inverse(var, module):
+	&quot;&quot;&quot;
+	Return b such that b*m mod k = 1, or 0 if no solution
+	&quot;&quot;&quot;
+	v = extended_euclidean(var,module)
+	return (v[0]==1)*(v[1] % module)
+
+def code(u):
+	buf = &#039;&#039;
+	for i in xrange(0, 16, 1):
+		t = u % (1 &amp;lt;&amp;lt; 32)
+		buf += pack(&#039;&amp;lt;I&#039;, t)
+		u = u &amp;gt;&amp;gt; 32
+	return buf[::-1]
+
+hello1 = &#039;\x16\x01\x00\x01\x01&#039;
+def decryptTime(u):
+	tries = 3
+	t = 0
+	for i in range(0, tries, 1):
+		s = Sock(&quot;213.170.102.196:4001&quot;, timeout=30)
+		s.send(hello1)
+		cerHello = s.recv(10000)		
+		buf = &#039;\x16\x01\x00\x41\x0c&#039; + code(u)
+		s.send(buf)
+		s.read_until(&#039;Processing time &#039;)
+		buf = s.read_until(&#039; cycles&#039;)
+		s.close()
+		t += int(buf[1:-6])
+	return (t / tries)
+
+
+Modulus = 0x00d30f0d35084103fdf880a2e23f34b2631cca681eb7651d733cdc09b7c95e68b9b956d37ea3695ea3e6b406c26460a192fc153cf9b688a90282c78dcbee012341
+R = 1 &amp;lt;&amp;lt; 256
+invR = inverse(R, Modulus)
+
+treshold = 50000 #this means 50000 cycles from DEBUG output 
+def guess(g0):
+	gOrig = g0
+	randTries = 1
+	for i in xrange(0, 252, 1):
+		delta = 0
+		g1 = 0
+		for j in xrange(0, randTries, 1):
+			g = gOrig
+			if j &amp;gt; 0:
+				g += random.randint(0, 512)
+			print &#039;#&#039; + str(i)
+			g1 = (1 &amp;lt;&amp;lt; (251 - i)) | g
+
+			ug0 = g * invR % Modulus
+			print &#039;g : &#039; + hex(g)
+			print &#039;g1: &#039; + hex(g1)
+			ug1 = g1 * invR % Modulus
+
+			dt0 = decryptTime(ug0)
+			dt1 = decryptTime(ug1)
+			delta += abs(dt1 - dt0)
+		delta = delta / randTries	
+		print &#039;delta: &#039; + str(delta)
+
+		if delta &amp;lt; treshold:
+			gOrig = g1
+	return gOrig
+
+
+def tryWithG0(g0):
+	q = guess(g0)
+	print hex(q)
+	p = Modulus / q
+	if q * p == Modulus:
+		print &#039;SUCCES&#039;
+		print hex(q)
+		print hex(p)
+	else:
+		print &#039;FAIL&#039;
+
+
+for b1 in range(0, 8):
+	g0 = 1 &amp;lt;&amp;lt; 255
+	print &#039;======================================= &#039; + str(b1)
+	g0 = g0 + b1 * (1 &amp;lt;&amp;lt; 252)
+	print decryptTime(g0 * invR % Modulus)
+
+
+g0 = (1 &amp;lt;&amp;lt; 255) + 6 * (1 &amp;lt;&amp;lt; 252)
+tryWithG0(g0)
+&lt;/pre&gt;&lt;p&gt;&lt;em&gt;Примечение.&lt;/em&gt; Используется обертка для сокетов Sock, написанная Hellman (https://github.com/hellman/sock).&lt;/p&gt;&lt;p&gt;Если в функции guess выставить переменную&amp;nbsp;&lt;span style=&quot;background-color: #f5f5f5; font-family: Monaco, Menlo, Consolas, &#039;Courier New&#039;, monospace; font-size: 13px; white-space: pre-wrap;&quot;&gt;randTries&lt;/span&gt;&amp;nbsp;переменную равной &amp;gt;1, то скрипт будет использовать Neighborhood из статьи, но в данном случае это необязательно.&lt;/p&gt;&lt;p&gt;В итоге получаем один из множителей RSA модуля, находим закрытый ключ, расшифровываем сеансовый ключ &amp;nbsp;AES. Далее расшифровываем последнее сообщение. Оно говорит нам, что нужно отправить сообщение вида &quot;XXXXXXX:Connect&quot;. В качестве XXXXXXX подставляем код из&amp;nbsp;задания. Все это дело шифруем AES&#039;ом и дописываем заголовок пакета из протокола, используемого в задании:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/python
+import socket
+import struct
+from Crypto.Cipher import AES
+
+s1 = socket.socket()
+s1.connect((&quot;213.170.102.196&quot;, 4001)) 
+
+s2 = socket.socket()
+s2.connect((&quot;213.170.102.197&quot;, 4002))
+
+hello1 = &#039;\x16\x01\x00\x01\x01&#039;
+
+s1.send(hello1)
+cerHello = s1.recv(10000)
+s2.send(cerHello)
+buf = s2.recv(10000)
+print &#039;=== recv on cert:&#039;
+print buf.encode(&#039;hex&#039;)
+
+
+tmp = buf[-64:]
+c = int( &#039;0x&#039; + tmp.encode(&#039;hex&#039;), 16)
+d = 0x164e0ae945dc091df7fb303b94ce6ee3c691257bc989e818db9fad6f3cdabb5a6431a9262d6d04558cfc5084dfc2709f743f673396617b9d71de6f8da481eea1L
+N = 0xd30f0d35084103fdf880a2e23f34b2631cca681eb7651d733cdc09b7c95e68b9b956d37ea3695ea3e6b406c26460a192fc153cf9b688a90282c78dcbee012341L
+p = pow(c, d, N)
+p = hex(p)[2:-1]
+print p
+if len(p) % 2 == 1:
+	p = &#039;0&#039; + p
+p = p.decode(&#039;hex&#039;)
+key = p[-16:]
+print len(key)
+print key.encode(&#039;hex&#039;)
+iv = &#039;\x00&#039; * 16
+aes = AES.new(key, AES.MODE_CBC, iv)
+
+
+s1.send(buf)
+buf = s1.recv(10000)
+s2.send(buf)
+buf = s2.recv(10000)
+
+cmd = aes.decrypt(buf[-112:])
+print cmd
+
+msg = &#039;B4365F2:Connect&#039;
+length = 16 - (len(msg) % 16)
+msg += chr(length)*length
+print msg
+aes = AES.new(key, AES.MODE_CBC, iv)
+data = &#039;\x17\x01\x00\x10&#039; + aes.encrypt(msg)
+
+s2.send(data)
+aes = AES.new(key, AES.MODE_CBC, iv)
+flag = s2.recv(10000)
+
+flag = aes.decrypt(flag[4:])
+print &#039;FLAG:&#039;
+print flag
+
+s1.close()
+s2.close()&lt;/pre&gt;&lt;p&gt;И вот только после этого получаем ключ:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;To obtain the access to the missile control system send a message: &quot;XXXXXXX:Connect&quot;.
+XXXXXXX - ID
+B4365F2:Connect
+FLAG:
+b84395ebd302b3e8943708770d45c4d3&lt;/pre&gt;&lt;p&gt;Ключ:&amp;nbsp;&lt;strong&gt;b84395ebd302b3e8943708770d45c4d3&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Sports brands&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.sb-roscoff.fr/en/bdebfkshop/store/gender_man/category_shoes/&quot;&gt;UOMO, SCARPE&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Tue, 04 Mar 2014 15:14:52 +0000</pubDate>
+ <dc:creator>Dor1s</dc:creator>
+ <guid isPermaLink="false">36 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/36#comments</comments>
+</item>
+<item>
+ <title>Challenge 1: Guerilla</title>
+ <link>https://ctfcrew.org/writeup/15</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/11&quot;&gt;Teaser Insomnihack 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;First we see the text on the page: &lt;strong&gt;&quot;You must specify a nick&quot;.&amp;nbsp;&lt;/strong&gt;After quick look into source code of the page we understand that our URL must contain GET-parameter &#039;nick&#039; with random value.&lt;/p&gt;&lt;p&gt;Then&amp;nbsp;server sends us some leet-modified string like&amp;nbsp;&lt;/p&gt;&lt;pre class=&quot;brush: bash&quot;&gt;51xty tw0 plu5 0n3
+&lt;/pre&gt;&lt;p&gt;and expecting from us solution of this expression in the same format.&lt;/p&gt;&lt;p&gt;Experimentally found that there is only 4 leet-modified characters: &#039;1&#039; == &#039;i&#039;, &#039;3&#039; == &#039;e&#039;, &#039;5&#039; == &#039;s&#039;, &#039;0&#039; == &#039;o&#039;.&lt;/p&gt;&lt;p&gt;There are can be various numbers and all 4 operations: plus, minus, times and divide by. So our solution has following steps:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;unleetify string to normal words (ex. &quot;sixty two plus one&quot;);&lt;/li&gt;&lt;li&gt;extract operation (&quot;plus&quot; -&amp;gt; &quot;+&quot;);&lt;/li&gt;&lt;li&gt;turn 2 strings to numbers (62 and 1);&lt;/li&gt;&lt;li&gt;eval expression (62 + 1 = 63);&lt;/li&gt;&lt;li&gt;turn number to words (&quot;sixty three&quot;);&lt;/li&gt;&lt;li&gt;leetify this string using same rules as server (&quot;51xty thr33&quot;);&lt;/li&gt;&lt;li&gt;send string to server and get response. If there is no flag in response go to step 1.&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;After some number of iterations server will send us a flag:&amp;nbsp;&lt;strong&gt;Fl4g4Th3W1nl33tP0w4h.&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;P.S. Because of script use WebSockets we had to write code on JavaScript.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.copperbridgemedia.com/&quot;&gt;Running sports&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.fitforhealth.eu/cdavshop/2021/shop/sneakers-deals/vans-uv-ink-era-change-color-in-the-sun-1203127337/&quot;&gt;Vans Shoes That Change Color in the Sun: UV Era Ink Stacked &amp; More – Fitforhealth News&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/1337-calc.html.zip&quot; type=&quot;application/zip; length=2459&quot;&gt;1337-calc.html.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 03 Feb 2014 22:13:54 +0000</pubDate>
+ <dc:creator>azrael</dc:creator>
+ <guid isPermaLink="false">15 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/15#comments</comments>
+</item>
+<item>
+ <title>Markoff</title>
+ <link>https://ctfcrew.org/writeup/13</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/trivia&quot;&gt;trivia&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/10&quot;&gt;PHDays Quals IV&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;The name of this task connected to &quot;Markov chain&quot;&lt;/p&gt;
+&lt;p&gt;The main idea of that system is that the next state depends only on the current state, and there is a probability of transition.&lt;/p&gt;
+&lt;p&gt;First try shows, that one word phrases are shutting down the connection.&lt;/p&gt;
+&lt;p&gt;So we need to start with two word phrase. First hint is in the password:&quot;talk_with_markov_about_positive_things&quot;.&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;
+send &gt;&gt; positive spam
+recv &amp;lt;&amp;lt; positive spam
+send &gt;&gt; positive spam
+recv &amp;lt;&amp;lt; positive hack
+&lt;/pre&gt;
+&lt;p&gt;As you can see server sometimes changes last word, and this is the main idea&lt;/p&gt;
+&lt;p&gt;We just need to write a script that will send the same string “n” times and look how last word will be changed. After scipt should send new phrase with changed last word and appended &quot;spam&quot; word. Result of this script is a long chain of words:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;positive hack days ha_ha_not_that_easy maybe_technopandas_can_help phd technopandas techno_pandas sorry_wrong_turn techno pandas talk_with_markov_about_hacker&lt;/pre&gt;
+&lt;p&gt;After some words, you can get a chain of words:&amp;nbsp; &quot;talk_with_markov_about_hacker&quot; is a hint, to start a new chain with word &quot;hacker&quot; and this is the answer chain:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;hacker quas wex exort yep_those_three_weird_words_are_the_flag&lt;/pre&gt;
+&lt;p&gt;To take egg, you need to start chain with word &quot;easter&quot;:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;easter easter_egg dc245aad88104604acb82e566fde8ef6&lt;/pre&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Buy Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfecjzshop/collections/whatsnew&quot;&gt;Sneakers Nike Shoes&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 02 Feb 2014 08:30:27 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">13 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/13#comments</comments>
+</item>
+<item>
+ <title>Rbox</title>
+ <link>https://ctfcrew.org/writeup/6</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/10&quot;&gt;PHDays Quals IV&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;Задание:&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Unhash this:&lt;/div&gt;&lt;div&gt;5ebad7dcbd73584f32ef949486a161a1e9f10e48ade43b03649a2ca680f327c4&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;nc 195.133.87.165 5555&lt;/div&gt;&lt;div&gt;Auth token: rb0xch4ll3ng3&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;!--break--&gt;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;Решение:&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Подключаемся к серверу, выполнив команду &quot;nc 195.133.87.165 5555&quot;, и видим приветствие:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;em&gt;RX-Box hasher v0.1&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;------------------&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;Auth:&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Вводим токен:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;em&gt;rb0xch4ll3ng3&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;Enter message:&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Теперь можно ввести любое сообщение, и оно будет прохешировано. Вводим разные короткие сообщения и получаем:&lt;/div&gt;&lt;div&gt;&lt;em&gt;&quot;0&quot; - &quot;3ad2b2fcdb1f39281286e7b4e4995795d8906d709e82583b51ff18c3b4c745a70ad2b2fc&quot;&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;&quot;1&quot; - &quot;3bd2b2fcdb1f39281286e7b4e4995795d8906d709e82583b51ff18c3b4c745a70ad2b2fc&quot;&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;&quot;00&quot; - &quot;3ae2b2fcdb1f39281286e7b4e4995795d8906d709e82583b51ff18c3b4c745a70ad2b2fc&quot;&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;&quot;001&quot;-&quot;3ae283fcdb1f39281286e7b4e4995795d8906d709e82583b51ff18c3b4c745a70ad2b2fc&quot;&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Видно, что каждый байт исходного текста отображается в один байт (два hex-символа) хеша, то есть восстановить хеш можно простым посимвольным перебором. Еще можно заметить интересный момент: длина возвращаемого хеша - 72 hex-символа, в то же время нам дано лишь 64 символа, значит нужно подобрать лишь первые 32 байта сообщения.&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Далее просто пишем скрипт, который будет в цикле подключаться к серверу и подбирать хеш посимвольно.&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Например такой:&lt;/div&gt;&lt;div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+from socket import create_connection
+from time import sleep
+import string
+ 
+hash = &quot;5ebad7dcbd73584f32ef949486a161a1e9f10e48ade43b03649a2ca680f327c4&quot;
+ 
+message = &quot;&quot;
+end1 = 9
+end2 = 2
+ 
+for i in xrange(0,32,1):
+    for c in string.printable:
+        con = create_connection((&#039;195.133.87.165&#039;, 5555))
+        con.recv(1024)
+        con.recv(1024)
+        con.send(&quot;rb0xch4ll3ng3\n&quot;)
+        sleep(0.1)
+ 
+        con.recv(1024)
+        con.send(message+c+&quot;\n&quot;)
+        sleep(0.02)
+ 
+        res = con.recv(1024)
+        if res[7:end1] == hash[0:end2]:
+            message = message + c
+            print message
+            end1 = end1 +2
+            end2 = end2 +2
+            break
+ 
+print &quot;&quot;
+print &quot;Message: &quot; + message
+print &quot;&quot;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Запускаем скрипт и видим, как он постепенно подбирает исходное сообщение. В конце работы печатается результат:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;em&gt;Message: The flag is b8641ac83fc85e4e44bc&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;Флаг: b8641ac83fc85e4e44bc&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Authentic Nike Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeabcayshop/items/view/12928&quot;&gt;【国内5月1日発売予定】アンディフィーテッド × ナイキ コービー 5 プロトロ &quot;ホール オブ フェイム&quot; メタリック ゴールド/フィールド パープル-マルチ カラー (DA6809-700) - スニーカーウォーズ&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/rbox.py.txt&quot; type=&quot;text/plain; length=644&quot;&gt;rbox.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Thu, 30 Jan 2014 07:47:57 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">6 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/6#comments</comments>
+</item>
+</channel>
+</rss>

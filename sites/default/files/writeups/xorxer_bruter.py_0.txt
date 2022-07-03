@@ -1,0 +1,38 @@
+#!/usr/bin/python
+import itertools
+import hashlib
+import sys
+
+MD5 = '7179926e4253a0b405090df67f62c543'
+
+group1 = "Ktrno"
+group2 = "luai"
+group3 = "abdk"
+group4 = "aaat"
+
+all_variants = 24*24*24*120
+count = 0
+
+for g1 in itertools.permutations(group1):
+	for g2 in itertools.permutations(group2):
+		for g3 in itertools.permutations(group3):
+			for g4 in itertools.permutations(group4):
+				result = ''
+				for i in xrange(0,17,1):
+					if i%4 ==0:
+						result+=(g1[i/4])
+					if i%4 ==1:
+						result+=(g2[i/4])
+					if i%4 ==2:
+						result+=(g3[i/4])
+					if i%4 ==3:
+						result+=(g4[i/4])
+				md5 = hashlib.new('md5')
+				md5.update(result)
+				hashed = md5.hexdigest()
+				if hashed == MD5:
+					print "Flag: " + result
+					exit(0)
+	count+=13824
+	sys.stdout.write( "Progress: " + str(100*count/all_variants) + "%\r" )
+	sys.stdout.flush()

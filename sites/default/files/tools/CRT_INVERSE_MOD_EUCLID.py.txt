@@ -1,0 +1,45 @@
+import sys
+from fractions import gcd
+from numpy import random
+from operator import *
+from time import *
+
+
+#Extended Euclidean algorithm
+def extended_euclidean(a, b):	
+	x = 0
+	lastx = 1
+	y = 1
+	lasty = 0
+	
+	while b != 0:
+		q = a // b
+		a, b = b, a % b		
+		x, lastx = (lastx - q * x, x)
+		y, lasty = (lasty - q * y, y)
+	return (a, lastx, lasty)
+	
+def inverse(var, module):
+	"""
+	Return b such that b*m mod k = 1, or 0 if no solution
+	"""
+	v = extended_euclidean(var,module)
+	return (v[0]==1)*(v[1] % module)
+	
+	
+	
+def CRT(RemList,ModulList):
+	"""
+	Chinese Remainder Theorem:
+	RemList = reminders when x is divided by ModulList
+	ModulList = list of pairwise relatively prime integers
+	(ri is 'each in RemList', mi 'each in ModulList')
+
+	The solution for x modulo N (N = product of ModulList) will be:
+	x = a1*N1*y1 + a2*N2*y2 + ... + ar*Nr*yr (mod N),
+	where Ni = N/mi and yi = (Ni)^-1 (mod mi) for 1 <= i <= r.
+	"""
+	N  = reduce(mul,ModulList)        		# multiply ModulList together
+	Ns = [N/mi for mi in ModulList]   		# create list of all N/multiply
+	ys = [inverse(Ni, mi) for Ni,mi in zip(Ns,ModulList)] # get inverse elements of Ni by module mi
+	return (reduce(add,[ri*Ni*yi for ri,Ni,yi in zip(RemList,Ns,ys)]) % N,N)

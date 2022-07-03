@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - trivia</title>
+ <link>https://ctfcrew.org/categories/trivia</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>Markoff</title>
+ <link>https://ctfcrew.org/writeup/13</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/trivia&quot;&gt;trivia&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/10&quot;&gt;PHDays Quals IV&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;The name of this task connected to &quot;Markov chain&quot;&lt;/p&gt;
+&lt;p&gt;The main idea of that system is that the next state depends only on the current state, and there is a probability of transition.&lt;/p&gt;
+&lt;p&gt;First try shows, that one word phrases are shutting down the connection.&lt;/p&gt;
+&lt;p&gt;So we need to start with two word phrase. First hint is in the password:&quot;talk_with_markov_about_positive_things&quot;.&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;
+send &gt;&gt; positive spam
+recv &amp;lt;&amp;lt; positive spam
+send &gt;&gt; positive spam
+recv &amp;lt;&amp;lt; positive hack
+&lt;/pre&gt;
+&lt;p&gt;As you can see server sometimes changes last word, and this is the main idea&lt;/p&gt;
+&lt;p&gt;We just need to write a script that will send the same string “n” times and look how last word will be changed. After scipt should send new phrase with changed last word and appended &quot;spam&quot; word. Result of this script is a long chain of words:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;positive hack days ha_ha_not_that_easy maybe_technopandas_can_help phd technopandas techno_pandas sorry_wrong_turn techno pandas talk_with_markov_about_hacker&lt;/pre&gt;
+&lt;p&gt;After some words, you can get a chain of words:&amp;nbsp; &quot;talk_with_markov_about_hacker&quot; is a hint, to start a new chain with word &quot;hacker&quot; and this is the answer chain:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;hacker quas wex exort yep_those_three_weird_words_are_the_flag&lt;/pre&gt;
+&lt;p&gt;To take egg, you need to start chain with word &quot;easter&quot;:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;easter easter_egg dc245aad88104604acb82e566fde8ef6&lt;/pre&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Buy Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfecjzshop/collections/whatsnew&quot;&gt;Sneakers Nike Shoes&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 02 Feb 2014 08:30:27 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">13 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/13#comments</comments>
+</item>
+</channel>
+</rss>

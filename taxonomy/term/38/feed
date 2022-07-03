@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - Isomni&#039;hack teaser 2017</title>
+ <link>https://ctfcrew.org/event/38</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>Isomni&#039;hack 2017 teaser mindreader writeup</title>
+ <link>https://ctfcrew.org/writeup/104</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/mobile&quot;&gt;mobile&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/38&quot;&gt;Isomni&amp;#039;hack teaser 2017&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Machines infected lots of Android smartphones and try to collect information on human behaviour... Have a look to their application and try to steal information on them.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;So we have an android application file. Let&#039;s decompile its code!&lt;/p&gt;
+&lt;p&gt;First, we need to translate Dalvik bytecode to equivalent Java bytecode. I used &lt;a href=&quot;https://github.com/google/enjarify&quot;&gt;enjarify&lt;/a&gt; for this:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+➜ git clone https://github.com/google/enjarify
+➜ cd enjarify
+➜ ./enjarify.sh ../mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516.apk -o ../app.jar&lt;/pre&gt;
+&lt;p&gt;And now we can decompile java bytecode by using &lt;a href=&quot;http://jd.benow.ca&quot;&gt;jd-gui&lt;/a&gt;. Let&#039;s see what we have.&lt;/p&gt;
+&lt;p&gt;The first intresting function is&amp;nbsp;&lt;em&gt;readMind&lt;/em&gt;:&lt;/p&gt;
+&lt;pre class=&quot;brush: java; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+static String device = &quot;000000000000000&quot;;
+...
+public String readMind()
+{
+    localObject1 = device;
+    String str1 = jsonify((String)localObject1); // encode to json {&quot;device&quot;: &quot;...&quot;}
+    byte[] arrayOfByte1 = str1.getBytes();
+    byte[] arrayOfByte2 = new byte[arrayOfByte1.length];
+    localObject1 = getApplicationContext();
+    encrypt((Context)localObject1, arrayOfByte1, arrayOfByte2);
+    int i = 0;
+    localObject1 = null;
+    String str2 = Base64.encodeToString(arrayOfByte2, 0);
+    ... // Send HTTP-request with str2 as parameter to server
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Here we can see that string with json &lt;em&gt;{&quot;device&quot;: &quot;000000000000000&quot;}&lt;/em&gt; is encrypted, encoded to base64 and then sent to the server. And function &lt;em&gt;encrypt&lt;/em&gt; looks like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: java; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+public native int encrypt(Context paramContext, byte[] paramArrayOfByte1, byte[] paramArrayOfByte2);&lt;/pre&gt;
+&lt;p&gt;And above this we have lines:&lt;/p&gt;
+&lt;pre class=&quot;brush: java; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+static
+{
+    System.loadLibrary(&quot;native-lib&quot;);
+}
+&lt;/pre&gt;
+&lt;p&gt;As we can see &lt;em&gt;encrypt&lt;/em&gt;&amp;nbsp;function is implemented in library &lt;em&gt;libnative-lib.so&lt;/em&gt;. Let&#039;s find it.&lt;/p&gt;
+&lt;p&gt;First, we should extract application files. I used&amp;nbsp;&lt;a href=&quot;https://ibotpeaches.github.io/Apktool&quot;&gt;apktool&lt;/a&gt;&amp;nbsp;for this:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+➜ apktool d mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516.apk
+➜ cd mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516/lib/armeabi
+➜ file libnative-lib.so
+libnative-lib.so: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /system/bin/linker, BuildID[sha1]=f092f48095eec3cb0c6dd8eddec9994c2b3e01b4, stripped
+&lt;/pre&gt;
+&lt;p&gt;Now we should find `encrypt` function in this library. As `encrypt` is called from java code it seems that it should use JNI (Java Native Interface). So, according to &lt;a href=&quot;https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/design.html&quot;&gt;Oracle documentation&lt;/a&gt; name of &lt;em&gt;encrypt&lt;/em&gt;&amp;nbsp;function &amp;nbsp;in library will be like &lt;em&gt;Java_ch_scrt_hiddenservice_MainActivity_encrypt&lt;/em&gt;&amp;nbsp;(&lt;em&gt;ch.scrt.hiddenservice&lt;/em&gt;&amp;nbsp;- name of application package, &lt;em&gt;MainActivity&lt;/em&gt;&amp;nbsp;- name of class).&lt;/p&gt;
+&lt;p&gt;In Ida Pro this function looks like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int __fastcall Java_ch_scrt_hiddenservice_MainActivity_encrypt(int a1, int a2, int a3, int a4, int a5)
+{
+  int v5; // ST1C_4@1
+  int v6; // r4@1
+  int v7; // r6@1
+  unsigned int v8; // r0@1
+  char v9; // r5@3
+  int v10; // r1@3
+  int v12; // [sp+8h] [bp-34h]@1
+  int v13; // [sp+10h] [bp-2Ch]@1
+  int v14; // [sp+14h] [bp-28h]@1
+  int v15; // [sp+18h] [bp-24h]@2
+  int v16; // [sp+1Ch] [bp-20h]@1
+  int v17; // [sp+20h] [bp-1Ch]@1
+  char v18; // [sp+24h] [bp-18h]@1
+  __int16 v19; // [sp+28h] [bp-14h]@1
+  char v20; // [sp+2Ah] [bp-12h]@1
+  char v21; // [sp+2Bh] [bp-11h]@1
+  int v22; // [sp+2Ch] [bp-10h]@4
+
+  v14 = a4;
+  v5 = a3;
+  v6 = a1;
+  v13 = a1;
+  v7 = 0;
+  v18 = 0;
+  v12 = (*(int (**)(void))(*(_DWORD *)a1 + 684))();
+  v17 = (*(int (__fastcall **)(int, int, char *))(*(_DWORD *)v6 + 736))(v6, v14, &amp;amp;v18);
+  v16 = (*(int (__fastcall **)(int))(*(_DWORD *)v6 + 736))(v6);
+  sub_4A68();
+  v8 = sub_4AC4(v6, v5);
+  v19 = v8;
+  v20 = v8 &amp;gt;&amp;gt; 16;
+  v21 = HIBYTE(v8);
+  if ( v12 &amp;gt; 0 )
+  {
+    v15 = dword_1D0F8;
+    do
+    {
+      v9 = *(_BYTE *)(v17 + v7);
+      j_j_j___aeabi_idivmod(v7, 80);
+      *(_BYTE *)(v16 + v7) = *((_BYTE *)&amp;amp;v19 + v7 % 4) ^ *(_BYTE *)(v15 + v10) ^ v9;
+      ++v7;
+    }
+    while ( v12 != v7 );
+  }
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)v13 + 768))(v13, v14, v17, 0);
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)v13 + 768))(v13, a5, v16, 0);
+  if ( _stack_chk_guard != v22 )
+    j_j___stack_chk_fail();
+  return 0;
+}
+&lt;/pre&gt;
+&lt;p&gt;Also according to JNI Oracle documentation the first argument of this function is &lt;em&gt;JNIEnv* env&lt;/em&gt;&amp;nbsp;and the second is &lt;em&gt;jobject obj&lt;/em&gt;. The rest of arguments is arguments from java i.e. &lt;em&gt;Context paramContext, byte[] paramArrayOfByte1, byte[] paramArrayOfByte2)&lt;/em&gt;. Now our function looks like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int __fastcall Java_ch_scrt_hiddenservice_MainActivity_encrypt(int env, int obj, int paramContext, int paramArrayOfByte1, int paramArrayOfByte2)
+{
+  ...
+   paramArrayOfByte1_1 = paramArrayOfByte1;
+  paramContext_1 = paramContext;
+  env_1 = env;
+  env_2 = env;
+  v7 = 0;
+  v18 = 0;
+  v12 = (*(int (**)(void))(*(_DWORD *)env + 684))();
+  v17 = (*(int (__fastcall **)(int, int, char *))(*(_DWORD *)env_1 + 736))(env_1, paramArrayOfByte1_1, &amp;amp;v18);
+  v16 = (*(int (__fastcall **)(int))(*(_DWORD *)env_1 + 736))(env_1);
+  sub_4A68();
+  v8 = sub_4AC4(env_1, paramContext_1);
+  v19 = v8;
+  v20 = v8 &amp;gt;&amp;gt; 16;
+  v21 = HIBYTE(v8);
+  if ( v12 &amp;gt; 0 )
+  {
+    v15 = dword_1D0F8;
+    do
+    {
+      v9 = *(_BYTE *)(v17 + v7);
+      j_j_j___aeabi_idivmod(v7, 80);
+      *(_BYTE *)(v16 + v7) = *((_BYTE *)&amp;amp;v19 + v7 % 4) ^ *(_BYTE *)(v15 + v10) ^ v9;
+      ++v7;
+    }
+    while ( v12 != v7 );
+  }
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + 768))(env_2, paramArrayOfByte1_1, v17, 0);
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + 768))(env_2, paramArrayOfByte2, v16, 0);
+  if ( _stack_chk_guard != v22 )
+    j_j___stack_chk_fail();
+  return 0;
+}
+&lt;/pre&gt;
+&lt;p&gt;Better but still not readable because of many function calls like &lt;em&gt;(*(int (__fastcall **)(int, int, char *))(*(_DWORD *)env_1 + 736))&lt;/em&gt;&amp;nbsp; i.e. by offset in&amp;nbsp;&lt;em&gt;JNIEnv *env&lt;/em&gt;. We need to find function names by their offsets in &lt;em&gt;JNIEnv&lt;/em&gt;. All JNI functions are listed &lt;a href=&quot;http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/functions.html&quot;&gt;here&lt;/a&gt;. But I found cool Ida script &lt;a href=&quot;https://github.com/trojancyborg/IDA_JNI_Rename&quot;&gt;IDA_JNI_Rename&lt;/a&gt;&amp;nbsp;on GitHub. After using it our function will look like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int __fastcall Java_ch_scrt_hiddenservice_MainActivity_encrypt(int env, int obj, int paramContext, int paramArrayOfByte1, int paramArrayOfByte2)
+{
+  ...
+  paramArrayOfByte1_1 = paramArrayOfByte1;
+  paramContext_1 = paramContext;
+  env_1 = env;
+  env_2 = env;
+  v7 = 0;
+  v18 = 0;
+  v12 = (*(int (**)(void))(*(_DWORD *)env + jni_GetArrayLength))();
+  v17 = (*(int (__fastcall **)(int, int, char *))(*(_DWORD *)env_1 + jni_GetByteArrayElements))(
+          env_1,
+          paramArrayOfByte1_1,
+          &amp;amp;v18);
+  v16 = (*(int (__fastcall **)(int))(*(_DWORD *)env_1 + jni_GetByteArrayElements))(env_1);
+  sub_4A68();
+  v8 = sub_4AC4(env_1, paramContext_1);
+  v19 = v8;
+  v20 = v8 &amp;gt;&amp;gt; 16;
+  v21 = HIBYTE(v8);
+  if ( v12 &amp;gt; 0 )
+  {
+    v15 = dword_1D0F8;
+    do
+    {
+      v9 = *(_BYTE *)(v17 + v7);
+      j_j_j___aeabi_idivmod(v7, 80);
+      *(_BYTE *)(v16 + v7) = *((_BYTE *)&amp;amp;v19 + v7 % 4) ^ *(_BYTE *)(v15 + v10) ^ v9;
+      ++v7;
+    }
+    while ( v12 != v7 );
+  }
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + jni_ReleaseByteArrayElements))(
+    env_2,
+    paramArrayOfByte1_1,
+    v17,
+    0);
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + jni_ReleaseByteArrayElements))(
+    env_2,
+    paramArrayOfByte2,
+    v16,
+    0);
+  if ( _stack_chk_guard != v22 )
+    j_j___stack_chk_fail();
+  return 0;
+}
+&lt;/pre&gt;
+&lt;p&gt;Now we can assume that &lt;em&gt;paramArrayOfByte1&lt;/em&gt;&amp;nbsp;is &lt;em&gt;plaintext&lt;/em&gt;&amp;nbsp;and &lt;em&gt;paramArrayOfByte2&lt;/em&gt;&amp;nbsp;is &lt;em&gt;ciphertext&lt;/em&gt;. Let&#039;s do some renames:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int __fastcall Java_ch_scrt_hiddenservice_MainActivity_encrypt(int env, int obj, int paramContext, int plaintext, int ciphertext)
+{
+  ...
+  paramArrayOfByte1_1 = plaintext;
+  paramContext_1 = paramContext;
+  env_1 = env;
+  env_2 = env;
+  i = 0;
+  v18 = 0;
+  plaintext_len = (*(int (**)(void))(*(_DWORD *)env + jni_GetArrayLength))();
+  plaintext_bytes = (*(int (__fastcall **)(int, int, char *))(*(_DWORD *)env_1 + jni_GetByteArrayElements))(
+                      env_1,
+                      paramArrayOfByte1_1,
+                      &amp;amp;v18);
+  ciphertext_bytes = (*(int (__fastcall **)(int))(*(_DWORD *)env_1 + jni_GetByteArrayElements))(env_1);
+  sub_4A68();
+  some_int = sub_4AC4(env_1, paramContext_1);
+  some_int_1 = some_int;
+  v20 = some_int &amp;gt;&amp;gt; 16;
+  v21 = HIBYTE(some_int);
+  if ( plaintext_len &amp;gt; 0 )
+  {
+    v15 = dword_1D0F8;
+    do
+    {
+      v9 = *(_BYTE *)(plaintext_bytes + i);
+      j_j_j___aeabi_idivmod(i, 80);
+      *(_BYTE *)(ciphertext_bytes + i) = *((_BYTE *)&amp;amp;some_int_1 + i % 4) ^ *(_BYTE *)(v15 + v10) ^ v9;
+      ++i;
+    }
+    while ( plaintext_len != i );
+  }
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + jni_ReleaseByteArrayElements))(
+    env_2,
+    paramArrayOfByte1_1,
+    plaintext_bytes,
+    0);
+  (*(void (__fastcall **)(int, int, int, _DWORD))(*(_DWORD *)env_2 + jni_ReleaseByteArrayElements))(
+    env_2,
+    ciphertext,
+    ciphertext_bytes,
+    0);
+  if ( _stack_chk_guard != v22 )
+    j_j___stack_chk_fail(_stack_chk_guard - v22);
+  return 0;
+}
+&lt;/pre&gt;
+&lt;p&gt;So, the encryption algoritm is like this:&lt;/p&gt;
+&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+int some_int = sub_4AC4(env_1, paramContext_1);
+int dword_1D0F8[80] = ?;
+for (i = 0; i &amp;lt; plaintext_len; i++) {
+  ciphertext[i] = plaintext[i] ^ some_int[i % 4] ^ dword_1D0F8[i % 80];
+}
+&lt;/pre&gt;
+&lt;p&gt;Cool, but we don&#039;t have &lt;em&gt;some_int&lt;/em&gt;&amp;nbsp;and &lt;em&gt;dword_1D0F8&lt;/em&gt;. At this point I decided that it would be easier to place a breakpoint here and just copy this values from memory because I&#039;m lazy :) . To do this I used android emulator &lt;em&gt;armeabi-v7a&lt;/em&gt;:&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Start emulator with the command:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+➜ emulator -avd Nexus_5_API_24
+&lt;/pre&gt;
+&lt;p&gt;Then install application by drag&#039;n&#039;drop apk-file to it.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;&quot; height=&quot;569&quot; src=&quot;/sites/default/files/writeups/images/emulator.png&quot; width=&quot;892&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;After that I setup Ida Dalvik debugger as described &lt;a href=&quot;https://www.hex-rays.com/products/ida/support/tutorials/debugging_dalvik.pdf&quot;&gt;here&lt;/a&gt;&amp;nbsp;and place breakpoint on &lt;em&gt;encrypt&lt;/em&gt;&amp;nbsp;in &lt;em&gt;readMind&lt;/em&gt;&amp;nbsp;function:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;&quot; height=&quot;405&quot; src=&quot;/sites/default/files/writeups/images/dalvik_breakpoint.png&quot; width=&quot;1200&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Then I opened another Ida instance with `libnative-lib.so`, setup remote android debugger as described &lt;a href=&quot;https://finn.svbtle.com/remotely-debugging-android-binaries-in-ida-pro&quot;&gt;here&lt;/a&gt;&amp;nbsp;and place breakpoint before encryption started:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;&quot; height=&quot;694&quot; src=&quot;/sites/default/files/writeups/images/arm_breakpoint.png&quot; width=&quot;990&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;After that I ran Ida with Dalvik debugger and wait until program stopped and then I ran remote android debugger and attached to application process:&lt;/p&gt;
+&lt;p style=&quot;text-align: center;&quot;&gt;&lt;img alt=&quot;&quot; height=&quot;622&quot; src=&quot;/sites/default/files/writeups/images/attach.png&quot; width=&quot;581&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Next I press continue in first Ida instance (Dalvik debugger) and wait until breakpoint fires in second instance.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&quot;&quot; height=&quot;349&quot; src=&quot;/sites/default/files/writeups/images/break.png&quot; width=&quot;1200&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Ok, let&#039;s just find values of &lt;em&gt;some_int&lt;/em&gt;&amp;nbsp;and dword_1D0F8.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;dword_1D0F8&lt;/em&gt;&amp;nbsp;(started from &lt;em&gt;7E 66 31 05&lt;/em&gt;):&lt;/p&gt;
+&lt;p style=&quot;text-align: center;&quot;&gt;&lt;img alt=&quot;&quot; height=&quot;192&quot; src=&quot;/sites/default/files/writeups/images/hex.png&quot; width=&quot;491&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;and &lt;em&gt;some_int = 0xb1342c3a&lt;/em&gt;:&lt;/p&gt;
+&lt;p style=&quot;text-align: center;&quot;&gt;&lt;img alt=&quot;&quot; height=&quot;197&quot; src=&quot;/sites/default/files/writeups/images/stack.png&quot; width=&quot;333&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Ok, now we can rewrite encrypion in python:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+import json
+import base64
+
+table = [
+    0x7e, 0x66, 0x31, 0x05, 0x11, 0x22, 0x2b, 0x1f,
+    0x07, 0x74, 0x58, 0x19, 0x21, 0x16, 0x17, 0x05,
+    0x56, 0x52, 0x09, 0x22, 0x7f, 0x61, 0x25, 0x1f,
+    0x25, 0x13, 0x32, 0x33, 0x2a, 0x32, 0x32, 0x22,
+    0x28, 0x51, 0x13, 0x27, 0x5b, 0x62, 0x26, 0x1e,
+    0x20, 0x01, 0x0f, 0x09, 0x57, 0x1d, 0x14, 0x1e,
+    0x39, 0x17, 0x1d, 0x19, 0x03, 0x50, 0x12, 0x12,
+    0x02, 0x62, 0x1a, 0x7a, 0x0f, 0x4f, 0x26, 0x20,
+    0x02, 0x32, 0x11, 0x11, 0x57, 0x3d, 0x2e, 0x33,
+    0x0b, 0x14, 0x16, 0x0e, 0x1b, 0x60, 0x1c, 0x02,
+]
+
+crc = [ 0x3a, 0x2c, 0x34, 0xb1 ]
+
+def encrypt(p):
+    c = [0] * len(p)
+    for i in range(len(p)):
+        c[i] = chr(ord(p[i]) ^ crc[i % 4] ^ table[i % len(table)])
+    return &quot;&quot;.join(c)
+
+def encode(data):
+    return base64.b64encode(encrypt(json.dumps(data)))
+&lt;/pre&gt;
+&lt;p&gt;To check it I&#039;ve intercept HTTP-request from emulator and get:&lt;/p&gt;
+&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+GET /?a=1&amp;amp;c=P2hh0V1nfMsfYk6YKwoThFxODaN1fSGeLw8k%2Fw%3D%3D%0A HTTP/1.1
+User-Agent: Dalvik/2.1.0 (Linux; U; Android 7.0; sdk_google_phone_armv7 Build/NYC)
+Host: mindreader.teaser.insomnihack.ch
+Connection: close
+&lt;/pre&gt;
+&lt;p&gt;So, we can check correctness of python script as:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+test_in = &#039;{&quot;device&quot;:&quot;000000000000000&quot;}&#039;
+test_out = base64.b64decode(&quot;P2hh0V1nfMsfYk6YKwoThFxODaN1fSGeLw8k/w==&quot;)
+assert(encrypt(test_in) == test_out)
+&lt;/pre&gt;
+&lt;p&gt;Script was correct and I decided to try all requests from application:&lt;/p&gt;
+&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+URL = &quot;http://mindreader.teaser.insomnihack.ch&quot;
+
+def read_mind(device_id):
+    data = {
+        &quot;device&quot;: device_id
+    }
+    params = {
+        &quot;a&quot;: 1,
+        &quot;c&quot;: encode(data)
+    }
+    r = requests.get(URL, params=params)
+    return r
+
+def sms_send(device_id, date, sender, body):
+    data = {
+        &quot;device&quot;: device_id,
+        &quot;date&quot;: 0,
+        &quot;sender&quot;: sender,
+        &quot;body&quot;: body
+    }
+    params = {
+        &quot;a&quot;: 2,
+        &quot;c&quot;: encode(data)
+    }
+    r = requests.get(URL, params=params)
+    return r
+&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;sms_send&lt;/em&gt;&amp;nbsp;request I found in file &lt;em&gt;SMSReceiver.java&lt;/em&gt;&amp;nbsp;in JD-GUI.&lt;/p&gt;
+&lt;p&gt;After playing a little bit with this two requests I found that parameter sender in &lt;em&gt;sms_send&lt;/em&gt;&amp;nbsp;is vulnerable to SQL injection (time-based). So after gettting all nessesary table names and column names I got a flag:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;
+➜ python solve.py
+INS{N00bSmS_M1nD_r3ad1nG_TecH}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Full script solve.py (LINK!)&lt;/p&gt;
+&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Nike shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfejcashop/cheap-price/2021-new-adidas-yeezy-boost-350-v2-ash-stone-gw0089/&quot;&gt;2021 New adidas YEEZY BOOST 350 V2 &quot;Ash Stone&quot; GW0089 , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Binary Data&quot; title=&quot;application/octet-stream&quot; src=&quot;/modules/file/icons/application-octet-stream.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516.apk&quot; type=&quot;application/octet-stream; length=2457613&quot;&gt;mindreader-c3df7f2c966238cc8f4d4327dc1dca8b8b5a69d702f966963c828c965ebbf516.apk&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/solve.py_0.txt&quot; type=&quot;text/plain; length=2961&quot;&gt;solve.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 23 Jan 2017 13:46:15 +0000</pubDate>
+ <dc:creator>russtone</dc:creator>
+ <guid isPermaLink="false">104 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/104#comments</comments>
+</item>
+</channel>
+</rss>

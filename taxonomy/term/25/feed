@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - Sharif University CTF Quals 2014</title>
+ <link>https://ctfcrew.org/event/25</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>secure_coding 1,2,3 (coding 100, 200, 300)</title>
+ <link>https://ctfcrew.org/writeup/80</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/misc&quot;&gt;misc&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/25&quot;&gt;Sharif University CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;In these tasks we were given a service which:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;accepts .cpp file&lt;/li&gt;&lt;li&gt;compiles it via MSVS10 or gcc4.8 (you can choose which one)&lt;/li&gt;&lt;li&gt;launches a couple of tests on successfully compiled binary&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;You can look at it &lt;a href=&quot;http://ctf.sharif.edu:53840/problem.php?problem=ctf5quals_seccoding1&quot;&gt;here&lt;/a&gt;, &lt;a href=&quot;http://ctf.sharif.edu:53840/problem.php?problem=ctf5quals_seccoding2&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;http://ctf.sharif.edu:53840/problem.php?problem=ctf5quals_seccoding3&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Also there are original source code files, which are vulnerable and unstable. Tests launched on the service are checking some vulnerabilities on compiled binaries and our goal is to fix them and prevent program from crashing.&lt;/p&gt;&lt;p&gt;Well, the best way to show how we have solved these tasks is to show diff between original source code files and our solutions. Look at this&amp;nbsp;&lt;a href=&quot;https://github.com/BalalaikaCr3w/CTF/commit/ebe9b670195b78363ffe74df6a3d4ffe32bcdc0f&quot;&gt;commit&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;When uploaded source code passes all tests and keeps its initial functionality the service prints messages like:&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;WON!&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Flag: b658c70eb17bf96d6f8d64145b4cc859&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;WON!&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Flag: 57ba58587f972a80c12b5f590078270c&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;blockquote&gt;&lt;p&gt;WON!&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Flag: 696570afe73d9e8cbd206d10dbf58e8b&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;I don&#039;t think that it is needed to describe each line in our solution. But I mention most popular vulnerabilities fixed in these tasks:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;buffer overflow&lt;/li&gt;&lt;li&gt;writing to unallocated memory / reading uninitialized memory&lt;/li&gt;&lt;li&gt;format string vulnerabilities&lt;/li&gt;&lt;li&gt;few other errors&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;If you would have any questions about our code ask it via our &lt;a href=&quot;https://twitter.com/BalalaikaCr3w&quot;&gt;twitter account&lt;/a&gt;. We will answer and try to explain our fixes.&lt;/p&gt;&lt;p&gt;Btw, my lovely fix is:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/sec_coding300_best.png&quot; alt=&quot;&quot; width=&quot;929&quot; height=&quot;94&quot;&gt;&lt;/p&gt;&lt;p&gt;At the end of CTF we had just one vulnerability in our source code and suddenly we understood that input like &quot;%%x&quot; crashes the program. I could not come up with anything better than such fix and &lt;a href=&quot;http://ctf.sharif.edu/2014/quals/su-ctf/scoreboard/&quot;&gt;we got the 1st place&lt;/a&gt; when CTF was 12 minutes left.&lt;/p&gt;&lt;p&gt;p.s.&lt;/p&gt;&lt;p&gt;If service tells you complier error, try to choose another compiler ;)&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Adidas shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeagcnshop/fr/fr/nike-homme&quot;&gt;NIKE  HOMME&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Fri, 03 Oct 2014 14:10:45 +0000</pubDate>
+ <dc:creator>Dor1s</dc:creator>
+ <guid isPermaLink="false">80 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/80#comments</comments>
+</item>
+<item>
+ <title>Mining Your Rs and Ss (Crypto 500)</title>
+ <link>https://ctfcrew.org/writeup/76</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/25&quot;&gt;Sharif University CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;em&gt;[To try to solve the task see an attachment below the writeup]&lt;/em&gt;&lt;/p&gt;&lt;p&gt;For this particular task we&#039;ve been given some sort of CA to issue user certificates and authentication part to verify issued user certificate using SSL handshake. The main purpose according to the message provided after authentication is to login with certificate issued to the user named admin. There is no sense telling that one can not do this in ordinary way by requesting it from CA provided.&lt;/p&gt;&lt;p&gt;For some background information we issue three user certificates with random namesn (say N1, N2, N3) and download CA certificate provided. Examination of certificates shows, that &lt;a href=&quot;http://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm&quot; target=&quot;_blank&quot;&gt;ECDSA algorithm&lt;/a&gt; is used with curve sect283k1 for certificate signature by CA and curve secp384r1 for user auhentication purposes. After taking a look at the signatures of user certificates one can notice that the first part of signatures, corresponding to r value in ECDSA signature (r, s), is the same, which means that CA is using a very weak RNG, outputting the the same value any time:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl asn1parse -in N1.pem -dump -offset 402
+    0:d=0  hl=2 l=   7 prim: OBJECT            :ecdsa-with-SHA1
+    9:d=0  hl=2 l=  79 prim: BIT STRING        
+      0000 - 00 30 4c 02 24 00 fc b5-1f 21 1f ad 7c 90 2b a8   .0L.$....!..|.+.
+      0010 - 20 20 e6 52 d6 93 ef d3-38 06 46 87 32 06 06 b8     .R....8.F.2...
+      0020 - 8a 40 3a 31 a9 26 8f 27-5e 02 24 00 8a 8a 67 80   .@:1.&amp;amp;.&#039;^.$...g.
+      0030 - ed 0e 21 c4 52 80 58 83-68 a7 ce fc 29 76 a6 ee   ..!.R.X.h...)v..
+      0040 - ac b5 07 83 7c dc 09 a3-bc 30 29 8c 0e f1 a2      ....|....0)....
+
+openssl asn1parse -in N2.pem -dump -offset 403
+    0:d=0  hl=2 l=   7 prim: OBJECT            :ecdsa-with-SHA1
+    9:d=0  hl=2 l=  79 prim: BIT STRING        
+      0000 - 00 30 4c 02 24 00 fc b5-1f 21 1f ad 7c 90 2b a8   .0L.$....!..|.+.
+      0010 - 20 20 e6 52 d6 93 ef d3-38 06 46 87 32 06 06 b8     .R....8.F.2...
+      0020 - 8a 40 3a 31 a9 26 8f 27-5e 02 24 00 a7 71 0d e2   .@:1.&amp;amp;.&#039;^.$..q..
+      0030 - a4 1b 16 c6 62 89 cb de-2e 5c ed 1e fc 50 43 8a   ....b....\...PC.
+      0040 - c2 a1 69 2e 18 90 6c 7b-5f 22 4e 3a 72 a2 af      ..i...l{_&quot;N:r..
+
+openssl asn1parse -in N3.pem -dump -offset 405
+    0:d=0  hl=2 l=   7 prim: OBJECT            :ecdsa-with-SHA1
+    9:d=0  hl=2 l=  79 prim: BIT STRING        
+      0000 - 00 30 4c 02 24 00 fc b5-1f 21 1f ad 7c 90 2b a8   .0L.$....!..|.+.
+      0010 - 20 20 e6 52 d6 93 ef d3-38 06 46 87 32 06 06 b8     .R....8.F.2...
+      0020 - 8a 40 3a 31 a9 26 8f 27-5e 02 24 01 31 ec 40 94   .@:1.&amp;amp;.&#039;^.$.1.@.
+      0030 - cd cf 43 95 77 90 7f 38-e8 93 47 8c d6 bd 6f ea   ..C.w..8..G...o.
+      0040 - e0 fb 91 f0 e9 83 a9 1b-a2 bd 7b e2 f8 3e ac      ..........{..&amp;gt;. &lt;/pre&gt;&lt;p&gt;Using a weak RNG in ECDSA means that signer&#039;s private key can be recovered. An attack to such realization of signature can be deviced in a minute or simply found here (&lt;a href=&quot;http://www.nilsschneider.net/2013/01/28/recovering-bitcoin-private-keys.html&quot;&gt;http://www.nilsschneider.net/2013/01/28/recovering-bitcoin-private-keys.html&lt;/a&gt;).&lt;/p&gt;&lt;p&gt;To make an attack we first need to get the data being signed. To do it we use a bit of openssl magic:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl asn1parse -in N1.pem -dump -offset 402
+    0:d=0  hl=2 l=   7 prim: OBJECT            :ecdsa-with-SHA1
+    9:d=0  hl=2 l=  79 prim: BIT STRING        
+      0000 - 00 30 4c 02 24 00 fc b5-1f 21 1f ad 7c 90 2b a8   .0L.$....!..|.+.
+      0010 - 20 20 e6 52 d6 93 ef d3-38 06 46 87 32 06 06 b8     .R....8.F.2...
+      0020 - 8a 40 3a 31 a9 26 8f 27-5e 02 24 00 8a 8a 67 80   .@:1.&amp;amp;.&#039;^.$...g.
+      0030 - ed 0e 21 c4 52 80 58 83-68 a7 ce fc 29 76 a6 ee   ..!.R.X.h...)v..
+      0040 - ac b5 07 83 7c dc 09 a3-bc 30 29 8c 0e f1 a2      ....|....0)....
+
+openssl asn1parse -in N2.pem -dump -offset 403
+    0:d=0  hl=2 l=   7 prim: OBJECT            :ecdsa-with-SHA1
+    9:d=0  hl=2 l=  79 prim: BIT STRING        
+      0000 - 00 30 4c 02 24 00 fc b5-1f 21 1f ad 7c 90 2b a8   .0L.$....!..|.+.
+      0010 - 20 20 e6 52 d6 93 ef d3-38 06 46 87 32 06 06 b8     .R....8.F.2...
+      0020 - 8a 40 3a 31 a9 26 8f 27-5e 02 24 00 a7 71 0d e2   .@:1.&amp;amp;.&#039;^.$..q..
+      0030 - a4 1b 16 c6 62 89 cb de-2e 5c ed 1e fc 50 43 8a   ....b....\...PC.
+      0040 - c2 a1 69 2e 18 90 6c 7b-5f 22 4e 3a 72 a2 af      ..i...l{_&quot;N:r..
+
+openssl asn1parse -in N3.pem -dump -offset 405
+    0:d=0  hl=2 l=   7 prim: OBJECT            :ecdsa-with-SHA1
+    9:d=0  hl=2 l=  79 prim: BIT STRING        
+      0000 - 00 30 4c 02 24 00 fc b5-1f 21 1f ad 7c 90 2b a8   .0L.$....!..|.+.
+      0010 - 20 20 e6 52 d6 93 ef d3-38 06 46 87 32 06 06 b8     .R....8.F.2...
+      0020 - 8a 40 3a 31 a9 26 8f 27-5e 02 24 01 31 ec 40 94   .@:1.&amp;amp;.&#039;^.$.1.@.
+      0030 - cd cf 43 95 77 90 7f 38-e8 93 47 8c d6 bd 6f ea   ..C.w..8..G...o.
+      0040 - e0 fb 91 f0 e9 83 a9 1b-a2 bd 7b e2 f8 3e ac      ..........{..&amp;gt;.&lt;/pre&gt;&lt;p style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; white-space: normal;&quot;&gt;So data being signed is the hash of certbody:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl dgst -sha1 N1certbody
+SHA1(N1certbody)= 4e2e395cfa217aada0173f0fa8b241f7935ee075
+openssl dgst -sha1 N2certbody
+SHA1(N2certbody)= c0a7730b7195e788c2668241c4c05b4999e4177b
+openssl dgst -sha1 N3certbody
+SHA1(N3certbody)= 9cd1d8b1129b6eca8670e84f3897ec810aa96854 &lt;/pre&gt;&lt;p&gt;To recover private key of CA we use this sage script (private key is calculated twice for different certificate pairs to confirm our hypotheses):&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#http://www.nilsschneider.net/2013/01/28/recovering-bitcoin-private-keys.html
+
+# SECT283K1 Curve Parameters
+# p -- is a large prime, and the order of the subgroup generated by G # http://tools.ietf.org/html/draft-campagna-suitee-02
+p =0x01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE9AE2ED07577265DFF7F94451E061E163C61 # http://tools.ietf.org/html/draft-campagna-suitee-02
+# r -- part of signature (r, s)
+r =0x00FCB51F211FAD7C902BA82020E652D693EFD338064687320606B88A403A31A9268F275E
+# signatures
+s1=0x00A7710DE2A41B16C66289CBDE2E5CED1EFC50438AC2A1692E18906C7B5F224E3A72A2AF
+s2=0x008A8A6780ED0E21C45280588368A7CEFC2976A6EEACB507837CDC09A3BC30298C0EF1A2
+s3=0x0131EC4094CDCF439577907F38E893478CD6BD6FEAE0FB91F0E983A91BA2BD7BE2F83EAC
+# data signed
+z1=0xc0a7730b7195e788c2668241c4c05b4999e4177b
+z2=0x4e2e395cfa217aada0173f0fa8b241f7935ee075
+z3=0x9cd1d8b1129b6eca8670e84f3897ec810aa96854
+
+K = GF(p)
+
+K((z1*s2 - z2*s1)/(r*(s1-s2)))
+K((z1*s3 - z3*s1)/(r*(s1-s3)))&lt;/pre&gt;&lt;p style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; white-space: normal;&quot;&gt;&amp;nbsp;The result of script is private key of CA:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;&amp;gt;&amp;gt;&amp;gt; hex(1779322126191052087653210276489675744619364270759949965827494010645248553173825795038)
+&#039;0xea797dcbac1c6199f753e6253b220a8449812b05af20630c310f33742810fe48e2b3deL&#039;&lt;/pre&gt;&lt;p&gt;Now it&#039;s time for some more openssl magic to make PEM of CA private key. First extract CA public key from certificate:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl x509 -noout -in cacert.pem -pubkey | openssl asn1parse -dump
+    0:d=0  hl=2 l=  94 cons: SEQUENCE          
+    2:d=1  hl=2 l=  16 cons: SEQUENCE          
+    4:d=2  hl=2 l=   7 prim: OBJECT            :id-ecPublicKey
+   13:d=2  hl=2 l=   5 prim: OBJECT            :sect283k1
+   20:d=1  hl=2 l=  74 prim: BIT STRING        
+      0000 - 00 04 00 6c cb 96 b0 74-82 81 d3 8a 90 f4 99 40   ...l...t.......@
+      0010 - e7 9d b5 4f 4b d4 eb 91-91 e5 a4 94 db 1f d4 e1   ...OK...........
+      0020 - 44 85 27 d3 18 af 01 7d-c8 21 0a 96 8f 1c eb 88   D.&#039;....}.!......
+      0030 - 27 a5 2a 1b 64 51 b0 7d-93 70 77 a1 bf af 08 08   &#039;.*.dQ.}.pw.....
+      0040 - f9 99 cc 71 82 e4 bd 19-50 72                     ...q....Pr&lt;/pre&gt;&lt;p&gt;So public key value in hex is:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;0004006ccb96b0748281d38a90f49940e79db54f4bd4eb9191e5a494db1fd4e1448527d318af017dc8210a968f1ceb8827a52a1b6451b07d937077a1bfaf0808f999cc7182e4bd195072&lt;/pre&gt;&lt;p&gt;Now generate PEM of private key for given curve:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl ecparam -out ec_key.pem -name sect283k1 -genkey&lt;/pre&gt;&lt;p&gt;View what there is:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl pkey -inform PEM -in ec_key.pem -text
+-----BEGIN PRIVATE KEY-----
+MIGPAgEAMBAGByqGSM49AgEGBSuBBAAQBHgwdgIBAQQjicjkPAvY6jCO8CWcGUOg
+OBZcNtdp+detONZg61TTLhBZ0tKhTANKAAQHu2G42k56qQbyq6o6hNImkzu0mK5p
+wEtY6qGerVbTeW2ZDHIFEo9YHkqNNzCHJx55p3/CkVO1njtwHS1ot+ogUdGVA84L
+wOY=
+-----END PRIVATE KEY-----
+Private-Key: (281 bit)
+priv:
+    00:89:c8:e4:3c:0b:d8:ea:30:8e:f0:25:9c:19:43:
+    a0:38:16:5c:36:d7:69:f9:d7:ad:38:d6:60:eb:54:
+    d3:2e:10:59:d2:d2
+pub: 
+    04:07:bb:61:b8:da:4e:7a:a9:06:f2:ab:aa:3a:84:
+    d2:26:93:3b:b4:98:ae:69:c0:4b:58:ea:a1:9e:ad:
+    56:d3:79:6d:99:0c:72:05:12:8f:58:1e:4a:8d:37:
+    30:87:27:1e:79:a7:7f:c2:91:53:b5:9e:3b:70:1d:
+    2d:68:b7:ea:20:51:d1:95:03:ce:0b:c0:e6
+ASN1 OID: sect283k1&lt;/pre&gt;&lt;p&gt;Dump ec_key.pem in DER encoding as hex string:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl ec -in ec_key.pem -outform DER| xxd -p
+read EC key
+writing EC key
+307f020101042389c8e43c0bd8ea308ef0259c1943a038165c36d769f9d7
+ad38d660eb54d32e1059d2d2a00706052b81040010a14c034a000407bb61
+b8da4e7aa906f2abaa3a84d226933bb498ae69c04b58eaa19ead56d3796d
+990c7205128f581e4a8d373087271e79a77fc29153b59e3b701d2d68b7ea
+2051d19503ce0bc0e6 &lt;/pre&gt;&lt;p&gt;Replace private and public keys with the recovered ones of CA and generate CA&#039;s private key in PEM:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;echo \
+307f0201010423ea797dcbac1c6199f753e6253b220a8449812b05af2063\
+0c310f33742810fe48e2b3dea00706052b81040010a14c034a0004006ccb\
+96b0748281d38a90f49940e79db54f4bd4eb9191e5a494db1fd4e1448527\
+d318af017dc8210a968f1ceb8827a52a1b6451b07d937077a1bfaf0808f9\
+99cc7182e4bd195072 | xxd -r -p - | openssl ec -inform der -out cakey.pem -outform pem &lt;/pre&gt;&lt;p style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; white-space: normal;&quot;&gt;Prepare environment of your own CA:&amp;nbsp;&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;mkdir myCA
+cp cacert.pem myCA/
+cp cakey.pem myCA/
+cd myCA
+mkdir -p demoCA/newcerts
+cat /dev/null demoCA/index.txt
+echo -n &quot;00&quot; &amp;gt; demoCA/serial&lt;/pre&gt;&lt;p&gt;Now make certificate request with &quot;admin&quot; in the CN field:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl ecparam -out admin_key.pem -name secp384r1 -genkey
+openssl req -new -nodes -key admin_key.pem -outform pem -subj /C=IR/ST=Tehran/O=NoLoginPage\ Co./CN=admin/ -noout -text&lt;/pre&gt;&lt;p&gt;Sign the request to get certificate:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl ca -cert cacert.pem -keyfile cakey.pem -in admin_cert.req -out admin_cert.pem&lt;/pre&gt;&lt;p&gt;Export admin certificate and private key to p12:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;openssl pkcs12 -export -in admin_cert.pem -inkey admin_key.pem -out admin_cert.p12 &lt;/pre&gt;&lt;p&gt;Import certificate to Firefox.&amp;nbsp;Login to authentication part:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/Screen%20Shot%202014-10-01%20at%2018.54.56.png&quot; alt=&quot;&quot; height=&quot;400&quot; width=&quot;680&quot;&gt;&lt;/p&gt;&lt;p&gt;Voilà! Take you flag!&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/Screen%20Shot%202014-10-01%20at%2018.55.23.png&quot; alt=&quot;&quot; height=&quot;86&quot; width=&quot;488&quot;&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.urlfreeze.com/&quot;&gt;affiliate tracking url&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.fitforhealth.eu/cdaxshop/en/product/nike-dunk-low-coast-uncl/&quot;&gt;Nike Dunk Low Coast UNCL - Grailify&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/task.zip&quot; type=&quot;application/zip; length=4173&quot;&gt;task.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Wed, 01 Oct 2014 15:03:05 +0000</pubDate>
+ <dc:creator>Mirron</dc:creator>
+ <guid isPermaLink="false">76 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/76#comments</comments>
+</item>
+<item>
+ <title>AES Broken (300)</title>
+ <link>https://ctfcrew.org/writeup/75</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/25&quot;&gt;Sharif University CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;This time we are given a rather long file, presumably ciphertext -- the result of AES transformation weak in some sort of way. After taking a look at it in Sublime we can&#039;t find anything wrong with it: indeed, Sublime does normally hang after us trying to make a full-text search through the file. Let&#039;s better make it binary and open in some lightweight hex editor.&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;cat ciphertext | xxd -r -p - &amp;gt; ciphertext.bin&lt;/pre&gt;&lt;p&gt;Well, now by simply looking through the cipher text (so conveniently formatted by hex editor into lines of aes blocksize length), you can easily notice repeating blocks. For normal aes cipher in ecb mode that&#039;s not very strange, but let&#039;s find out, how much repeats of given cipher text block we have. About a thousand of repeats?&lt;br&gt;&lt;img src=&quot;/sites/default/files/writeups/images/crypto300hexeditor.png&quot; alt=&quot;&quot; height=&quot;421&quot; width=&quot;603&quot;&gt;&lt;br&gt;Well, that&#039;s strange indeed! Sharif guys, did you encrypt one char of plaintext per block?&lt;br&gt;Now we use a simple script to count different cipher text blocks in file.&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/python
+from sets import Set
+import operator
+
+with open(&#039;ciphertext&#039;,&#039;r&#039;) as f:
+    output = f.read()
+
+uniques=dict([])
+
+for i in xrange(len(output)/32):
+	word=output[32*i:32*i+32]
+	if uniques.has_key(word):
+		uniques[word]+=1
+	else:
+		uniques[word]=0
+print len(uniques)
+print uniques&lt;/pre&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;27 block seem to be covering 26 characters of English alphabet plus the space.&lt;br&gt;Modify the script to replace blocks by characters:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 19; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;for (block,c) in zip(uniques,map(chr, list(xrange(ord(&#039;A&#039;), ord(&#039;Z&#039;)+1)) + list([ord(&#039; &#039;)]))):
+	output=output.replace(block,c)
+print output&lt;/pre&gt;&lt;p&gt;Now feed the output into cryptool:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/crypto300cryptool.png&quot; alt=&quot;&quot; height=&quot;534&quot; width=&quot;733&quot;&gt;&lt;/p&gt;&lt;p&gt;Now correct some badly-guessed permutations over alphabet and get the flag: &quot;&lt;span data-rz-clipboard=&quot;true&quot;&gt;&lt;span data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;}&quot;&gt;flag is &lt;strong&gt;adoeagimjrrlyhcsqfgg&lt;/strong&gt;&lt;/span&gt;&lt;/span&gt;&quot;&lt;/p&gt;&lt;p&gt;Well, Alice, how many ctfs have you already seen? How many do still await you?&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.runtrendy.com/&quot;&gt;best Running shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.pochta.uz/en/facbcgnshop/collections/nike-sb&quot;&gt;Nike SB&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 29 Sep 2014 08:49:11 +0000</pubDate>
+ <dc:creator>Mirron</dc:creator>
+ <guid isPermaLink="false">75 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/75#comments</comments>
+</item>
+<item>
+ <title>Decrypt the message!</title>
+ <link>https://ctfcrew.org/writeup/74</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/25&quot;&gt;Sharif University CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Decrypt the message!&lt;/p&gt;&lt;p&gt;And &#039;ecnrypted.txt&#039; is attached to task:&lt;/p&gt;&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;The life that I have
+Is all that I have
+And the life that I have
+Is yours.
+
+The love that I have
+Of the life that I have
+Is yours and yours and yours.
+
+A sleep I shall have
+A rest I shall have
+Yet death will be but a pause.
+
+For the peace of my years
+In the long green grass
+Will be yours and yours and yours.
+
+decrypted message: emzcf sebt yuwi ytrr ortl rbon aluo konf ihye cyog rowh prhj feom ihos perp twnb tpak heoc yaui usoa irtd tnlu ntke onds goym hmpq&lt;/pre&gt;&lt;p&gt;&amp;nbsp;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;We&#039;ve got an encrypted message and a poem, so it looks like &lt;a title=&quot;Poem Code&quot; href=&quot;http://en.wikipedia.org/wiki/Poem_code&quot;&gt;Poem Code&lt;/a&gt;, whatever. Wiki article is not good enough, so i recommend &lt;a href=&quot;http://wmbriggs.com/blog/?p=1001&quot;&gt;this one&lt;/a&gt;, or just google it :)&lt;/p&gt;&lt;p&gt;First step is to find words which form key. First group of letters from encrypted message is &quot;&lt;span style=&quot;font-family: Monaco, Menlo, Consolas, &#039;Courier New&#039;, monospace; font-size: 13px; white-space: pre-wrap;&quot;&gt;emzcf&lt;/span&gt;&quot;, it means that 5th, 13th, 26th, 3th and 6th are used. Those words are:&amp;nbsp;&lt;/p&gt;&lt;p&gt;&quot;have life life that is&quot;, but there are only 18 letters and we need 25 (because we have 25 blocks of 4 letters each, and it&#039;s indicate that original message was splitted in 4 blocks with length 25, so key have same length - 25). Lets check all words by modulo:&lt;/p&gt;&lt;p style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; white-space: normal;&quot;&gt;5th have yours my&lt;/p&gt;&lt;p style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; white-space: normal;&quot;&gt;13th life shall be&lt;/p&gt;&lt;p style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; white-space: normal;&quot;&gt;26th life pause&lt;/p&gt;&lt;p style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; white-space: normal;&quot;&gt;3th that have peace&lt;/p&gt;&lt;p style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; white-space: normal;&quot;&gt;6th Is and years&lt;/p&gt;&lt;p&gt;Maximum word&#039;s length is 5, so we need five 5-letters words to reach sufficient key&#039;s length. There is only one way to choose words: &quot;yours shall pause peace years&quot;. Now we can compute key:&lt;span style=&quot;background-color: #f5f5f5;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;passphrase = &quot;yoursshallpausepeaceyears&quot;
+alph = string.ascii_lowercase
+count = 1
+passkey = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+for a in alph:
+	for i in xrange(len(passphrase)):
+		if passphrase[i:i+1] == a:
+			passkey[i] = count
+			count +=1
+
+print &quot;Key is &quot; + str(passkey)&lt;/pre&gt;&lt;p&gt;Output is:&amp;nbsp;Key is [24, 13, 22, 16, 18, 19, 10, 1, 11, 12, 14, 2, 23, 20, 6, 15, 7, 3, 5, 8, 25, 9, 4, 17, 21]&lt;/p&gt;&lt;p&gt;Next step is decrypting:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;encrypted = [&quot;sebt&quot;, &quot;yuwi&quot;, &quot;ytrr&quot;, &quot;ortl&quot;, &quot;rbon&quot;, &quot;aluo&quot;, &quot;konf&quot;, &quot;ihye&quot;, &quot;cyog&quot;,
+&quot;rowh&quot;, &quot;prhj&quot;, &quot;feom&quot;, &quot;ihos&quot;, &quot;perp&quot;, &quot;twnb&quot;, &quot;tpak&quot;, &quot;heoc&quot;, &quot;yaui&quot;, &quot;usoa&quot;, &quot;irtd&quot;,
+&quot;tnlu&quot;, &quot;ntke&quot;, &quot;onds&quot;, &quot;goym&quot;, &quot;hmpq&quot;]
+
+result =&quot;&quot;
+for i in xrange(4):
+	for j in xrange(len(passkey)):
+		test = j + 1
+		for k in xrange(len(passkey)):
+			if test == passkey[k]:
+				result = result + encrypted[k][i:i+1]
+
+print &quot;Decrypted message is &quot; + result&lt;/pre&gt;&lt;p&gt;And output is: &quot;ifyouthinkcryptographyistheanswertoyourproblemthenyoudonotknowwhatyourproblemisabcdefghijklmnopqrstu&quot;&lt;/p&gt;&lt;p&gt;At the end you can see padding, so answer is just: &quot;ifyouthinkcryptographyistheanswertoyourproblemthenyoudonotknowwhatyourproblemis&quot;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Flag: &quot;ifyouthinkcryptographyistheanswertoyourproblemthenyoudonotknowwhatyourproblemis&quot;&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;And the whole script, that solves task:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+import string
+
+encrypted = [&quot;sebt&quot;, &quot;yuwi&quot;, &quot;ytrr&quot;, &quot;ortl&quot;, &quot;rbon&quot;, &quot;aluo&quot;, &quot;konf&quot;, &quot;ihye&quot;, &quot;cyog&quot;,
+ &quot;rowh&quot;, &quot;prhj&quot;, &quot;feom&quot;, &quot;ihos&quot;, &quot;perp&quot;, &quot;twnb&quot;, &quot;tpak&quot;, &quot;heoc&quot;, &quot;yaui&quot;, &quot;usoa&quot;, &quot;irtd&quot;,
+  &quot;tnlu&quot;, &quot;ntke&quot;, &quot;onds&quot;, &quot;goym&quot;, &quot;hmpq&quot;]
+
+passphrase = &quot;yoursshallpausepeaceyears&quot;
+alph = string.ascii_lowercase
+count = 1
+passkey = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+for a in alph:
+	for i in xrange(len(passphrase)):
+		if passphrase[i:i+1] == a:
+			passkey[i] = count
+			count +=1
+
+print &quot;Key is &quot; + str(passkey)
+
+result =&quot;&quot;
+for i in xrange(4):
+	for j in xrange(len(passkey)):
+		test = j + 1
+		for k in xrange(len(passkey)):
+			if test == passkey[k]:
+				result = result + encrypted[k][i:i+1]
+
+print &quot;Decrypted message is &quot; + result&lt;/pre&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Authentic Nike Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfebafeshop/adidas&quot;&gt;adidas&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/encrypted.txt.zip&quot; type=&quot;application/zip; length=938&quot;&gt;encrypted.txt.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 29 Sep 2014 07:12:09 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">74 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/74#comments</comments>
+</item>
+<item>
+ <title>Rolling Hash</title>
+ <link>https://ctfcrew.org/writeup/73</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/25&quot;&gt;Sharif University CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;flag=&quot;*********&quot;
+def RabinKarpRollingHash( str, a, n ):
+        result = 0
+        l = len(str)
+        for i in range(0, l):
+                result += ord(str[i]) * a ** (l - i - 1) % n
+        print &quot;result = &quot;, result
+
+
+RabinKarpRollingHash(flag, 256, 10**30)&lt;/pre&gt;&lt;p&gt;output is&amp;nbsp;&lt;br&gt;1317748575983887541099&amp;nbsp;&lt;br&gt;What is the flag?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Let take a closer look at hash function. It takes every character in given string, convert it to int and multiply it by power of &#039;a&#039; modulo &#039;n&#039;. But look at call of this hash:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;RabinKarpRollingHash(flag, 256, 10**30)&lt;/pre&gt;&lt;p&gt;a = 256, and it means that each multyplying by &#039;a&#039; is equivalent of simple left-shifting. If input string is short enough we can just forget about &#039;n&#039; and try to restore flag, using this code:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;hashed_flag = 1317748575983887541099
+result = &quot;&quot;
+while hashed_flag &amp;gt; 0:
+	byte = hashed_flag&amp;amp;0xff
+	result += chr(byte)
+	hashed_flag = hashed_flag - byte
+	hashed_flag = hashed_flag &amp;gt;&amp;gt; 8
+
+print result[::-1]&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Flag:&amp;nbsp;Good Luck&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Best Authentic Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.adefra.com/index.php/acfbdpshop/us/women/shoes/sneakers/110/&quot;&gt;Women&amp;#x27;s Sneakers&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 29 Sep 2014 05:38:17 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">73 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/73#comments</comments>
+</item>
+<item>
+ <title>What is this</title>
+ <link>https://ctfcrew.org/writeup/71</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/stego&quot;&gt;stego&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/25&quot;&gt;Sharif University CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;This is most common task where we have two images with black and white pixels and need to XOR them pixel by pixel. Let the white pixel be 1 and black pixel be 0. Further description is not needed. Code is attached. Flag is &lt;strong&gt;AZADI TOWER.&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;&lt;img style=&quot;display: block; margin-left: auto; margin-right: auto;&quot; src=&quot;/sites/default/files/azadi-tower.png&quot; alt=&quot;&quot; width=&quot;300&quot; height=&quot;300&quot;&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Asics footwear&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfejcashop/cheap-price/2021-new-adidas-yeezy-boost-350-v2-ash-stone-gw0089/&quot;&gt;2021 New adidas YEEZY BOOST 350 V2 &quot;Ash Stone&quot; GW0089 , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/what-is-this.zip&quot; type=&quot;application/zip; length=150322&quot;&gt;what-is-this.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sat, 27 Sep 2014 21:11:10 +0000</pubDate>
+ <dc:creator>azrael</dc:creator>
+ <guid isPermaLink="false">71 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/71#comments</comments>
+</item>
+<item>
+ <title>Hidden message</title>
+ <link>https://ctfcrew.org/writeup/70</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/stego&quot;&gt;stego&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/25&quot;&gt;Sharif University CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;There we got a dump of UDP packets in pcap file.&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;We noted that there is only 80 packets that were sent from two source ports (3400 and 3401).&amp;nbsp;In the general case, we have 80 elements (that is a multiple 8), which may belong to one of two categories (source port 3400 or source port 3401)... It&#039;s looking like ascii-string presented as binary string - 80 zeros and ones.&lt;/p&gt;&lt;p&gt;So lets packets with source port 3400 be 1 and other packets be 0. After converting binary string to ascii we got flag &lt;strong&gt;Heisenberg&lt;/strong&gt;.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.runtrendy.com/&quot;&gt;Running Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeaeeqshop/nike-air-jordan-1-releases/&quot;&gt;Air Jordan&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/sharif-hidden-message.zip&quot; type=&quot;application/zip; length=9886&quot;&gt;sharif-hidden-message.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sat, 27 Sep 2014 19:54:28 +0000</pubDate>
+ <dc:creator>azrael</dc:creator>
+ <guid isPermaLink="false">70 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/70#comments</comments>
+</item>
+</channel>
+</rss>

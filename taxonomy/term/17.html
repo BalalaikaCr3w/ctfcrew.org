@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="ie6 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 7]>    <html class="ie7 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 8]>    <html class="ie8 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 9]>    <html class="ie9 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if !IE]> --> <html lang="en" dir="ltr"> <!-- <![endif]-->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="shortcut icon" href="../../sites/all/themes/open_framework/favicon.ico" type="image/vnd.microsoft.icon" />
+<link rel="shortlink" href="17.html" />
+<link rel="alternate" type="application/rss+xml" title="RSS - RuCTF Quals 2014" href="17/feed" />
+<meta name="Generator" content="Drupal 7 (http://drupal.org)" />
+<link rel="canonical" href="../../event/17.html" />
+  <!-- Set the viewport width to device width for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RuCTF Quals 2014 | BalalaikaCr3w</title>
+  <style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/system/system.base.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.menus.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.messages.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.theme.css?qtecp0");
+</style>
+<style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/comment/comment.css?qtecp0");
+@import url("https://ctfcrew.org/modules/field/theme/field.css?qtecp0");
+@import url("https://ctfcrew.org/modules/node/node.css?qtecp0");
+@import url("https://ctfcrew.org/modules/search/search.css?qtecp0");
+@import url("https://ctfcrew.org/modules/user/user.css?qtecp0");
+@import url("../../sites/all/modules/views/css/views.css%3Fqtecp0.css");
+@import url("../../sites/all/modules/ckeditor/css/ckeditor.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("../../sites/all/modules/ctools/css/ctools.css%3Fqtecp0.css");
+@import url("../../sites/all/libraries/syntaxhighlighter_3.0.83/styles/shCore.css%3Fqtecp0.css");
+@import url("../../sites/all/libraries/syntaxhighlighter_3.0.83/styles/shThemeDefault.css%3Fqtecp0.css");
+@import url("https://ctfcrew.org/modules/taxonomy/taxonomy.css?qtecp0");
+</style>
+<style type="text/css" media="all">
+@import url("../../sites/all/themes/open_framework/bootstrap/css/bootstrap.min.css%3Fqtecp0.css");
+@import url("../../sites/all/themes/open_framework/bootstrap/css/bootstrap-responsive.min.css%3Fqtecp0.css");
+@import url("../../sites/all/themes/open_framework/css/open_framework.css%3Fqtecp0.css");
+@import url("../../sites/all/themes/open_framework/css/ie.css%3Fqtecp0.css");
+@import url("../../sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.css%3Fqtecp0.css");
+@import url("../../sites/all/themes/open_framework/css/jquery.themizer.css%3Fqtecp0.css");
+@import url("../../sites/all/themes/open_framework/css/universal.css%3Fqtecp0.css");
+@import url("../../sites/all/themes/open_framework/font-awesome-4.0.3/css/font-awesome.min.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="print">
+@import url("../../sites/all/themes/open_framework/css/open_framework_print.css%3Fqtecp0.css");
+</style>
+  <script type="text/javascript" src="../../sites/all/modules/jquery_update/replace/jquery/1.8/jquery.min.js%3Fv=1.8.3"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/jquery.once.js?v=1.2"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/drupal.js?qtecp0"></script>
+<script type="text/javascript" src="../../sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shCore.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../../sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shAutoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../../sites/default/files/syntaxhighlighter.autoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../../sites/all/themes/open_framework/bootstrap/js/bootstrap.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../../sites/all/themes/open_framework/js/open_framework.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../../sites/all/themes/open_framework/js/override.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../../sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../../sites/all/themes/open_framework/js/jquery.themizer.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../../sites/all/themes/open_framework/js/universal.js%3Fqtecp0"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","ajaxPageState":{"theme":"open_framework","theme_token":"-QiHIW3g5CBKNFvdami3bxDPxt9vasF9QlaTaNE1x0k","js":{"sites\/all\/modules\/syntaxhighlighter\/syntaxhighlighter.min.js":1,"sites\/all\/modules\/jquery_update\/replace\/jquery\/1.8\/jquery.min.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shCore.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shAutoloader.js":1,"sites\/default\/files\/syntaxhighlighter.autoloader.js":1,"sites\/all\/themes\/open_framework\/bootstrap\/js\/bootstrap.min.js":1,"sites\/all\/themes\/open_framework\/js\/open_framework.js":1,"sites\/all\/themes\/open_framework\/js\/override.js":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.min.js":1,"sites\/all\/themes\/open_framework\/js\/jquery.themizer.js":1,"sites\/all\/themes\/open_framework\/js\/universal.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"modules\/comment\/comment.css":1,"modules\/field\/theme\/field.css":1,"modules\/node\/node.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,"sites\/all\/modules\/views\/css\/views.css":1,"sites\/all\/modules\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/modules\/ctools\/css\/ctools.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shCore.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shThemeDefault.css":1,"modules\/taxonomy\/taxonomy.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap.min.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap-responsive.min.css":1,"sites\/all\/themes\/open_framework\/fontawesome\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework.css":1,"sites\/all\/themes\/open_framework\/css\/ie.css":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.css":1,"sites\/all\/themes\/open_framework\/css\/jquery.themizer.css":1,"sites\/all\/themes\/open_framework\/css\/universal.css":1,"sites\/all\/themes\/open_framework\/font-awesome-4.0.3\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework_print.css":1}},"syntaxhighlighter":{"useAutoloader":true}});
+//--><!]]>
+</script>
+  <!--[if IE 7]>
+  <link rel="stylesheet" href="/sites/all/themes/open_framework/fontawesome/css/font-awesome-ie7.min.css">
+  <![endif]-->
+  <!-- IE Fix for HTML5 Tags -->
+  <!--[if lt IE 9]>
+    <script src="/sites/all/themes/open_framework/js/html5shiv.js"></script>
+  <![endif]-->
+
+    <style type="text/css" media="all">@import url("../../sites/all/themes/open_framework/css/page.css");</style>
+  <script type="text/javascript" src="../../sites/all/themes/open_framework/js/page.js"></script>
+
+</head>
+
+<body class="main-body html not-front not-logged-in one-sidebar sidebar-second page-taxonomy page-taxonomy-term page-taxonomy-term- page-taxonomy-term-17   content-first     "  >
+    <a href="17.html#content" class="element-invisible element-focusable">Skip to content</a>
+<a href="17.html#main-nav" class="element-invisible element-focusable" data-target=".nav-collapse" data-toggle="collapse">Skip to navigation</a>
+<!-- /#skipnav -->
+<!-- /#admin-shortcuts -->
+	<div id="header" class="clearfix header" role="banner">
+	<div class="container">
+		<div class="row">
+			<div class="span12">
+								<div id="logo" class="site-logo"> <a href="../../index.html" title="Home" rel="home"> <img src="../../sites/default/files/logo.png" alt="BalalaikaCr3w" role="presentation" /> </a></div>
+								<!-- /#logo -->
+								<div id="name-and-slogan">
+										<div id="site-name" class="site-name"><a href="../../index.html" title="Home" rel="home">BalalaikaCr3w</a></div>
+															<div id="site-slogan" class="site-slogan">Russian CTF team</div>
+									</div>
+												<!-- /#name-and-slogan -->
+							</div>
+		</div>
+		<div class="social">
+			<a href="http://twitter.com/BalalaikaCr3w" class="social-item twitter">
+				<i class="fa fa-twitter"></i>
+			</a>
+		</div>
+	</div>
+</div>
+<!-- /#header --><div id="main" class="clearfix main" role="main">
+	<div class="container">
+								<div id="main-content" class="row main-content">
+						<div id="content" class="mc-content span9">
+				<div class="color-pane bg-0D"></div>
+				<div id="content-wrapper" class="content-wrapper">
+					<div id="content-head" class="row-fluid content-head">
+																								<h1 class="title" id="page-title"> RuCTF Quals 2014 </h1>
+																																									</div>
+																				<div id="content-body" class="row-fluid content-body"> <div class="region region-content clearfix">
+  <div id="block-system-main" class="clearfix block block-system">       <div class="content"> <div class="term-listing-heading"><div id="taxonomy-term-17" class="taxonomy-term vocabulary-events">
+
+  
+  <div class="content">
+      </div>
+
+</div>
+</div><article id="node-54" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">20</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-54" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/54.html">MD5 (crypto 100)</a></h2>
+                <div class="submitted">
+       
+      20.03.2014 23:17, by <i class="fa fa-user"></i><span class="username">Dor1s</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/crypto.html">crypto</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>Classic Hash Length Extension Attack.</p><p>Is is doing like wrote <a href="http://en.wikipedia.org/wiki/Length_extension_attack">here</a> and <a href="https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks">here</a>.</p><p>The easiest way to perfofm hash-length-extension attack is using <a href="https://github.com/bwall/HashPump">HashPump</a>.</p><p>Download it, build it and then write a little script to bruteforce secret's length and find the flag:</p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/54.html" rel="tag" title="MD5 (crypto 100)">Read more<span class="element-invisible"> about MD5 (crypto 100)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-53" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">19</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-53" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/53.html">PIN (reverse 400)</a></h2>
+                <div class="submitted">
+       
+      19.03.2014 16:35, by <i class="fa fa-user"></i><span class="username">Dil4rd</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/reverse.html">reverse</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>The task was to reverse file <a href="../../sites/default/files/writeups/images/main.45c1ec963414c50855bcb1172dd808d2">main</a>. This is an executable for MS DOS.</p><p>Fortunately, this binary isn't packed and it's logic can be easily understand without dynamic analysis. After few minutes of analysis is becames obvius that this executable set hook for interupt int9 (keyboard handler) and for every input character makes some changes with global variable byte_178. If this variables equals 0x14 then we get success message.</p><p>First of all let's take a look at the begging of main function:</p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/53.html" rel="tag" title="PIN (reverse 400)">Read more<span class="element-invisible"> about PIN (reverse 400)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-52" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">18</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-52" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/52.html">No harm (reverse 200)</a></h2>
+                <div class="submitted">
+       
+      18.03.2014 18:19, by <i class="fa fa-user"></i><span class="username">Dil4rd</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/reverse.html">reverse</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>The task was to find MD5 of the biggets file from the file HARM.DAT, which is the part of game Harm0597 for MS DOS.</p><p>First of all let's ask Google to find this game and easily find URL to download it: <a href="ftp://78.46.52.48/pub/mags/harm/harm0597.zip">ftp://78.46.52.48/pub/mags/harm/harm0597.zip</a></p><p>File HARM.DAT has an obvious structure:</p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/52.html" rel="tag" title="No harm (reverse 200)">Read more<span class="element-invisible"> about No harm (reverse 200)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-51" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">17</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-51" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/51.html">Cat&#039;s eyes (stego 100)</a></h2>
+                <div class="submitted">
+       
+      17.03.2014 23:05, by <i class="fa fa-user"></i><span class="username">briskly</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/stego.html">stego</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>This task is the most simple stego task in this ctf. We have the GIF with 8 frames, all of them have little color difference in the first 3 lines. All we need just to build differences image. After some analysis we decided that it is binary encoded ASCII text. And we decoded it.</p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/51.html" rel="tag" title="Cat&#039;s eyes (stego 100)">Read more<span class="element-invisible"> about Cat&#039;s eyes (stego 100)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-50" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">17</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-50" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/50.html">Secret String (ppc 300)</a></h2>
+                <div class="submitted">
+       
+      17.03.2014 22:37, by <i class="fa fa-user"></i><span class="username">briskly</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/ppc.html">ppc</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>As we can see from the task, the talk is about DNA replication, as said my friends from team, we should find the most popular string in the given file.</p><p>First of all, I should say, that I'm using python. In the start I just tried to build index where keys are string that can be found in file and values are there frequency. But that didn't work. Because in python index always saved in the RAM, and for my counting, I should have more than 16GB (I think something like 32 or 64). That numbers is reachable, but I guessed that it should be better solution.</p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/50.html" rel="tag" title="Secret String (ppc 300)">Read more<span class="element-invisible"> about Secret String (ppc 300)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-49" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">17</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-49" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/49.html">Secret host (forensics 100)</a></h2>
+                <div class="submitted">
+       
+      17.03.2014 17:32, by <i class="fa fa-user"></i><span class="username">azrael</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/forensics.html">forensics</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>Here we need to find something hidden on host&nbsp;http://10.100.0.1/ using given openvpn configs and dump.</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/49.html" rel="tag" title="Secret host (forensics 100)">Read more<span class="element-invisible"> about Secret host (forensics 100)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-48" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">17</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-48" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/48.html">es (web 200)</a></h2>
+                <div class="submitted">
+       
+      17.03.2014 16:49, by <i class="fa fa-user"></i><span class="username">azrael</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/web.html">web</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>There is service raised at&nbsp;<a href="http://w2.quals.ructf.org/">http://w2.quals.ructf.org/</a>.</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/48.html" rel="tag" title="es (web 200)">Read more<span class="element-invisible"> about es (web 200)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-47" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">17</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-47" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/47.html">Arcfour (reverse 500)</a></h2>
+                <div class="submitted">
+       
+      17.03.2014 16:32, by <i class="fa fa-user"></i><span class="username">Dil4rd</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/reverse.html">reverse</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>In reverse category this task was the easiest one, except Harm (reverse 10), of course:)</p><p>The task was to reverse x86 PE executable. There was 2 ways to solve this task: the easiest one and little more complicated. But let's start with their commom part.</p><p>The file seems to be packed by UPX, so start debugging! After unpacking by upx we can find that OEP is at address 0x6d28, but there is a very strange code:</p><p><img src="../../sites/default/files/writeups/images/pic1.png" alt="" height="229" width="516" /></p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/47.html" rel="tag" title="Arcfour (reverse 500)">Read more<span class="element-invisible"> about Arcfour (reverse 500)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-46" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">17</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-46" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/46.html">Get the message (recon 300)</a></h2>
+                <div class="submitted">
+       
+      17.03.2014 15:01, by <i class="fa fa-user"></i><span class="username">azrael</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/recon.html">recon</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>In this task somebody is telegraphing&nbsp;Olimpiada&nbsp;strange messages with secret password and we&nbsp;need to find that.</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/46.html" rel="tag" title="Get the message (recon 300)">Read more<span class="element-invisible"> about Get the message (recon 300)</span></a></li>
+</ul>   </div>
+</article>
+<article id="node-45" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">17</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="17.html#node-45" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="../../writeup/45.html">Guess the flag (vuln 100)</a></h2>
+                <div class="submitted">
+       
+      17.03.2014 14:34, by <i class="fa fa-user"></i><span class="username">azrael</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../categories/pwn.html">pwn</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../../event/17.html" class="active">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>There is given service raised at vuln1.quals.ructf.org:16712 and it's ELF 32-bit executable source file.</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="../../writeup/45.html" rel="tag" title="Guess the flag (vuln 100)">Read more<span class="element-invisible"> about Guess the flag (vuln 100)</span></a></li>
+</ul>   </div>
+</article>
+<h2 class="element-invisible">Pages</h2><div class="item-list"><ul class="pager"><li class="pager-current first">1</li>
+<li class="pager-item"><a title="Go to page 2" href="../../event/17%3Fpage=1.html">2</a></li>
+<li class="pager-next"><a title="Go to next page" href="../../event/17%3Fpage=1.html">next ›</a></li>
+<li class="pager-last last"><a title="Go to last page" href="../../event/17%3Fpage=1.html">last »</a></li>
+</ul></div> </div>
+</div></div>
+ <!-- /.region -->
+ <a href="17/feed" class="feed-icon" title="Subscribe to RSS - RuCTF Quals 2014"><img src="https://ctfcrew.org/misc/feed.png" width="16" height="16" alt="Subscribe to RSS - RuCTF Quals 2014" /></a> </div>
+																																																	</div>
+				<!-- /#content-wrap --> 
+			</div>
+			<!-- /#content -->
+							<div id="sidebar-second" class="sidebar span3 site-sidebar-second">
+	<div class="color-pane bg-0B"></div>
+	<div class="row-fluid row-block row-block-1">
+		<div class="region region-sidebar-second clearfix">
+  <div id="block-system-navigation" class="clearfix block block-system block-menu">       <div class="content"> <ul class="menu nav"><li class="first leaf"><a href="../../index.html"><i class="fa fa-home"></i>Home</a></li>
+<li class="leaf"><a href="../../writeups.html"><i class="fa fa-file-text"></i>Writeups</a></li>
+<li class="leaf"><a href="../../tools.html"><i class="fa fa-wrench"></i>Tools</a></li>
+<li class="last leaf"><a href="../../blogs.html"><i class="fa fa-users"></i>Blog</a></li>
+</ul> </div>
+</div>
+<div id="block-views-events-block-1" class="clearfix block block-views">     <h2>Last events</h2>
+      <div class="content"> <div class="view view-events view-id-events view-display-id-block_1 view-dom-id-82b229a89193a8206c0be14a2305bbef">
+        
+  
+  
+      <div class="view-content">
+        <div class="views-row views-row-1 views-row-odd views-row-first">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../../event/32.html">Boston Key Party 2015</a></span>  </div>  </div>
+  <div class="views-row views-row-2 views-row-even">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../../event/36.html">Boston Key Party CTF 2016</a></span>  </div>  </div>
+  <div class="views-row views-row-3 views-row-odd views-row-last">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../../event/35.html">EKOPARTY PRE-CTF 2015</a></span>  </div>  </div>
+    </div>
+  
+  
+  
+      
+<div class="more-link">
+  <a href="../../events.html">
+    all events  </a>
+</div>
+  
+  
+  
+</div> </div>
+</div>
+</div>
+ <!-- /.region -->
+	</div>
+			<div class="color-pane bg-09"></div>
+	<div class='row-fluid row-block row-block-2'>
+		<ul class="nav">
+			<li><a href="../../user.html"><i class="fa fa-sign-in"></i>Sign in</a></li>
+		</ul>
+	</div>
+	</div>
+<!-- /#sidebar-second -->					</div>
+					</div>
+</div>
+<!-- /#main, /#main-wrapper -->
+	  <script type="text/javascript" src="../../sites/all/modules/syntaxhighlighter/syntaxhighlighter.min.js%3Fqtecp0"></script>
+</body>
+
+</html>

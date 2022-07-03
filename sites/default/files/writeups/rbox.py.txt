@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+from socket import create_connection
+from time import sleep
+import string
+ 
+hash = "5ebad7dcbd73584f32ef949486a161a1e9f10e48ade43b03649a2ca680f327c4"
+ 
+message = ""
+end1 = 9
+end2 = 2
+ 
+for i in xrange(0,32,1):
+	for c in string.printable:
+		con = create_connection(('195.133.87.165', 5555))
+		con.recv(1024)
+		con.recv(1024)
+		con.send("rb0xch4ll3ng3\n")
+		sleep(0.1)
+ 
+		con.recv(1024)
+		con.send(message+c+"\n")
+		sleep(0.02)
+		 
+		res = con.recv(1024)
+		if res[7:end1] == hash[0:end2]:
+			message = message + c
+			print message
+			end1 = end1 +2
+			end2 = end2 +2
+			break
+ 
+print ""
+print "Message: " + message
+print ""
