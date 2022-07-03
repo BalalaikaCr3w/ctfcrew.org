@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - Olympic CTF 2014</title>
+ <link>https://ctfcrew.org/event/13</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>Aski (Binathlon 300)</title>
+ <link>https://ctfcrew.org/writeup/25</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/reverse&quot;&gt;reverse&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/13&quot;&gt;Olympic CTF 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Description:&lt;/strong&gt;&lt;/p&gt;&lt;p style=&quot;padding-left: 30px;&quot;&gt;Download &lt;a title=&quot;Aski&quot; href=&quot;http://shell-storm.org/repo/CTF/Olympic-2014/Aski/aski&quot; target=&quot;_self&quot;&gt;Aski&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;After downloading file we can see that it&#039;s x86 ELF. The description tells us nothing, so the best way to understand what is it --- execution:) When we execute it, we will see a newly created conlose with very-very fast changing pictures (every picture is a set of ASCII symbols). Hmm.. maybe something intresting is hidden in those pictures?.. Let&#039;s take a look!&lt;/p&gt;&lt;p&gt;A simple search of symbols from last picture produced no results, so they seems to be encrypted, gziped or saved in unusual way. To understend it let&#039;s load our executable to IDA and start reversing.&lt;/p&gt;&lt;p&gt;After fast research it&#039;s became clear that the greater part of this binary are compilated parts of different open source projects (e.g. OpenSSL sources has been used for cryptographical purposes). From one hand, it seems to be a problem: big projects have template-like structure and it&#039;s own data representation, what makes fast research very hard. From other hand, such projects have good error messages with functions or file names, and in many cases big projects with template-like structure provide a set of functions, which allow easy enumeration of elements of input array and making simular actions under every single element. The most common way to realize such functionality is the next:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;typedef void (*with_element)(element &amp;amp;el);
+void for_each(array&amp;lt;element&amp;gt; arr, with_element foo);&lt;/pre&gt;&lt;p&gt;According to this suggestion, the first thing we do is rearch for high-level function which enumerates pictures and write them to console. It&#039;s a function at address 0x0804ABB0:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/IDA2.png&quot; alt=&quot;&quot; height=&quot;131&quot; width=&quot;481&quot;&gt;&lt;/p&gt;&lt;p&gt;Now everything we need is to set breakpoint at the end of function sub_804A910 or sub_804A460 and saw pictures. As practice has shown, it&#039;s better to set breakpoint at the end of function sub_804A460, because this function executes ones in conlose&#039;s pictures modification (e.g. at address 0x0804AA87).&lt;/p&gt;&lt;p&gt;The recived pictures are the next:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/2.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/3.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/4.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/5.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/6.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/7.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/8.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/9.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/10.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/11.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/12.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/13.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/14.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/15.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/16.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/17.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;After some bruting (not all symbols can be easily recognised) we take a flag: &quot;CTF+WINT3R+S3A50N&quot;. It&#039;s not very hard for 300 points:)&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.urlfreeze.com/&quot;&gt;spy offers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.worldarchitecturefestival.com/dfbcdwshop/nike-air-jordan-xxx-white-black-wolf-grey-811006-101.html&quot;&gt;Nike Air Jordan XXX Basketball Shoes/Sneakers 811006-101 Worldarchitecturefestival&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Tue, 11 Feb 2014 23:36:23 +0000</pubDate>
+ <dc:creator>Dil4rd</dc:creator>
+ <guid isPermaLink="false">25 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/25#comments</comments>
+</item>
+<item>
+ <title>mic</title>
+ <link>https://ctfcrew.org/writeup/22</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/13&quot;&gt;Olympic CTF 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;Flags for free!&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;nc 109.233.61.11 3120&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;&lt;em&gt;Source code also provided (file mic_server.py)&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;So, first thing to do: open and read source file (whatever...)&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;Some interesting things:&amp;nbsp;conversation with server consits of two parts: in the first part we send to server a big prime number (more than 100, but less than 200 binary places), then we send a base ( number, that greater than 1 but less than prime -1); stage two: server sends a flag mixed in our base. Flag is greater than our prime (from sources: &lt;em&gt;assert 1 &amp;lt;&amp;lt; 256 &amp;lt; FLAG &amp;lt; 1 &amp;lt;&amp;lt; 512&lt;/em&gt;), so, in fact we receive only part of flag.&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;Server mixes flag into our base with following algorithm:&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif; padding-left: 30px;&quot;&gt;&lt;em&gt;res = pow(g * FLAG, FLAG, p) * FLAG + FLAG&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif; padding-left: 30px;&quot;&gt;&lt;em&gt;res %= p&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;So, if we send some different primes, we will get remainders of flag by modulo of sent primes... it looks like&amp;nbsp;&lt;em&gt;Chinese Remainder Theorem . But res = (g&lt;sup&gt;FLAG&lt;/sup&gt; * FLAG&lt;sup&gt;FLAG&lt;/sup&gt;)*FLAG + FLAG mod p,&amp;nbsp;&lt;/em&gt;and even if get enough remainders, it would be easy, to extract pure FLAG. So we need a special g, to get rid of powered FLAG... maybe not one g...&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;Let base = p-g (p - our prime)&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif; padding-left: 30px;&quot;&gt;&lt;em&gt;res2 = ((p-g)&lt;sup&gt;FLAG&lt;/sup&gt; * FLAG&lt;sup&gt;FLAG&lt;/sup&gt;)*FLAG + FLAG mod p&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;&lt;em&gt;if FLAG is odd: &amp;nbsp;&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif; padding-left: 30px;&quot;&gt;&lt;em&gt;(p-g)&lt;sup&gt;FLAG&lt;/sup&gt; mod p = -(g&lt;sup&gt;FLAG&lt;/sup&gt;), so&amp;nbsp;&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif; padding-left: 30px;&quot;&gt;&lt;em&gt;res2 = (-(g&lt;sup&gt;FLAG&lt;/sup&gt;) * FLAG&lt;sup&gt;FLAG&lt;/sup&gt;)*FLAG + FLAG mod p&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif; padding-left: 30px;&quot;&gt;&lt;em&gt;res1 =&amp;nbsp;&lt;/em&gt;&lt;em&gt;&amp;nbsp;(g&lt;sup&gt;FLAG&lt;/sup&gt; * FLAG&lt;sup&gt;FLAG&lt;/sup&gt;)*FLAG + FLAG mod p&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif; padding-left: 30px;&quot;&gt;&lt;em&gt;res1 + res2 = &lt;/em&gt;&lt;em&gt;g&lt;sup&gt;FLAG&lt;/sup&gt; * FLAG&lt;sup&gt;FLAG+1&lt;/sup&gt;&amp;nbsp;+ FLAG&amp;nbsp;&lt;/em&gt;&lt;em&gt;-(g&lt;sup&gt;FLAG&lt;/sup&gt;) * FLAG&lt;sup&gt;FLAG+1&lt;/sup&gt;+ FLAG mod p = 2*FLAG mod p&lt;/em&gt;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;And it is main idea of our attack.&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;Send a two bases two server, some g, and prime - g, so then we can get a remainder of 2*FLAG by modulo of prime and use CRT to recover flag.. in case of even FLAG we should substract res2 from res1 instead of sum.&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;Lets wrute some code and pwn task.&amp;nbsp;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;I took six prime numbers from wiki&#039;s article abour RSA-numbers (RSA-100,110 and 120=) ). I think 6 numbers will be enough to use CRT.&amp;nbsp;&lt;/p&gt;&lt;p style=&quot;box-sizing: border-box; margin-bottom: 10px; font-family: Arial, Helvetica, sans-serif;&quot;&gt;Then i used this script to get six remainders:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;g = 2
+primes = [37975227936943673922808872755445627854565536638199, 40094690950920881030683735292761468389214899724061,
+6122421090493547576937037317561418841225758554253106999, 5846418214406154678836553182979162384198610505601062333,
+327414555693498015751146303749141488063642403240171463406883, 693342667110830181197325401899700641361965863127336680673013]
+
+remainders = []
+
+print &quot;Receiving remainders...&quot;
+for i in xrange(0,6,1):
+	conn = create_connection((&#039;109.233.61.11&#039;, 3120));
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]) + &quot;\n&quot;)
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	conn.send(str(g) + &quot;\n&quot;)
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	res1 = data.split()[-1]
+
+	conn = create_connection((&#039;109.233.61.11&#039;, 3120));
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]) + &quot;\n&quot;)
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]-g) + &quot;\n&quot;)
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	res2 = data.split()[-1]
+
+	remainders.append((int(res1)+int(res2))%primes[i])&lt;/pre&gt;&lt;p&gt;When i got remainders, i used CRT to recover FLAG:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;def extended_euclidean(a, b):	
+	x = 0
+	lastx = 1
+	y = 1
+	lasty = 0
+	
+	while b != 0:
+		q = a // b
+		a, b = b, a % b		
+		x, lastx = (lastx - q * x, x)
+		y, lasty = (lasty - q * y, y)
+	return (a, lastx, lasty)
+	
+def inverse(var, module):
+	v = extended_euclidean(var,module)
+	return (v[0]==1)*(v[1] % module)
+
+def CRT(RemList,ModulList):
+	N  = reduce(mul,ModulList)        		# multiply ModulList together
+	Ns = [N/mi for mi in ModulList]   		# create list of all N/multiply
+	ys = [inverse(Ni, mi) for Ni,mi in zip(Ns,ModulList)] # get inverse elements of Ni by module mi
+	return (reduce(add,[ri*Ni*yi for ri,Ni,yi in zip(RemList,Ns,ys)]) % N,N)
+
+result =  CRT(remainders,primes)&lt;/pre&gt;&lt;p&gt;And finally we can find flag: we shoud devide result by 2 and then decode it from hex:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;f = result[0]/2
+encoded_flag = str(hex(f))[2:-1]
+flag = encoded_flag.decode(&quot;hex&quot;)&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;And the flag is&lt;/strong&gt;&amp;nbsp;&amp;nbsp;&lt;strong&gt;CTF{cf5246e06b13432b9e1116ddef226455}&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;And here is full script to perform attack:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/env python
+from socket import create_connection
+from sys import *
+from fractions import gcd
+from numpy import random
+from operator import *
+from time import *
+
+def extended_euclidean(a, b):	
+	x = 0
+	lastx = 1
+	y = 1
+	lasty = 0
+	
+	while b != 0:
+		q = a // b
+		a, b = b, a % b		
+		x, lastx = (lastx - q * x, x)
+		y, lasty = (lasty - q * y, y)
+	return (a, lastx, lasty)
+	
+def inverse(var, module):
+	v = extended_euclidean(var,module)
+	return (v[0]==1)*(v[1] % module)
+
+def CRT(RemList,ModulList):
+	N  = reduce(mul,ModulList)        		# multiply ModulList together
+	Ns = [N/mi for mi in ModulList]   		# create list of all N/multiply
+	ys = [inverse(Ni, mi) for Ni,mi in zip(Ns,ModulList)] # get inverse elements of Ni by module mi
+	return (reduce(add,[ri*Ni*yi for ri,Ni,yi in zip(RemList,Ns,ys)]) % N,N)
+
+g = 2
+primes = [37975227936943673922808872755445627854565536638199, 40094690950920881030683735292761468389214899724061,
+6122421090493547576937037317561418841225758554253106999, 5846418214406154678836553182979162384198610505601062333,
+327414555693498015751146303749141488063642403240171463406883, 693342667110830181197325401899700641361965863127336680673013]
+
+remainders = []
+
+print &quot;Receiving remainders...&quot;
+for i in xrange(0,6,1):
+	conn = create_connection((&#039;109.233.61.11&#039;, 3120));
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]) + &quot;\n&quot;)
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	conn.send(str(g) + &quot;\n&quot;)
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	res1 = data.split()[-1]
+
+	conn = create_connection((&#039;109.233.61.11&#039;, 3120));
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]) + &quot;\n&quot;)
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]-g) + &quot;\n&quot;)
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	res2 = data.split()[-1]
+
+	remainders.append((int(res1)+int(res2))%primes[i])
+
+print &quot;Using Chinese Remainder Theorem to recover flag...&quot;
+
+result =  CRT(remainders,primes)
+f = result[0]/2
+encoded_flag = str(hex(f))[2:-1]
+flag = encoded_flag.decode(&quot;hex&quot;)
+print flag
+&lt;/pre&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.copperbridgemedia.com/&quot;&gt;Running sports&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.adefra.com/index.php/acfffkshop/c/zapatillas-de-running-nike/gender-2&quot;&gt;Zapatillas de running Nike - Mujer&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/mic_server.py.txt&quot; type=&quot;text/plain; length=2357&quot;&gt;mic_server.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/mic.py.txt&quot; type=&quot;text/plain; length=1972&quot;&gt;mic.py.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 09 Feb 2014 18:58:23 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">22 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/22#comments</comments>
+</item>
+</channel>
+</rss>

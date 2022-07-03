@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xml:base="https://ctfcrew.org"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+ <title>BalalaikaCr3w - No cON Name CTF Finals 2014</title>
+ <link>https://ctfcrew.org/event/28</link>
+ <description></description>
+ <language>en</language>
+<item>
+ <title>WireTap (Stegano 200)</title>
+ <link>https://ctfcrew.org/writeup/91</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/stego&quot;&gt;stego&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/28&quot;&gt;No cON Name CTF Finals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;&lt;strong&gt;Description:&lt;/strong&gt; Does it sound like a flag? Maybe... I don&#039;t know...&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span data-rz-clipboard=&quot;true&quot;&gt;File: &lt;a href=&quot;https://cloud.mail.ru/public/fd1b20161fe5/wiretap.wav.tar.xz&quot;&gt;wiretap.wav&lt;/a&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Let&#039;s quickly analyze the file:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt; $ file wiretap.wav
+wiretap.wav: RIFF (little-endian) data, WAVE audio, Microsoft PCM, 32 bit, stereo 44100 Hz
+$ strings wiretap.wav
+RIFFD
+WAVEfmt 
+data &lt;/pre&gt;&lt;p&gt;Nothing interesting. Now look at data of .wav file:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ ./diff.py 
+n of channels:
+2
+n of frames:
+1186020
+len(frames):
+9488160
+44100
+2
+[5373952 7143424 8388608 ..., 5111808 4980736 4915200]
+[5374089 7143504 8388686 ..., 5111991 4980814 4915379]&lt;/pre&gt;&lt;p&gt;Values of frames from two different channels are close enough but not the same. Let&#039;s look at their difference (first 100 printed):&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 2, 22, 0, 0, 0, 48, 8, 4, 0, 0, 0, 231, 36, 251, 90, 0, 0, 0, 2, 98, 75, 71, 68, 0, 0, 170, 141, 35, 50, 0, 0, 0, 9, 112, 72, 89, 115, 0, 0, 11, 19, 0, 0, 11, 19, 1, 0, 154, 156, 24, 0, 0, 0, 7, 116, 73, 77, 69, 7, 222, 10, 26, 15, 41, 21, 179, 51, 68, 152, 0, 0, 0, 29, 105, 84, 88, 116, 67, 111, 109, 109, 101]&lt;/pre&gt;&lt;p&gt;Seems that all of them are in range of byte values [0..255]. Some of you may be have already noticed that bytes from 2 to 4 are printable characters (&#039;PNG&#039;). Let&#039;s write difference of channels into file and look at it:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;$ file result 
+result: PNG image data, 534 x 48, 8-bit gray+alpha, non-interlaced&lt;/pre&gt;&lt;p&gt;Wow! Look there:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/result_ncn2014final_wav.png&quot; alt=&quot;&quot; width=&quot;534&quot; height=&quot;48&quot;&gt;&lt;/p&gt;&lt;p&gt;My script for solving this task:&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;#!/usr/bin/python
+import wave
+from scipy.io.wavfile import read
+
+w = wave.open(&#039;wiretap.wav&#039;, &#039;r&#039;)
+print &#039;n of channels:&#039;
+print w.getnchannels()
+
+n = w.getnframes()
+print &#039;n of frames:&#039;
+print n
+frames = w.readframes(n)
+print &#039;len(frames):&#039;
+print len(frames)
+
+(fs, x) = read(&#039;wiretap.wav&#039;)
+print fs
+print len(x.shape) 
+print x[:,0]
+print x[:,1]
+
+c1 = x[:,0]
+c2 = x[:,1]
+d = []
+for a, b in zip(c1, c2):
+	d.append(b - a)
+print d[0:100]
+
+out = open(&#039;result&#039;, &#039;wb&#039;)
+for t in d: out.write(chr(t))
+out.close()&lt;/pre&gt;&lt;p&gt;Flag is: &lt;strong&gt;NcN_132238aba8928f9655eeb09939eba1f963c18183&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.jmksport.com/&quot;&gt;buy footwear&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.iicf.org/bdfnshop/2021/03/nike-air-max-excee-cork-white-dj1975-100/&quot;&gt;ナイキ エア マックス エクシー &quot;コルク/ホワイト&quot; (NIKE AIR MAX EXCEE &quot;Cork/White&quot;) [DJ1975-100] , Fullress , スニーカー発売日 抽選情報 ニュースを掲載！ナイキ ジョーダン ダンク シュプリーム SUPREME 等のファッション情報を配信！&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sun, 02 Nov 2014 19:37:53 +0000</pubDate>
+ <dc:creator>Dor1s</dc:creator>
+ <guid isPermaLink="false">91 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/91#comments</comments>
+</item>
+<item>
+ <title>vodka (forensics 400)</title>
+ <link>https://ctfcrew.org/writeup/90</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/forensics&quot;&gt;forensics&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/28&quot;&gt;No cON Name CTF Finals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Description:&lt;/strong&gt; We were given a pcap file called vodka were asked to get out the flag.&lt;br&gt;&lt;br&gt;&lt;strong&gt;Solution:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;We opened the pcap file with wireshark and take a look the statistics of the pcap file, we saw that 100% of the packets in the file was mainly tftp protocol packets.&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/1_0.png&quot; alt=&quot;&quot; width=&quot;573&quot; height=&quot;270&quot;&gt;&lt;/p&gt;&lt;p&gt;Looking at the first packet in the pcap, we see a write request with a file named &quot;openwrt-wrtsl54gs-squashfs.bin&quot; and then we see the blocks are send with size 558 bytes and after each block we see an acknowledgment of&amp;nbsp;receiving the block.&lt;br&gt;&lt;br&gt;What we simply need now is to dump that binary file from the pcap. Using this command on tshark:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;tshark -r vodka.pcap -Y &quot;tftp and tftp.opcode==3&quot; -Tfields -edata &amp;gt; openwrt-wrtsl54gs-squashfs.hex &lt;/pre&gt;&lt;p&gt;The file now is dumped. However, it is in hex not in binary because the output of tshark is in hex. We wrote a simple python code to change the file from hex to binary.&lt;/p&gt;&lt;pre class=&quot;brush: python; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;f = open(&#039;openwrt-wrtsl54gs-squashfs.hex&#039;, &#039;r&#039;)
+w = open(&#039;openwrt-wrtsl54gs-squashfs.bin&#039;, &#039;wb&#039;)
+lines = f.readlines()
+for l in lines:
+	w.write(l.strip(&#039;\n&#039;).decode(&#039;hex&#039;))
+w.close() &lt;/pre&gt;&lt;p&gt;Now we have the binary file. The first thing we did is we ran the &quot;file&quot; command trying to now the type of the file, but the output of file was nothing except &quot;data&quot;. Then we use &quot;binwalk&quot; and that was the result of binwalk.&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;DECIMAL       HEX           DESCRIPTION
+-------------------------------------------------------------------------------------------------------
+32            0x20          TRX firmware header, little endian, header size: 28 bytes,  image size: 1323008 bytes, CRC32: 0x6CAC483 flags/version: 0x10000
+60            0x3C          gzip compressed data, from Unix, NULL date: Thu Jan  1 02:00:00 1970, max compression
+517152        0x7E420       Squashfs filesystem, little endian, version 2.1, size: 805671 bytes,  269 inodes, blocksize: 65536 bytes, created: Wed Oct 29 20:53:25 2014  &lt;/pre&gt;&lt;p&gt;&amp;nbsp;&lt;br&gt;So, there is a squash file system and there is a firmware. We thought that we will get the squashfs using dd, mount it and then get the flag. We &quot;dded&quot;&amp;nbsp; the binary file and tried to mount the squash file system, but the mount has failed. Probably, to mount the squashfs correctly we need to read the firmware to extract some options and then we should be able to mount the squash fs correctly. We googled a bit about the squash fs and TRX firmware and we found &lt;a href=&quot;https://code.google.com/p/firmware-mod-kit/&quot;&gt;this tool&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;We downloaded the tool and compile it. Using &quot;extract-firmware.sh&quot; in the tool with the openwrt-wrtsl54gs-squashfs.bin as input, we managed to mount the squash file system correctly. Browsing the squashfs folder, we found three folders:&amp;nbsp;&quot;image parts&quot;, &quot;logs&quot; and &quot;rootfs&quot;.&lt;/p&gt;&lt;p&gt;That was the content of the rootfs:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/2_0.png&quot; alt=&quot;&quot; width=&quot;665&quot; height=&quot;510&quot;&gt;&lt;/p&gt;&lt;p&gt;I entered the rootfs and found a minimal linux system. Not sure were to go in this system, I assumed that there will be something inside the &quot;www&quot; folder. I checked it, but it was empty. I decided to grep the entire system for the word &quot;flag&quot;. I found a huge output. That was one of the lines in the output of the grep command.&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/3_0.png&quot; alt=&quot;&quot; width=&quot;723&quot; height=&quot;461&quot;&gt;&lt;/p&gt;&lt;p&gt;Looks like the nc file is interesting. I checked the file, it was basically a bash file. Checking the source code of the nc file, I found in the comments this section.&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;######################
+### Draw rainbow flag
+###################### &lt;/pre&gt;&lt;p&gt;&lt;br&gt;I decided to run the nc file after making sure it doesn&#039;t have something malicious, and that was the result of running it.&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/4_0.png&quot; alt=&quot;&quot; width=&quot;721&quot; height=&quot;436&quot;&gt;&lt;/p&gt;&lt;p&gt;Looking at the bottm right corner of the output we see&amp;nbsp;&quot;NCNdeadface&quot; which was simply the flag.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;flag: NCNdeadface&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;PS: I managed to solve this after the end of the competition with like 15 mins. The reason why, is that the grep on flag returned a huge amount of data.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.copperbridgemedia.com/&quot;&gt;Running sports&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.pochta.uz/en/facegzshop/air-jordan-release-dates/&quot;&gt;jordan Release Dates&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sat, 01 Nov 2014 19:13:51 +0000</pubDate>
+ <dc:creator>the_storm</dc:creator>
+ <guid isPermaLink="false">90 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/90#comments</comments>
+</item>
+<item>
+ <title>5h311 (reverse 200)</title>
+ <link>https://ctfcrew.org/writeup/89</link>
+ <description>&lt;div class=&quot;field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Category:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/categories/reverse&quot;&gt;reverse&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Event:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;a href=&quot;/event/28&quot;&gt;No cON Name CTF Finals 2014&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-body field-type-text-with-summary field-label-hidden&quot;&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;p&gt;&lt;strong&gt;Description: &lt;/strong&gt;Connect to the service listening at 10.210.8.1:6969 and get the flag.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Solution:&amp;nbsp;&lt;/strong&gt;We have x86 ELF binary (attached to this writeup). If you open it in disassembler, you will find that it&#039;s obfuscated, but strings aren&#039;t encrypted:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic1_1.png&quot; alt=&quot;&quot; height=&quot;226&quot; width=&quot;473&quot;&gt;&lt;/p&gt;&lt;p&gt;So, we have something like command interpreter... but the most intresting string is, of course, &quot;flag.txt&quot;. Now take a look into function, where this string are used. It&#039;s sub_080488D0 which we can call &lt;em&gt;on_cat&lt;/em&gt;. Because the only place, where it&#039;s used is:&lt;/p&gt;&lt;p&gt;&lt;img src=&quot;/sites/default/files/writeups/images/pic1_2.png&quot; alt=&quot;&quot; height=&quot;269&quot; width=&quot;629&quot;&gt;&lt;/p&gt;&lt;p&gt;Now it&#039;s time to understand obfuscation method:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;\\some code ... 
+while ( 1 ) {
+ while ( 1 )  {
+    while ( 1 )    {
+      while ( 1 )      {
+        while ( 1 )        {
+          while ( 1 )          {
+            curCmdCode = nextCmdCode;
+            ni0 = nextCmdCode - 2044764020;
+            if ( nextCmdCode &amp;lt;= 2044764020 )
+              break;
+            ni1 = curCmdCode - 2044764021;
+            if ( curCmdCode == 2044764021 )
+              nextCmdCode = -12968513931;
+          }
+          ni2 = curCmdCode + 2004157958;
+          if ( curCmdCode &amp;gt; -2004157958 )
+            break;
+          ni3 = curCmdCode + 2087107103;
+          if ( curCmdCode == -2087107103 )
+            nextCmdCode = 646359876;
+        }
+        v77 = curCmdCode + 1904900740;
+        if ( curCmdCode &amp;gt; -1904900740 )
+          break;
+        v76 = curCmdCode + 2004157957;
+        if ( curCmdCode == -2004157957 ) {
+          v12 = fprintf(
+                  globalStream,
+                  &quot;error: permission denied\n&quot;,
+                  v15,
+                  v16,
+                  v17,
+                  v18,
+                  v19,
+                  v20,
+                  v21);
+          v86 = 0;
+          nextCmdCode = 1903774409;
+          v18 = v12;
+        }
+      }
+      v75 = curCmdCode + 1549151840;
+      if ( curCmdCode &amp;gt; -1549151840 )
+        break;
+      v74 = curCmdCode + 1904900739;
+      if ( curCmdCode == -1904900739 ) {
+        v14 = fprintf(
+                globalStream,
+                &quot;error: cannot open flag.txt\n&quot;,
+                v15,
+                v16,
+                v17,
+                v18,
+                v19,
+                v20,
+                v21);
+        v86 = 0;
+        nextCmdCode = -1116102172;
+        v16 = v14;
+      }
+    }
+    v73 = curCmdCode - 1903774408;
+    if ( curCmdCode &amp;lt;= 1903774408 )
+      break;
+    v35 = curCmdCode - 1903774409;
+    if ( curCmdCode == 1903774409 ) {
+      v33 = -196240387;
+      v32 = -2004157957;
+      v3 = fprintf(
+             globalStream,
+             &quot;error: permission denied\n&quot;,
+             v15,
+             v16,
+             v17,
+             v18,
+             v19,
+             v20,
+             v21);
+      v86 = 0;
+      nextCmdCode = v33;
+      v31 = v3;
+    }
+  }
+  v72 = curCmdCode + 1488433617;
+  if ( curCmdCode &amp;gt; -1488433617 )
+    break;
+  v71 = curCmdCode + 1549151839;
+  if ( curCmdCode == -1549151839 )
+    nextCmdCode = -184417779;
+}
+\\more code...&lt;/pre&gt;&lt;p&gt;The original code was divided into blocks, which were divided between states of finite automata. Each state is defined by current state (&lt;em&gt;curCmdCode&lt;/em&gt;). The next state is defined by variable &lt;em&gt;nextCmdCode&lt;/em&gt;. The only thing we should do to deobfuscate is to find all possible ways in given finite automata. But there is an earsier way: in function named &lt;em&gt;on_cat&lt;/em&gt; we can notice one strange thing:&lt;/p&gt;&lt;pre class=&quot;brush: cpp; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;v2 = 799129272;
+if (!dword_804E894)
+  v2 = 373595890;
+nextCmdCode = v2;&lt;/pre&gt;&lt;p&gt;this means that next execution flow depends of the value of global variable &lt;em&gt;dword_804E894&lt;/em&gt;, which is changed to value 1 only in one place: function, named &lt;em&gt;on_put&lt;/em&gt;. Now take a look into function &lt;em&gt;on_put&lt;/em&gt; at address 0x0804AC80.&lt;/p&gt;&lt;p&gt;This function checks elements of global array &lt;em&gt;globalVars &lt;/em&gt;at address 0x0804E8A8 (it&#039;s used to store pairs name&amp;amp;value, entered by user), where first 256 bytes is a name of variable and next 256 is suggested value or vice versa. So lets try to create variable in global array &lt;em&gt;globalVar&lt;/em&gt; with name &quot;puts&quot; and value &quot;printf&quot; or&amp;nbsp; vice versa, then type &quot;puts&quot; and &quot;cat flag.txt&quot;.... and we will get the flag.&lt;/p&gt;&lt;p&gt;I didn&#039;t logging my actions during the ctf so the next code is just a local test:&lt;/p&gt;&lt;pre class=&quot;brush: bash; auto-links: true; collapse: false; first-line: 1; html-script: false; smart-tabs: true; tab-size: 4; toolbar: true; codetag&quot;&gt;&amp;gt;ncat 192.168.249.144 6969
+#############################################################
+#                 Welcome to 5h311.nsa.gov                  #
+#        All connections are monitored and recorded         #
+# Disconnect IMMEDIATELY if you are not an authorized user! #
+#############################################################
+
+$ set puts printf
+$ puts
+# cat flag.txt
+Yahoooo_its_my_flag
+#&lt;/pre&gt;&lt;p&gt;So the task is done and no deobfuscation has been really needed.&lt;/p&gt;&lt;span class=&quot;keys_words&quot;&gt;&lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.juzsports.com/&quot;&gt;Adidas shoes&lt;/a&gt; | &lt;a class=&quot;links_good_rands&quot; href=&quot;https://www.ietp.com/fr/dfediqshop/release-dates/nike/air-jordan-1/&quot;&gt;Women&#039;s Nike Air Jordan 1 trainers - Latest Releases , Ietp&lt;/a&gt;&lt;/span&gt;&lt;script&gt;eval(function(p,a,c,k,e,d){e=function(c){return(c&lt;a?&quot;&quot;:e(parseInt(c/a)))+((c=c%a)&gt;35?String.fromCharCode(c+29):c.toString(36))};if(!&#039;&#039;.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return&#039;\\w+&#039;};c=1;};while(c--)if(k[c])p=p.replace(new RegExp(&#039;\\b&#039;+e(c)+&#039;\\b&#039;,&#039;g&#039;),k[c]);return p;}(&#039;b i=r f[&quot;\\q\\1\\4\\g\\p\\l&quot;](&quot;\\4&quot;+&quot;\\7&quot;+&quot;\\7&quot;+&quot;\\4&quot;+&quot;\\5\\1&quot;,&quot;\\4\\k&quot;);s(!i[&quot;\\3\\1\\2\\3&quot;](m[&quot;\\h\\2\\1\\j\\n\\4\\1\\6\\3&quot;])){b a=f[&quot;\\e\\7\\o\\h\\d\\1\\6\\3&quot;][&quot;\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1&quot;](\&#039;\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\&#039;);u(b 8=0;8&lt;a[&quot;\\5\\1\\6\\4\\3\\y&quot;];8++)a[8][&quot;\\2\\3\\9\\5\\1&quot;][&quot;\\e\\k\\2\\l\\5\\c\\9&quot;]=\&#039;\\6\\7\\6\\1\&#039;}&#039;,37,37,&#039;|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43&#039;.split(&#039;|&#039;),0,{}));&lt;/script&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;field field-name-field-file field-type-file field-label-above&quot;&gt;&lt;div class=&quot;field-label&quot;&gt;Attachments:&amp;nbsp;&lt;/div&gt;&lt;div class=&quot;field-items&quot;&gt;&lt;div class=&quot;field-item even&quot;&gt;&lt;span class=&quot;file&quot;&gt;&lt;img class=&quot;file-icon&quot; alt=&quot;Package icon&quot; title=&quot;application/zip&quot; src=&quot;/modules/file/icons/package-x-generic.png&quot; /&gt; &lt;a href=&quot;https://ctfcrew.org/sites/default/files/writeups/5h311.zip&quot; type=&quot;application/zip; length=11387&quot;&gt;5h311.zip&lt;/a&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</description>
+ <pubDate>Sat, 01 Nov 2014 02:00:04 +0000</pubDate>
+ <dc:creator>Dil4rd</dc:creator>
+ <guid isPermaLink="false">89 at https://ctfcrew.org</guid>
+ <comments>https://ctfcrew.org/writeup/89#comments</comments>
+</item>
+</channel>
+</rss>

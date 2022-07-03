@@ -1,0 +1,42 @@
+.jquery-themizer {
+  position: fixed;
+  top: 200px;
+  right: 0;
+  width: 300px;
+  min-height: 100px;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #333;
+  border-radius: 4px 0 0 4px;
+  z-index: 999;
+}
+.jquery-themizer .toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 26px;
+  height: 100%;
+  background-color: #ddd;
+  border-radius: 4px 0 0 4px;
+  cursor: pointer;
+}
+.jquery-themizer .toggle i {
+  position: absolute;
+  top: 50%;
+  margin-top: -12px;
+  padding: 8px;
+}
+.jquery-themizer .themizer-title {
+  text-align: center;
+}
+.jquery-themizer .control-group label {
+  width: 110px;
+  line-height: 26px;
+}
+.jquery-themizer .control-group .controls {
+  width: 113px;
+  margin-left: 120px;
+}
+.jquery-themizer .control-group .controls input {
+  height: 26px;
+}

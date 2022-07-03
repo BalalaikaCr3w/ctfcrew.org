@@ -1,0 +1,104 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from socket import create_connection
+import sys
+from time import *
+import mitmlib
+
+#
+# Generate my own key pair
+#
+mySecretKey, myPublicKey = mitmlib.mkshare()
+
+myPublicKeyStr = str(myPublicKey[0]) + "," + str(myPublicKey[1])
+
+print "My Public Key: " + myPublicKeyStr + "\n"
+
+
+#
+# Send hello to my girls
+#
+
+Alice = Sock("54.186.6.201:12345", timeout=30)
+Chisa = Sock("54.186.6.201:12346", timeout=30)
+
+hello = Alice.recv(1024)
+print "=== Alice ---> Chisa ==="
+print "Hello: " + hello + "\n"
+Chisa.send(hello)
+sleep(0.25)
+
+hello = Chisa.recv(1024)
+print "=== Alice <--- Chisa ==="
+print "Hello: " + hello + "\n"
+Alice.send(hello)
+sleep(0.25)
+
+#
+# Create MitM connection
+#
+
+AlicePubKeyArr = Alice.recv(1024).split(',')
+print "=== Alice ---> Chisa ==="
+print "Try to send: " + str(AlicePubKeyArr[0]) + "," + str(AlicePubKeyArr[1])
+print "Really sent: " + myPublicKeyStr + "\n"
+Chisa.send(myPublicKeyStr)
+sleep(0.25)
+
+ChisaPubKeyArr = Chisa.recv(1024).split(',')
+print "=== Alice <--- Chisa ==="
+print "Try to send: " + str(ChisaPubKeyArr[0]) + "," + str(ChisaPubKeyArr[1])
+print "Really sent: " + myPublicKeyStr + "\n"
+Alice.send(myPublicKeyStr)
+sleep(0.25)
+
+#
+# Evaluate secret key for each connection
+#
+
+AlicePubKey = tuple([int(AlicePubKeyArr[0]), int(AlicePubKeyArr[1])])
+ChisaPubKey = tuple([int(ChisaPubKeyArr[0]), int(ChisaPubKeyArr[1])])
+
+AliceAesKey = mitmlib.mksecret(mySecretKey, AlicePubKey)
+ChisaAesKey = mitmlib.mksecret(mySecretKey, ChisaPubKey)
+
+#
+# Listen conversation
+#
+
+try:
+	for i in xrange(0,25,1):
+
+		some_slice = Alice.recv(1024)
+		print "=== Alice ---> Chisa ==="
+		print "Try to send: " + some_slice
+
+		decrypted_slice = mitmlib.decrypt(AliceAesKey, some_slice)
+		encrypted_slice = mitmlib.encrypt(ChisaAesKey, decrypted_slice)
+
+		print "Decrypted: " + decrypted_slice
+		print "Really sent: " + encrypted_slice + "\n"
+
+		Chisa.send(encrypted_slice)
+		sleep(0.35)
+
+
+		some_slice = Chisa.recv(1024)
+		print "=== Alice <--- Chisa ==="
+		print "Try to send: " + some_slice
+
+		decrypted_slice = mitmlib.decrypt(ChisaAesKey, some_slice)
+		encrypted_slice = mitmlib.encrypt(AliceAesKey, decrypted_slice)
+
+		print "Decrypted: " + decrypted_slice
+		print "Really sent: " + encrypted_slice + "\n"
+
+		Alice.send(encrypted_slice)
+		sleep(0.35)
+except Exception, e:
+	print e
+
+
+exit(0)
+
+

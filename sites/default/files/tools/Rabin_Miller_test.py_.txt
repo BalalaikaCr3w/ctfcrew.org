@@ -1,0 +1,65 @@
+#!/usr/bin/python
+import sys
+import math
+import random
+import time
+
+if (len(sys.argv) < 2):
+	print 'Usage: Rabin_Miller_test.py number_to_test [number_of_rounds]'
+	exit()
+
+try:
+	p = int(sys.argv[1])
+except ValueError:
+    print 'Invalid input'
+    print 'Usage: Rabin_Miller_test.py number_to_test [number_of_rounds]'
+    exit()
+
+if (len(sys.argv) > 2):
+	try:
+		n = int(sys.argv[2])
+		if (n > math.log(p, 2)):
+			print 'Too big number of rounds. Set no more than log2(p): ' + str(math.log(p, 2))
+	except ValueError:
+		print 'Invalid input'
+		print 'Usage: Rabin_Miller_test.py number_to_test [number_of_rounds]'
+		exit()
+else:
+	n = int(math.log(p, 2))
+	print 'Default number of rounds set (log2(p)): ' + str(n)
+
+print 'Number to test: ' + str(p)
+print 'Number of rounds: ' + str(n)
+
+#test begins here
+b = 0
+m = p - 1
+while (m % 2 == 0):
+	b += 1
+	m = m / 2
+print 'p = ' + str(p) + ' = 1 + 2 ^ ' + str(b) + ' * ' + str(m)
+
+random.seed(time.time())
+i = 0
+for i in xrange(1, n + 1):
+	a = random.randint(2, p - 1)
+	z = pow(a, m, p)							#z = a^m (mod p)
+	if ( (1 == z) or (p - 1 == z) ): continue
+	
+	j = 0
+	for j in xrange(1, b + 1):
+		if (p - 1 == z): break
+		z = pow(z, 2, p)
+
+	if ( (j == b) and (z != p - 1) ):
+		print str(p) + ' is NOT prime!'
+
+		#print 'witness: ' + str(a)
+		#z = pow(a, m, p)
+		#print 'z = a^m (mod p)' + str(z)
+
+		exit()
+	if (p - 1 == z): continue
+
+if (i == n):
+	print str(p) + ' may be prime. Probability: ' + str("{0:.64f}".format(1 - pow(0.25, n)))

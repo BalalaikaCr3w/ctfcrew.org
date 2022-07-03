@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="ie6 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 7]>    <html class="ie7 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 8]>    <html class="ie8 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if IE 9]>    <html class="ie9 ie" lang="en" dir="ltr"> <![endif]-->
+<!--[if !IE]> --> <html lang="en" dir="ltr"> <!-- <![endif]-->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="shortcut icon" href="sites/all/themes/open_framework/favicon.ico" type="image/vnd.microsoft.icon" />
+<meta name="Generator" content="Drupal 7 (http://drupal.org)" />
+  <!-- Set the viewport width to device width for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writeups | BalalaikaCr3w</title>
+  <style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/system/system.base.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.menus.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.messages.css?qtecp0");
+@import url("https://ctfcrew.org/modules/system/system.theme.css?qtecp0");
+</style>
+<style type="text/css" media="all">
+@import url("https://ctfcrew.org/modules/comment/comment.css?qtecp0");
+@import url("https://ctfcrew.org/modules/field/theme/field.css?qtecp0");
+@import url("https://ctfcrew.org/modules/node/node.css?qtecp0");
+@import url("https://ctfcrew.org/modules/search/search.css?qtecp0");
+@import url("https://ctfcrew.org/modules/user/user.css?qtecp0");
+@import url("sites/all/modules/views/css/views.css%3Fqtecp0.css");
+@import url("sites/all/modules/ckeditor/css/ckeditor.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("sites/all/modules/ctools/css/ctools.css%3Fqtecp0.css");
+@import url("sites/all/libraries/syntaxhighlighter_3.0.83/styles/shCore.css%3Fqtecp0.css");
+@import url("sites/all/libraries/syntaxhighlighter_3.0.83/styles/shThemeDefault.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="all">
+@import url("sites/all/themes/open_framework/bootstrap/css/bootstrap.min.css%3Fqtecp0.css");
+@import url("sites/all/themes/open_framework/bootstrap/css/bootstrap-responsive.min.css%3Fqtecp0.css");
+@import url("sites/all/themes/open_framework/css/open_framework.css%3Fqtecp0.css");
+@import url("sites/all/themes/open_framework/css/ie.css%3Fqtecp0.css");
+@import url("sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.css%3Fqtecp0.css");
+@import url("sites/all/themes/open_framework/css/jquery.themizer.css%3Fqtecp0.css");
+@import url("sites/all/themes/open_framework/css/universal.css%3Fqtecp0.css");
+@import url("sites/all/themes/open_framework/font-awesome-4.0.3/css/font-awesome.min.css%3Fqtecp0.css");
+</style>
+<style type="text/css" media="print">
+@import url("sites/all/themes/open_framework/css/open_framework_print.css%3Fqtecp0.css");
+</style>
+  <script type="text/javascript" src="sites/all/modules/jquery_update/replace/jquery/1.8/jquery.min.js%3Fv=1.8.3"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/jquery.once.js?v=1.2"></script>
+<script type="text/javascript" src="https://ctfcrew.org/misc/drupal.js?qtecp0"></script>
+<script type="text/javascript" src="sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shCore.js%3Fqtecp0"></script>
+<script type="text/javascript" src="sites/all/libraries/syntaxhighlighter_3.0.83/scripts/shAutoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="sites/default/files/syntaxhighlighter.autoloader.js%3Fqtecp0"></script>
+<script type="text/javascript" src="sites/all/themes/open_framework/bootstrap/js/bootstrap.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="sites/all/themes/open_framework/js/open_framework.js%3Fqtecp0"></script>
+<script type="text/javascript" src="sites/all/themes/open_framework/js/override.js%3Fqtecp0"></script>
+<script type="text/javascript" src="sites/all/themes/open_framework/jquery.minicolors/jquery.minicolors.min.js%3Fqtecp0"></script>
+<script type="text/javascript" src="sites/all/themes/open_framework/js/jquery.themizer.js%3Fqtecp0"></script>
+<script type="text/javascript" src="sites/all/themes/open_framework/js/universal.js%3Fqtecp0"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","ajaxPageState":{"theme":"open_framework","theme_token":"NBXPNnbwkp52DhQZ28NS5FRgMdIZ32z-ZKHfvr239M8","js":{"sites\/all\/modules\/syntaxhighlighter\/syntaxhighlighter.min.js":1,"sites\/all\/modules\/jquery_update\/replace\/jquery\/1.8\/jquery.min.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shCore.js":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/scripts\/shAutoloader.js":1,"sites\/default\/files\/syntaxhighlighter.autoloader.js":1,"sites\/all\/themes\/open_framework\/bootstrap\/js\/bootstrap.min.js":1,"sites\/all\/themes\/open_framework\/js\/open_framework.js":1,"sites\/all\/themes\/open_framework\/js\/override.js":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.min.js":1,"sites\/all\/themes\/open_framework\/js\/jquery.themizer.js":1,"sites\/all\/themes\/open_framework\/js\/universal.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"modules\/comment\/comment.css":1,"modules\/field\/theme\/field.css":1,"modules\/node\/node.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,"sites\/all\/modules\/views\/css\/views.css":1,"sites\/all\/modules\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/modules\/ctools\/css\/ctools.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shCore.css":1,"sites\/all\/libraries\/syntaxhighlighter_3.0.83\/styles\/shThemeDefault.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap.min.css":1,"sites\/all\/themes\/open_framework\/bootstrap\/css\/bootstrap-responsive.min.css":1,"sites\/all\/themes\/open_framework\/fontawesome\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework.css":1,"sites\/all\/themes\/open_framework\/css\/ie.css":1,"sites\/all\/themes\/open_framework\/jquery.minicolors\/jquery.minicolors.css":1,"sites\/all\/themes\/open_framework\/css\/jquery.themizer.css":1,"sites\/all\/themes\/open_framework\/css\/universal.css":1,"sites\/all\/themes\/open_framework\/font-awesome-4.0.3\/css\/font-awesome.min.css":1,"sites\/all\/themes\/open_framework\/css\/open_framework_print.css":1}},"syntaxhighlighter":{"useAutoloader":true}});
+//--><!]]>
+</script>
+  <!--[if IE 7]>
+  <link rel="stylesheet" href="/sites/all/themes/open_framework/fontawesome/css/font-awesome-ie7.min.css">
+  <![endif]-->
+  <!-- IE Fix for HTML5 Tags -->
+  <!--[if lt IE 9]>
+    <script src="/sites/all/themes/open_framework/js/html5shiv.js"></script>
+  <![endif]-->
+
+    <style type="text/css" media="all">@import url("sites/all/themes/open_framework/css/page.css");</style>
+  <script type="text/javascript" src="sites/all/themes/open_framework/js/page.js"></script>
+
+</head>
+
+<body class="main-body html not-front not-logged-in one-sidebar sidebar-second page-writeups   content-first     "  >
+    <a href="writeups%3Fpage=5.html#content" class="element-invisible element-focusable">Skip to content</a>
+<a href="writeups%3Fpage=5.html#main-nav" class="element-invisible element-focusable" data-target=".nav-collapse" data-toggle="collapse">Skip to navigation</a>
+<!-- /#skipnav -->
+<!-- /#admin-shortcuts -->
+	<div id="header" class="clearfix header" role="banner">
+	<div class="container">
+		<div class="row">
+			<div class="span12">
+								<div id="logo" class="site-logo"> <a href="index.html" title="Home" rel="home"> <img src="sites/default/files/logo.png" alt="BalalaikaCr3w" role="presentation" /> </a></div>
+								<!-- /#logo -->
+								<div id="name-and-slogan">
+										<div id="site-name" class="site-name"><a href="index.html" title="Home" rel="home">BalalaikaCr3w</a></div>
+															<div id="site-slogan" class="site-slogan">Russian CTF team</div>
+									</div>
+												<!-- /#name-and-slogan -->
+							</div>
+		</div>
+		<div class="social">
+			<a href="http://twitter.com/BalalaikaCr3w" class="social-item twitter">
+				<i class="fa fa-twitter"></i>
+			</a>
+		</div>
+	</div>
+</div>
+<!-- /#header --><div id="main" class="clearfix main" role="main">
+	<div class="container">
+								<div id="main-content" class="row main-content">
+						<div id="content" class="mc-content span9">
+				<div class="color-pane bg-0D"></div>
+				<div id="content-wrapper" class="content-wrapper">
+					<div id="content-head" class="row-fluid content-head">
+																								<h1 class="title" id="page-title"> Writeups </h1>
+																																									</div>
+																				<div id="content-body" class="row-fluid content-body"> <div class="region region-content clearfix">
+  <div id="block-system-main" class="clearfix block block-system">       <div class="content"> <div class="view view-writeups view-id-writeups view-display-id-page view-dom-id-f46c25338497e49619428b33c7a85e54">
+        
+  
+  
+      <div class="view-content">
+        <div class="views-row views-row-1 views-row-odd views-row-first">
+    <article id="node-43" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">14</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-43" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/43.html">Stolen camera (recon 200)</a></h2>
+                <div class="submitted">
+       
+      14.03.2014 18:27, by <i class="fa fa-user"></i><span class="username">azrael</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/recon.html">recon</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/17.html">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>In this task we need to find city&nbsp;where Olimpiada Balalaykina's camera&nbsp;was stolen.</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/43.html" rel="tag" title="Stolen camera (recon 200)">Read more<span class="element-invisible"> about Stolen camera (recon 200)</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-2 views-row-even">
+    <article id="node-42" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">14</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-42" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/42.html">Favourite book (recon 100)</a></h2>
+                <div class="submitted">
+       
+      14.03.2014 14:52, by <i class="fa fa-user"></i><span class="username">azrael</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/recon.html">recon</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/17.html">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>All tasks from recon category are related to the search for information about Olimpiada Balalaykina. In this task we need to find her favourite book.</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/42.html" rel="tag" title="Favourite book (recon 100)">Read more<span class="element-invisible"> about Favourite book (recon 100)</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-3 views-row-odd">
+    <article id="node-41" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">14</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-41" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/41.html">Landlord (recon 400)</a></h2>
+                <div class="submitted">
+       
+      14.03.2014 14:11, by <i class="fa fa-user"></i><span class="username">azrael</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/recon.html">recon</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/17.html">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>In this task we need to find Olimpiada Balalaykina's landlord&nbsp;name.</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/41.html" rel="tag" title="Landlord (recon 400)">Read more<span class="element-invisible"> about Landlord (recon 400)</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-4 views-row-even">
+    <article id="node-40" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">14</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-40" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/40.html">Shredder (misc 100)</a></h2>
+                <div class="submitted">
+       
+      14.03.2014 12:44, by <i class="fa fa-user"></i><span class="username">azrael</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/misc.html">misc</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/17.html">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>This is very simple task, but it requires a lot of patience :)</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/40.html" rel="tag" title="Shredder (misc 100)">Read more<span class="element-invisible"> about Shredder (misc 100)</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-5 views-row-odd">
+    <article id="node-39" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">11</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-39" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/39.html">Maze (PPC - 200)</a></h2>
+                <div class="submitted">
+       
+      11.03.2014 13:28, by <i class="fa fa-user"></i><span class="username">Triff</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/ppc.html">ppc</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/17.html">RuCTF Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p><strong>Task:</strong></p><p>Universal dangerous positive: 194.226.244.125:1024. Send me your password: "3k8bbz032mrap75c8iz8tmi7f4ou00". Flag format is "RUCTF_.*"</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/39.html" rel="tag" title="Maze (PPC - 200)">Read more<span class="element-invisible"> about Maze (PPC - 200)</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-6 views-row-even">
+    <article id="node-37" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">05</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-37" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/37.html">risc_emu</a></h2>
+                <div class="submitted">
+       
+      05.03.2014 17:59, by <i class="fa fa-user"></i><span class="username">villytiger</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/pwn.html">pwn</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/15.html">Boston Key Party 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p><strong>Task:</strong></p><p>Pwning : 100</p><p>nobody cares about this service nc 54.218.22.41 4545</p><p>http://bostonkeyparty.net/challenges/emu-c7c4671145c5bb6ad48682ec0c58b831</p><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/37.html" rel="tag" title="risc_emu">Read more<span class="element-invisible"> about risc_emu</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-7 views-row-odd">
+    <article id="node-36" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">04</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-36" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/36.html">NEOQUEST 2014 Quals - TimeShift 2. Revenge</a></h2>
+                <div class="submitted">
+       
+      04.03.2014 19:14, by <i class="fa fa-user"></i><span class="username">Dor1s</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/crypto.html">crypto</a></div><div class="field-item odd"><a href="categories/ppc.html">ppc</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/16.html">NeoQuest Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>Задание:</p><blockquote><p>&nbsp; &nbsp; &nbsp; &nbsp; Мое внимание привлекает монитор. На него наклеен стикер с надписью B4365F2. Видимо, это какой-то ключ. На экране мигают две точки, соединенные пунктиром, а ниже бегут пакеты сетевого трафика. Наверное, это передача каких-то команд ракете. Но, по всей видимости, передаваемые данные зашифрованы... На компьютере также открыт файл, в котором записаны два IP-адреса (213.170.102.196:4001, 213.170.102.197:4002). Наверняка IP-адреса помогут мне понять схему работы протокола, по которому передаются команды! Да и в отладочной информации, если покопаться, можно будет обнаружить что-нибудь полезное...</p></blockquote><p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/36.html" rel="tag" title="NEOQUEST 2014 Quals - TimeShift 2. Revenge">Read more<span class="element-invisible"> about NEOQUEST 2014 Quals - TimeShift 2. Revenge</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-8 views-row-even">
+    <article id="node-35" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">04</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-35" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/35.html">NEOQUEST 2014 Quals - Отмороженный компьютер</a></h2>
+                <div class="submitted">
+       
+      04.03.2014 13:37, by <i class="fa fa-user"></i><span class="username">Dor1s</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/forensics.html">forensics</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/16.html">NeoQuest Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>Дан .vmem дамп памяти, по легенде, полученный с помощью Cold Boot Attack .</p><p>Из дампа среди всего прочего можно вытащить .html страницу (руками или через foremost) для ввода кодов деактивации ракет:</p><p> <img src="sites/default/files/writeups/images/otmorojenniy_comp_html_screen.png" alt="" width="800" height="468" /></p><p>По легенде как раз нужно найти <em>"коды отмена пуска ракеты или хотя бы что-то?"</em>.</p><p>Посмотрим список процессов (например, через фрэймворк volatility):</p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/35.html" rel="tag" title="NEOQUEST 2014 Quals - Отмороженный компьютер">Read more<span class="element-invisible"> about NEOQUEST 2014 Quals - Отмороженный компьютер</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-9 views-row-odd">
+    <article id="node-34" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">04</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-34" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/34.html">NEOQUEST 2014 Quals - Hasta la vista</a></h2>
+                <div class="submitted">
+       
+      04.03.2014 13:36, by <i class="fa fa-user"></i><span class="username">Dor1s</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/crypto.html">crypto</a></div><div class="field-item odd"><a href="categories/reverse.html">reverse</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/16.html">NeoQuest Quals 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p>Дано андроид приложение.</p><p>Распаковываем, декомпилим. Видим, что проверяется deviceId -&gt; нет смысла запускать, т.к. будет работать только на одном устройстве.</p><p>Анализируем исходники, полученные с помощью декомпилятора:</p><p>1) Замечаем формирование ссылки и скачиваение файла с адреса вида:</p></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/34.html" rel="tag" title="NEOQUEST 2014 Quals - Hasta la vista">Read more<span class="element-invisible"> about NEOQUEST 2014 Quals - Hasta la vista</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+  <div class="views-row views-row-10 views-row-even views-row-last">
+    <article id="node-31" class="node node-writeup node-promoted node-teaser clearfix">        <div class="bookmark-wrapper">
+      <div class="type bg-0B">writeup</div>
+      <div class="bookmark">
+        <span class="day">02</span>
+        <span class="month">Mar</span>
+      </div>
+      <a href="writeups%3Fpage=5.html#node-31" class="link"><i class="fa fa-link"></i></a>
+    </div>
+    <div class="node-wrapper">
+        <h2><a href="writeup/31.html">MITM II: Electric Boogaloo (Crypto 200)</a></h2>
+                <div class="submitted">
+       
+      02.03.2014 02:32, by <i class="fa fa-user"></i><span class="username">Triff</span>    </div>
+        <div class="content">
+      <div class="field field-name-field-category field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Category:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="categories/crypto.html">crypto</a></div></div></div><div class="field field-name-field-event field-type-taxonomy-term-reference field-label-inline clearfix"><div class="field-label">Event:&nbsp;</div><div class="field-items"><div class="field-item even"><a href="event/15.html">Boston Key Party 2014</a></div></div></div><div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><p><strong>Task:</strong></p><p style="box-sizing: border-box; margin-bottom: 10px;">Chisa and Arisu are trying to tell each other two halves of a very important secret! They think they're safe, because they know how cryptography works---but can you learn their terrible, terrible secret? They're available as services at 54.186.6.201:12346 and 54.186.6.201:12345 respectively.</p><p style="box-sizing: border-box; margin-bottom: 10px;">http://bostonkeyparty.net/challenges/mitm2-632e4ecc332baba0943a0c6471dec2c6.tar.bz2</p><p style="box-sizing: border-box; margin-bottom: 10px;"></div></div></div>    </div>
+    <ul class="links inline"><li class="node-readmore first last"><a href="writeup/31.html" rel="tag" title="MITM II: Electric Boogaloo (Crypto 200)">Read more<span class="element-invisible"> about MITM II: Electric Boogaloo (Crypto 200)</span></a></li>
+</ul>   </div>
+</article>
+  </div>
+    </div>
+  
+      <h2 class="element-invisible">Pages</h2><div class="item-list"><ul class="pager"><li class="pager-first first"><a title="Go to first page" href="writeups.html">« first</a></li>
+<li class="pager-previous"><a title="Go to previous page" href="writeups%3Fpage=4.html">‹ previous</a></li>
+<li class="pager-item"><a title="Go to page 1" href="writeups.html">1</a></li>
+<li class="pager-item"><a title="Go to page 2" href="writeups%3Fpage=1.html">2</a></li>
+<li class="pager-item"><a title="Go to page 3" href="writeups%3Fpage=2.html">3</a></li>
+<li class="pager-item"><a title="Go to page 4" href="writeups%3Fpage=3.html">4</a></li>
+<li class="pager-item"><a title="Go to page 5" href="writeups%3Fpage=4.html">5</a></li>
+<li class="pager-current">6</li>
+<li class="pager-item"><a title="Go to page 7" href="writeups%3Fpage=6.html">7</a></li>
+<li class="pager-next"><a title="Go to next page" href="writeups%3Fpage=6.html">next ›</a></li>
+<li class="pager-last last"><a title="Go to last page" href="writeups%3Fpage=6.html">last »</a></li>
+</ul></div>  
+  
+  
+  
+  
+</div> </div>
+</div></div>
+ <!-- /.region -->
+  </div>
+																																																	</div>
+				<!-- /#content-wrap --> 
+			</div>
+			<!-- /#content -->
+							<div id="sidebar-second" class="sidebar span3 site-sidebar-second">
+	<div class="color-pane bg-0B"></div>
+	<div class="row-fluid row-block row-block-1">
+		<div class="region region-sidebar-second clearfix">
+  <div id="block-system-navigation" class="clearfix block block-system block-menu">       <div class="content"> <ul class="menu nav"><li class="first leaf"><a href="index.html"><i class="fa fa-home"></i>Home</a></li>
+<li class="leaf active-trail"><a href="writeups.html" class="active"><i class="fa fa-file-text active-trail"></i>Writeups</a></li>
+<li class="leaf"><a href="tools.html"><i class="fa fa-wrench"></i>Tools</a></li>
+<li class="last leaf"><a href="blogs.html"><i class="fa fa-users"></i>Blog</a></li>
+</ul> </div>
+</div>
+<div id="block-views-events-block-1" class="clearfix block block-views">     <h2>Last events</h2>
+      <div class="content"> <div class="view view-events view-id-events view-display-id-block_1 view-dom-id-1c2a85fac09ac646659d2c47b063ada4">
+        
+  
+  
+      <div class="view-content">
+        <div class="views-row views-row-1 views-row-odd views-row-first">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="event/32.html">Boston Key Party 2015</a></span>  </div>  </div>
+  <div class="views-row views-row-2 views-row-even">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="event/36.html">Boston Key Party CTF 2016</a></span>  </div>  </div>
+  <div class="views-row views-row-3 views-row-odd views-row-last">
+      
+  <div class="views-field views-field-name">        <span class="field-content"><a href="event/35.html">EKOPARTY PRE-CTF 2015</a></span>  </div>  </div>
+    </div>
+  
+  
+  
+      
+<div class="more-link">
+  <a href="events.html">
+    all events  </a>
+</div>
+  
+  
+  
+</div> </div>
+</div>
+</div>
+ <!-- /.region -->
+	</div>
+			<div class="color-pane bg-09"></div>
+	<div class='row-fluid row-block row-block-2'>
+		<ul class="nav">
+			<li><a href="user.html"><i class="fa fa-sign-in"></i>Sign in</a></li>
+		</ul>
+	</div>
+	</div>
+<!-- /#sidebar-second -->					</div>
+					</div>
+</div>
+<!-- /#main, /#main-wrapper -->
+	  <script type="text/javascript" src="sites/all/modules/syntaxhighlighter/syntaxhighlighter.min.js%3Fqtecp0"></script>
+</body>
+
+</html>
